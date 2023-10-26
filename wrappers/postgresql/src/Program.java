@@ -1,8 +1,6 @@
-package src.plugins.postgresql;
+package wrappers.postgresql.src;
 
-import src.plugins.postgresql.Executor;
-
-class Program {
+class App {
 
     public static void main(String[] args) {
         Executor e = new Executor("jdbc:postgresql://localhost:5432/josefholubec");

@@ -1,4 +1,4 @@
-package src.plugins.postgresql;
+package wrappers.postgresql.src;
 
 import java.sql.Connection;
 import java.sql.DriverManager;
@@ -6,6 +6,7 @@ import java.sql.Statement;
 import java.sql.ResultSet;
 //import java.sql.ResultSetMetaData;
 //import java.sql.SQLException;
+import java.sql.SQLException;
 
 public class Executor {
 
@@ -26,14 +27,22 @@ public class Executor {
         }
     }
 
-    private void printQueryResult(ResultSet result) {
-        /*try {
-            ResultSetMetaData metaData = result.getMetaData();
+    private void printQueryResult(ResultSet result) throws SQLException {
+        try {
+            while (result.next()) {
+                int id = result.getInt("id");
+                String fname = result.getString("fname");
+                String lname = result.getString("lname");
+
+                System.out.println("id: " + id);
+                System.out.println("fname: " + fname);
+                System.out.println("lname: " + lname);
+                System.out.println();
+            }
         }
         catch (SQLException e) {
-            System.err.println( e.getClass().getName()+": "+ e.getMessage() );
+            throw new SQLException(e.getMessage(), e.getCause());
         }
-        */
     }
 
     public void executeQuery(String query) {
