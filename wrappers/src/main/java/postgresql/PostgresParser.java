@@ -5,7 +5,5 @@ public class PostgresParser {
     private String fromClause;
     private String whereClause;
 
-    public PostgresParser(String query) {
-
-    }
+    
 }

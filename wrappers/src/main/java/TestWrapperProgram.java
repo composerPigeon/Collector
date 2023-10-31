@@ -9,7 +9,7 @@ public class TestWrapperProgram {
         try {
             PostgresWrapper wrapper = new PostgresWrapper("jdbc:postgresql://localhost:5432/josefholubec");
 
-            wrapper.executeQuery("select * from person");
+            wrapper.executeQuery("select * from knows_view");
         }
         catch (SQLException e) {
             System.err.println(e.getMessage());
