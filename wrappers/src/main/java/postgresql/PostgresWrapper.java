@@ -1,26 +1,25 @@
-package wrappers.postgresql.src;
+package wrappers.src.main.java.postgresql;
 
 import java.sql.Connection;
 import java.sql.DriverManager;
 import java.sql.Statement;
 import java.sql.ResultSet;
 //import java.sql.ResultSetMetaData;
-//import java.sql.SQLException;
 import java.sql.SQLException;
 
-public class Executor {
+import wrappers.src.main.java.abstractwrapper.AbstractWrapper;
+import model.src.main.java.DataModel;
 
-    private String link;
-    private Connection c;
+public class PostgresWrapper extends AbstractWrapper{
     
-    Executor(String link) {
+    public PostgresWrapper(String link) {
         this.link = link;
     }
 
     private Statement initConnnection() {
         try {
-            c = DriverManager.getConnection(link);
-            return c.createStatement();
+            connection = DriverManager.getConnection(link);
+            return connection.createStatement();
         } catch (Exception e){
             System.err.println( e.getClass().getName()+": "+ e.getMessage() );
             return null;
@@ -45,8 +44,12 @@ public class Executor {
         }
     }
 
-    public void executeQuery(String query) {
+    @Override
+    public DataModel executeQuery(String query) throws SQLException {
         try {
+            DataModel dataModel = parseQuery(query);
+            //DataModel data = new DataModel();
+
             Statement s = initConnnection();
             //TODO: gather data before query
             ResultSet result = s.executeQuery(query);
@@ -54,10 +57,32 @@ public class Executor {
             printQueryResult(result);
             //TODO: gather data after query
             s.close();
-            c.commit();
+            //connection.commit();
+
+            return dataModel;
         }
-        catch (Exception e) {
-            System.err.println( e.getClass().getName()+": "+ e.getMessage() );
+        catch (SQLException e) {
+            throw e;
         }
+    }
+
+
+    //Use Parser class for parsing query
+    //Thean get interesting items into data model from individual clauses of query
+    //return the data model
+    @Override
+    protected DataModel parseQuery(String query) {
+
+
+        return new DataModel(null);
+    }
+
+    @Override
+    public String toString() {
+        StringBuilder line = new StringBuilder();
+
+        line.append("Connection link: " + link + "\n");
+
+        return line.toString();
     }
 }
