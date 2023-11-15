@@ -1,5 +1,3 @@
-package wrappers.src.main.java;
-
 import wrappers.src.main.java.postgresql.PostgresWrapper;
 
 import java.sql.SQLException;

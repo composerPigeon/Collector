@@ -7,11 +7,37 @@ import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 //import java.sql.ResultSetMetaData;
 import java.sql.SQLException;
+import java.util.Map;
+
+import com.fasterxml.jackson.databind.ObjectMapper;
 
 import wrappers.src.main.java.abstractwrapper.AbstractWrapper;
 import model.src.main.java.DataModel;
 
 public class PostgresWrapper extends AbstractWrapper{
+
+    private class Parser {
+
+        public static DataModel parseExplainTree(String jsonExplainTree) {
+            try {
+                DataModel dataModel = new DataModel("PostrgeSQL", "");
+
+                ObjectMapper objectMapper = new ObjectMapper();
+
+                Object resultMap = objectMapper.readValue(jsonExplainTree, Object.class);
+
+                //resultMap.keySet().forEach(key -> {System.out.println(key);});
+
+                System.out.println(resultMap);
+
+                return dataModel;
+            }
+            catch (Exception e) {
+                System.out.println(e);
+                return null;
+            }
+        }
+    }
     
     public PostgresWrapper(String link) throws SQLException{
         try {
@@ -32,10 +58,7 @@ public class PostgresWrapper extends AbstractWrapper{
                 String obFname = result.getString("Who_fname");
                 String obLanme = result.getString("Who_lname");
 
-                System.out.println("subfname: " + subFname);
-                System.out.println("sublname: " + subLname);
-                System.out.println("obfname: " + obFname);
-                System.out.println("obLname: " + obLanme);
+                System.out.println(subFname + " " + subLname + " knows " + obFname + " " + obLanme);
                 System.out.println();
             }
         }
@@ -49,6 +72,7 @@ public class PostgresWrapper extends AbstractWrapper{
             while(result.next()) {
                 String plan = result.getString("QUERY PLAN");
 
+                System.out.println("Query plan:");
                 System.out.println(plan);
             }
         }
@@ -68,6 +92,8 @@ public class PostgresWrapper extends AbstractWrapper{
             //TODO: gather data before query
             ResultSet res = resStmt.executeQuery();
             ResultSet planRes = planStmt.executeQuery();
+
+            Parser.parseExplainTree(planRes.getString("QUERY PLAN"));
 
             printQueryResult(res);
             printExplainRes(planRes);
@@ -89,7 +115,7 @@ public class PostgresWrapper extends AbstractWrapper{
     protected DataModel parseQuery(String query) {
 
 
-        return new DataModel(null);
+        return new DataModel("PostgreSQL", "");
     }
 
     @Override

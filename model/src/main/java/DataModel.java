@@ -1,28 +1,42 @@
 package model.src.main.java;
 
-import java.util.ArrayList;
-
-import model.src.main.java.BeforeQueryData;
-import model.src.main.java.AfterQueryData;
-
 public class DataModel {
 
     //Gathered data (objects that will be trasnlated to JSON using GSON)
-    BeforeQueryData beforeQueryData;
-    AfterQueryData afterQueryData;
-    
-    //Items that we will be ineterested in after parsing query
-    private ArrayList<String> affectedTables;
+    private String dbName;
+    private String database;
 
-    public DataModel(ArrayList<String> affectedTables) {
-        this.affectedTables = affectedTables;
+    private QueryData beforeQueryData;
+    private QueryData afterQueryData;
+
+    public DataModel(String database, String dbName) {
+        this.dbName = dbName;
+        this.database = database;
+
+        beforeQueryData = new QueryData();
+        afterQueryData = new QueryData();
     }
 
-    public BeforeQueryData getBeforeQueryData() {
+    public QueryData beforeQuery() {
         return beforeQueryData;
     }
 
-    public AfterQueryData getAfterQueryData() {
+    public QueryData afterQuery() {
         return afterQueryData;
+    }
+
+
+    @Override
+    public String toString() {
+        StringBuilder str = new StringBuilder();
+        
+        str.append(database + ":\n");
+        str.append("Database name: " + dbName + "\n");
+        str.append("DataBeforeQuery:\n");
+        str.append(beforeQueryData.toString(1));
+        str.append("\nDataAfterQuery:\n");
+        str.append(afterQueryData.toString(1));
+
+        return str.toString();
     }
 }
