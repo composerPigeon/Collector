@@ -5,10 +5,12 @@ plugins {
 
 repositories {
     // Use Maven Central for resolving dependencies.
+    mavenCentral()
 }
 
 dependencies {
     // Use JUnit Jupiter for testing.
+    implementation 'com.fasterxml.jackson.core:jackson-databind:2.15.3'
 }
 
 // Apply a specific Java toolchain to ease working on different environments.

@@ -1,4 +1,4 @@
-package model.src.main.java;
+package cz.cuni.matfyz.collector.model;
 
 import java.util.HashMap;
 
@@ -10,9 +10,10 @@ public class TableData {
     public int sizeInPages; //size of tables in pages on disk
     public int rowCount; //number of rows
 
-    private HashMap<String, ColumnData> columns;
+    private final HashMap<String, ColumnData> columns;
 
     public TableData(String name) {
+        columns = new HashMap<>();
         this.name = name;
     }
 
@@ -35,32 +36,18 @@ public class TableData {
             columns.get(colName).setByteSize(size);
         }
         else {
-            columns.put(colName, new ColumnData(colName)).setByteSize(size);
+            columns.put(colName, new ColumnData(colName));
+            columns.get(colName).setByteSize(size);
         }
     }
 
-    public void setColumnDictinctRatio(String colName, double ratio) {
+    public void setColumnDistinctRatio(String colName, double ratio) {
         if(columns.containsKey(colName)) {
             columns.get(colName).setDistinctRatio(ratio);
         }
         else {
-            columns.put(colName, new ColumnData(colName)).setDistinctRatio(ratio);
+            columns.put(colName, new ColumnData(colName));
+            columns.get(colName).setDistinctRatio(ratio);
         }
-    }
-
-    
-    public String toString(int indent) {
-        String indentStr = QueryData.createIndentedString(indent);
-        StringBuilder str = new StringBuilder();
-
-        str.append(indentStr + "Table name: " + name + "\n");
-        str.append(indentStr + "Table size: " + size + "\n");
-        str.append(indentStr + "Table size in pages: " + sizeInPages + "\n");
-        str.append(indentStr + "Table number of rows: " + rowCount + "\n");
-        for (ColumnData data: columns.values()) {
-            str.append(data.toString(indent + 1));
-        }
-
-        return str.toString();
     }
 }

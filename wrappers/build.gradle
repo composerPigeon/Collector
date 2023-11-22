@@ -11,7 +11,7 @@ repositories {
 
 dependencies {
     // This is the postgresql jdbc driver.
-    implementation 'org.postgresql:postgresql:42.2.2'
+    implementation 'org.postgresql:postgresql:42.2.27'
 
     // json dependency for json parsing
     implementation 'com.fasterxml.jackson.core:jackson-databind:2.15.3'
@@ -31,5 +31,5 @@ java {
 
 application {
     // Define the main class for the application.
-    mainClass = 'wrappers.src.main.java.TestWrapperProgram';
+    mainClass = 'cz.cuni.matfyz.collector.wrappers.program.WrappersProgram'
 }
