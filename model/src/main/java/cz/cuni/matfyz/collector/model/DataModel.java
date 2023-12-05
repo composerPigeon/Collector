@@ -8,31 +8,31 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 public class DataModel {
 
     //Gathered data (objects that will be translated to JSON using GSON)
-    private String databaseName;
+    private String _databaseName;
 
-    private String datasetName;
-    private double executionTime = 0;
+    private String _datasetName;
+    private double _executionTime = 0;
 
-    private QueryData beforeQueryData;
-    private QueryData afterQueryData;
+    private QueryData _beforeQueryData;
+    private QueryData _afterQueryData;
 
     public DataModel(String databaseName, String datasetName) {
-        this.databaseName = databaseName;
-        this.datasetName = datasetName;
+        _databaseName = databaseName;
+        _datasetName = datasetName;
 
-        beforeQueryData = new QueryData();
-        afterQueryData = new QueryData();
+        _beforeQueryData = new QueryData();
+        _afterQueryData = new QueryData();
     }
 
     public QueryData beforeQuery() {
-        return beforeQueryData;
+        return _beforeQueryData;
     }
 
     public QueryData afterQuery() {
-        return afterQueryData;
+        return _afterQueryData;
     }
 
-    public void setExecTime(double execTime) { this.executionTime = execTime; }
+    public void setExecTime(double execTime) { _executionTime = execTime; }
 
     public String toJson() throws JsonProcessingException {
         ObjectMapper objectMapper = new ObjectMapper();

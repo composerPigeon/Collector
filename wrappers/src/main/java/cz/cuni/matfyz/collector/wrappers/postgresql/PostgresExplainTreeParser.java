@@ -9,13 +9,13 @@ import cz.cuni.matfyz.collector.model.DataModel;
 
 public class PostgresExplainTreeParser {
 
-    private static void saveExecTime(Map<String, Object> root, DataModel dataModel) {
+    private static void _saveExecTime(Map<String, Object> root, DataModel dataModel) {
         Object result = root.get("Execution Time");
         if (result instanceof Double time) {
             dataModel.setExecTime(time);
         }
     }
-    private static void saveTableData(Map<String, Object> node, DataModel dataModel) {
+    private static void _saveTableData(Map<String, Object> node, DataModel dataModel) {
         if (node.get("Relation Name") instanceof String relName) {
             if (node.get("Actual Rows") instanceof Integer rowCount) {
                 dataModel.afterQuery().setTableRowCount(relName, rowCount);
@@ -23,19 +23,19 @@ public class PostgresExplainTreeParser {
         }
     }
 
-    private static void parseTree(Map<String, Object> root, DataModel dataModel) {
+    private static void _parseTree(Map<String, Object> root, DataModel dataModel) {
         if (root.containsKey("Execution Time")) {
-            saveExecTime(root, dataModel);
+            _saveExecTime(root, dataModel);
         }
         if (root.containsKey("Plan") && root.get("Plan") instanceof Map node) {
-            parseSubTree(node, dataModel);
+            _parseSubTree(node, dataModel);
         }
     }
 
-    private static void parseSubTree(Map<String, Object> root, DataModel dataModel) {
+    private static void _parseSubTree(Map<String, Object> root, DataModel dataModel) {
         if (root.get("Node Type") instanceof String nodeType) {
             if ("Seq Scan".equals(nodeType)) {
-                saveTableData(root, dataModel);
+                _saveTableData(root, dataModel);
             } else if ("Index Scan".equals(nodeType)) {
 
             }
@@ -43,7 +43,7 @@ public class PostgresExplainTreeParser {
             if (root.containsKey("Plans") && root.get("Plans") instanceof List list) {
                 for(Object o: list) {
                     if (o instanceof Map node) {
-                        parseSubTree(node, dataModel);
+                        _parseSubTree(node, dataModel);
                     }
                 }
             }
@@ -58,7 +58,7 @@ public class PostgresExplainTreeParser {
 
             for (Object plan: result) {
                 if (plan instanceof Map root) {
-                    parseTree(root, dataModel);
+                    _parseTree(root, dataModel);
                 }
             }
 

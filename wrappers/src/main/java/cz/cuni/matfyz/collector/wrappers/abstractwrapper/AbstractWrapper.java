@@ -6,11 +6,11 @@ import java.sql.SQLException;
 import cz.cuni.matfyz.collector.model.DataModel;
 
 public abstract class AbstractWrapper {
-    protected String link;
-    protected String datasetName;
-    protected Connection connection;
+    protected String _link;
+    protected String _datasetName;
+    protected Connection _connection;
 
-    protected abstract DataModel parseQuery(String query);
+    protected abstract DataModel _parseQuery(String query);
     
     public abstract DataModel executeQuery(String query) throws SQLException;
 }
