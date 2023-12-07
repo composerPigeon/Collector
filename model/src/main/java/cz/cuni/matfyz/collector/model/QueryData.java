@@ -1,7 +1,6 @@
 package cz.cuni.matfyz.collector.model;
 
 import java.util.HashMap;
-import java.util.Arrays;
 import java.util.Set;
 
 public class QueryData {
@@ -14,15 +13,18 @@ public class QueryData {
     public QueryData() {
         _tables = new HashMap<>();
         _indexes = new HashMap<>();
+
+        _dataSetSize = -1;
+        _dataSetSizeInPages = -1;
     }
 
     //Database setting methods
     public void setDataSetSize(int size) {
-        _dataSetSize = size;
+        if(_dataSetSize == -1) {_dataSetSize = size;}
     }
 
     public void setDataSetSizeInPages(int dataSetSizeInPages) {
-        _dataSetSizeInPages = dataSetSizeInPages;
+        if (_dataSetSizeInPages == -1) {_dataSetSizeInPages = dataSetSizeInPages;}
     }
 
     //Tables setting methods
@@ -88,10 +90,6 @@ public class QueryData {
 
     public Set<String> getTableNames() {
         return _tables.keySet();
-    }
-
-    public Set<String> getColumnNames(String tableName) {
-        return _tables.get(tableName).getColumnNames();
     }
 
     public Set<String> getIndexNames() {

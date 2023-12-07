@@ -8,14 +8,16 @@ public class ColumnData {
 
     public ColumnData(String name) {
         _name = name;
+        _size = -1;
+        _ratio = Double.NaN;
     }
 
     public void setByteSize(int size) {
-        _size = size;
+        if (_size == -1) {_size = size;}
     }
 
     public void setDistinctRatio(double ratio) {
-        _ratio = ratio;
+        if (Double.isNaN(_ratio)) {_ratio = ratio;}
     }
 
 }

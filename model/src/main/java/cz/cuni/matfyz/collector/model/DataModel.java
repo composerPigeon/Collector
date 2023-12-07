@@ -14,7 +14,7 @@ public class DataModel {
     private String _databaseName;
 
     private String _datasetName;
-    private double _executionTime = 0;
+    private double _executionTime;
 
     private QueryData _beforeQueryData;
     private QueryData _afterQueryData;
@@ -22,6 +22,8 @@ public class DataModel {
     public DataModel(String databaseName, String datasetName) {
         _databaseName = databaseName;
         _datasetName = datasetName;
+
+        _executionTime = -1;
 
         _beforeQueryData = new QueryData();
         _afterQueryData = new QueryData();
@@ -48,7 +50,9 @@ public class DataModel {
         return names;
     }
 
-    public void setExecTime(double execTime) { _executionTime = execTime; }
+    public void setExecTime(double execTime) {
+        if (_executionTime == -1) {_executionTime = execTime; }
+    }
 
     public String toJson() throws JsonProcessingException {
         ObjectMapper objectMapper = new ObjectMapper();

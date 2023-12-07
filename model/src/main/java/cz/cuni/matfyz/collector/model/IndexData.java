@@ -9,18 +9,21 @@ public class IndexData {
 
     public IndexData(String name) {
         _name = name;
+        _size = -1;
+        _sizeInPages = -1;
+        _rowCount = -1;
     }
 
     //Tables setting methods
     public void setByteSize(int size) {
-        _size = size;
+        if (_size == -1) {_size = size;}
     }
 
     public void setSizeInPages(int sizeInPages) {
-        _sizeInPages = sizeInPages;
+        if (_sizeInPages == -1) {_sizeInPages = sizeInPages;}
     }
 
     public void setRowCount(int count) {
-        _rowCount = count;
+        if (_rowCount == -1) {_rowCount = count;}
     }
 }
