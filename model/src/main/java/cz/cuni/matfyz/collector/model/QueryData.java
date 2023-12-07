@@ -2,6 +2,7 @@ package cz.cuni.matfyz.collector.model;
 
 import java.util.HashMap;
 import java.util.Arrays;
+import java.util.Set;
 
 public class QueryData {
     private int _dataSetSize; //size of dataset in bytes
@@ -85,46 +86,38 @@ public class QueryData {
         }
     }
 
-    public String[] getTableNames() {
-        String[] result = new String[_tables.size()];
-        int i = 0;
-        for (String tableName: _tables.keySet()) {
-            result[i] = tableName;
-            i += 1;
-        }
-        return result;
+    public Set<String> getTableNames() {
+        return _tables.keySet();
     }
 
-    public String[] getIndexNames() {
-        String[] result = new String[_indexes.size()];
-        int i = 0;
-        for (String inxName: _indexes.keySet()) {
-            result[i] = inxName;
-            i += 1;
-        }
-        return result;
+    public Set<String> getColumnNames(String tableName) {
+        return _tables.get(tableName).getColumnNames();
+    }
+
+    public Set<String> getIndexNames() {
+        return _indexes.keySet();
     }
 
 
 
     //Columns setting methods
     public void setColumnByteSize(String tableName, String colName, int size) {
-        if(tables.containsKey(tableName)) {
-            tables.get(tableName).setColumnByteSize(colName, size);
+        if(_tables.containsKey(tableName)) {
+            _tables.get(tableName).setColumnByteSize(colName, size);
         }
         else {
-            tables.put(tableName, new TableData(tableName));
-            tables.get(tableName).setColumnByteSize(colName, size);
+            _tables.put(tableName, new TableData(tableName));
+            _tables.get(tableName).setColumnByteSize(colName, size);
         }
     }
 
     public void setColumnDistinctRatio(String tableName, String colName, double ratio) {
-        if(tables.containsKey(tableName)) {
-            tables.get(tableName).setColumnDistinctRatio(colName, ratio);
+        if(_tables.containsKey(tableName)) {
+            _tables.get(tableName).setColumnDistinctRatio(colName, ratio);
         }
         else {
-            tables.put(tableName, new TableData(tableName));
-            tables.get(tableName).setColumnDistinctRatio(colName, ratio);
+            _tables.put(tableName, new TableData(tableName));
+            _tables.get(tableName).setColumnDistinctRatio(colName, ratio);
         }
     }
 }
