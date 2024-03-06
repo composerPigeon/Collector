@@ -16,6 +16,15 @@ dependencies {
     // json dependency for json parsing
     implementation 'com.fasterxml.jackson.core:jackson-databind:2.15.3'
 
+    //neo4j jdbc driver
+    implementation 'org.neo4j:neo4j-jdbc-bolt:5.0.0'
+
+    //neo4j native driver
+    implementation 'org.neo4j.driver:neo4j-java-driver:5.7.0'
+
+    //mongodb native driver
+    implementation 'org.mongodb:mongodb-driver-sync:4.11.1'
+
     // model
     implementation project(':model')
 }
