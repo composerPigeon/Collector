@@ -1,16 +1,15 @@
 package cz.cuni.matfyz.collector.wrappers.abstractwrapper;
 
-import java.sql.Connection;
-import java.sql.SQLException;
-
 import cz.cuni.matfyz.collector.model.DataModel;
 
-public abstract class AbstractWrapper {
+public abstract class AbstractWrapper<P, R> {
     protected String _link;
     protected String _datasetName;
-    protected Connection _connection;
 
-    protected abstract DataModel _parseQuery(String query);
+    public AbstractWrapper(String link, String datasetName) {
+        _link = link;
+        _datasetName = datasetName;
+    }
     
-    public abstract DataModel executeQuery(String query) throws SQLException;
+    public abstract DataModel executeQuery(String query) throws WrapperException;
 }
