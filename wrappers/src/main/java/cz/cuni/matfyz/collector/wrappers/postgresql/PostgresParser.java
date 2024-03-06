@@ -1,17 +1,18 @@
 package cz.cuni.matfyz.collector.wrappers.postgresql;
 
+import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 
 import java.util.List;
 import java.util.Map;
 
 import cz.cuni.matfyz.collector.model.DataModel;
-import cz.cuni.matfyz.collector.wrappers.resources.Queries;
+import cz.cuni.matfyz.collector.wrappers.abstractwrapper.AbstractParser;
+import cz.cuni.matfyz.collector.wrappers.abstractwrapper.ExplainParseException;
 
-public class PostgresExplainTreeParser {
-    private String _datasetName;
-    public PostgresExplainTreeParser(String datasetName) {
-        _datasetName = datasetName;
+public class PostgresParser extends AbstractParser<String> {
+    public PostgresParser(String datasetName) {
+        super(datasetName);
     }
 
     private void _saveExecTime(Map<String, Object> root, DataModel dataModel) {
@@ -59,9 +60,10 @@ public class PostgresExplainTreeParser {
         }
     }
 
-    public DataModel parseExplainTree(String jsonExplainTree) {
+    @Override
+    public DataModel parseExplainTree(String forQuery, String jsonExplainTree) throws ExplainParseException {
         try {
-            DataModel dataModel = new DataModel(Queries.Postgres.DATABASE_NAME, _datasetName);
+            DataModel dataModel = new DataModel(forQuery, PostgresResources.DATABASE_NAME, _datasetName);
             ObjectMapper objectMapper = new ObjectMapper();
 
             List result = objectMapper.readValue(jsonExplainTree, List.class);
@@ -72,13 +74,9 @@ public class PostgresExplainTreeParser {
                 }
             }
 
-            //resultMap.keySet().forEach(System.out::println);
-            //System.out.println(result);
             return dataModel;
-        }
-        catch (Exception e) {
-            System.out.println(e.getMessage());
-            return null;
+        } catch (JsonProcessingException e) {
+            throw new ExplainParseException(e);
         }
     }
 }
