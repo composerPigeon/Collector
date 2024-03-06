@@ -11,55 +11,46 @@ import java.util.HashSet;
 public class DataModel {
 
     //Gathered data (objects that will be translated to JSON using GSON)
-    private String _databaseName;
+    private final String _databaseName;
+    private final String _datasetName;
+    private final String _query;
 
-    private String _datasetName;
-    private double _executionTime;
+    private final DatasetData _datasetData;
+    private final ResultData _resultData;
 
-    private QueryData _beforeQueryData;
-    private QueryData _afterQueryData;
-
-    public DataModel(String databaseName, String datasetName) {
+    public DataModel(String query, String databaseName, String datasetName) {
+        _query = query;
         _databaseName = databaseName;
         _datasetName = datasetName;
 
-        _executionTime = -1;
-
-        _beforeQueryData = new QueryData();
-        _afterQueryData = new QueryData();
+        _datasetData = new DatasetData();
+        _resultData = new ResultData();
     }
 
-    public QueryData beforeQuery() {
-        return _beforeQueryData;
+    public DatasetData toDatasetData() {
+        return _datasetData;
     }
-    public QueryData afterQuery() {
-        return _afterQueryData;
+    public ResultData toResultData() {
+        return _resultData;
     }
 
     public Set<String> getTableNames() {
-        Set<String> names = new HashSet<>();
-        names.addAll(_beforeQueryData.getTableNames());
-        names.addAll(_afterQueryData.getTableNames());
-        return names;
+        return new HashSet<>(_datasetData.getTableNames());
     }
-
     public Set<String> getIndexNames() {
-        Set<String> names = new HashSet<>();
-        names.addAll(_beforeQueryData.getIndexNames());
-        names.addAll(_afterQueryData.getIndexNames());
-        return names;
+        return new HashSet<>(_datasetData.getIndexNames());
     }
-
-    public void setExecTime(double execTime) {
-        if (_executionTime == -1) {_executionTime = execTime; }
+    public int getColumnByteSize(String tableName, String colName) {
+        return _datasetData.getColumnByteSize(tableName, colName);
+    }
+    public int getPageSize() {
+        return _datasetData.getDataSetPageSize();
     }
 
     public String toJson() throws JsonProcessingException {
         ObjectMapper objectMapper = new ObjectMapper();
         objectMapper.setVisibility(PropertyAccessor.FIELD, Visibility.ANY);
 
-        String dataModelJson = objectMapper.writerWithDefaultPrettyPrinter().writeValueAsString(this);
-
-        return dataModelJson;
+        return objectMapper.writerWithDefaultPrettyPrinter().writeValueAsString(this);
     }
 }

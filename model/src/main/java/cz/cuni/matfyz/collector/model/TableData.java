@@ -5,7 +5,7 @@ import java.util.Set;
 
 public class TableData {
 
-    private String _name;
+    final private String _name;
 
     public int _size; //size of table in bytes
     public int _sizeInPages; //size of tables in pages on disk
@@ -43,6 +43,13 @@ public class TableData {
             _columns.put(colName, new ColumnData(colName));
             _columns.get(colName).setByteSize(size);
         }
+    }
+
+    public int getColumnByteSize(String colName) {
+        if (_columns.containsKey(colName)) {
+            return _columns.get(colName).getByteSize();
+        }
+        throw new IllegalArgumentException("Column " + colName + " in table " + _name + " does not exists");
     }
 
     public void setColumnDistinctRatio(String colName, double ratio) {

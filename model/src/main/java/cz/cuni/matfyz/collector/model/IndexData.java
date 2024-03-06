@@ -1,8 +1,7 @@
 package cz.cuni.matfyz.collector.model;
 
 public class IndexData {
-    private String _name;
-
+    private final String _name;
     public int _size; //size of table in bytes
     public int _sizeInPages; //size of tables in pages on disk
     public int _rowCount; //number of rows
