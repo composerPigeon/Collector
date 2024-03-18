@@ -2,12 +2,12 @@ package cz.cuni.matfyz.collector.model;
 
 public class ResultData {
 
-    private double _executionTime;
+    private Double _executionTime;
     private final TableData _resultTable;
 
     public ResultData() {
         _resultTable = new TableData("result");
-        _executionTime = -1;
+        _executionTime = null;
     }
 
     public void setByteSize(int size) {
@@ -23,6 +23,6 @@ public class ResultData {
     }
 
     public void setExecutionTime(double time) {
-        if (_executionTime == -1) _executionTime = time;
+        if (_executionTime == null) _executionTime = time;
     }
 }

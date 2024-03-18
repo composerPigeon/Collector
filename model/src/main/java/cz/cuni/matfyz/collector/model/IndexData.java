@@ -2,27 +2,27 @@ package cz.cuni.matfyz.collector.model;
 
 public class IndexData {
     private final String _name;
-    public int _size; //size of table in bytes
-    public int _sizeInPages; //size of tables in pages on disk
-    public int _rowCount; //number of rows
+    public Integer _size; //size of table in bytes
+    public Integer _sizeInPages; //size of tables in pages on disk
+    public Integer _rowCount; //number of rows
 
     public IndexData(String name) {
         _name = name;
-        _size = -1;
-        _sizeInPages = -1;
-        _rowCount = -1;
+        _size = null;
+        _sizeInPages = null;
+        _rowCount = null;
     }
 
     //Tables setting methods
     public void setByteSize(int size) {
-        if (_size == -1) {_size = size;}
+        if (_size == null) {_size = size;}
     }
 
     public void setSizeInPages(int sizeInPages) {
-        if (_sizeInPages == -1) {_sizeInPages = sizeInPages;}
+        if (_sizeInPages == null) {_sizeInPages = sizeInPages;}
     }
 
     public void setRowCount(int count) {
-        if (_rowCount == -1) {_rowCount = count;}
+        if (_rowCount == null) {_rowCount = count;}
     }
 }

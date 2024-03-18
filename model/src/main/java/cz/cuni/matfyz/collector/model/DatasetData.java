@@ -4,9 +4,9 @@ import java.util.HashMap;
 import java.util.Set;
 
 public class DatasetData {
-    private int _dataSetSize; //size of dataset in bytes
-    private int _dataSetSizeInPages; //size of dataset in pages
-    private int _pageSize;
+    private Integer _dataSetSize; //size of dataset in bytes
+    private Integer _dataSetSizeInPages; //size of dataset in pages
+    private Integer _pageSize;
     
     private final HashMap<String, TableData> _tables;
     private final HashMap<String, IndexData> _indexes;
@@ -15,21 +15,21 @@ public class DatasetData {
         _tables = new HashMap<>();
         _indexes = new HashMap<>();
 
-        _dataSetSize = -1;
-        _dataSetSizeInPages = -1;
-        _pageSize = -1;
+        _dataSetSize = null;
+        _dataSetSizeInPages = null;
+        _pageSize = null;
     }
 
     //Database setting methods
     public void setDataSetSize(int size) {
-        if(_dataSetSize == -1) { _dataSetSize = size; }
+        if(_dataSetSize == null) { _dataSetSize = size; }
     }
 
     public void setDataSetSizeInPages(int dataSetSizeInPages) {
-        if (_dataSetSizeInPages == -1) { _dataSetSizeInPages = dataSetSizeInPages; }
+        if (_dataSetSizeInPages == null) { _dataSetSizeInPages = dataSetSizeInPages; }
     }
     public void setDataSetPageSize(int pageSize) {
-        if (_pageSize == -1) { _pageSize = pageSize; }
+        if (_pageSize == null) { _pageSize = pageSize; }
     }
     public int getDataSetPageSize() {
         return _pageSize;
