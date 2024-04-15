@@ -1,4 +1,4 @@
-package cz.cuni.matfyz.collector.wrappers.abstractwrapper.exceptions;
+package cz.cuni.matfyz.collector.wrappers.exceptions;
 
 public class ParseException extends WrapperException {
     public ParseException(String message) { super(message); }

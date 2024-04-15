@@ -1,7 +1,7 @@
 package cz.cuni.matfyz.collector.wrappers.exceptions;
 
-public class DataSaveException extends WrapperException {
-    public DataSaveException(Throwable cause) { super(cause); }
-    public DataSaveException(String message) { super(message); }
-    public DataSaveException(String message, Throwable cause) { super(message, cause); }
+public class DataCollectException extends WrapperException {
+    public DataCollectException(Throwable cause) { super(cause); }
+    public DataCollectException(String message) { super(message); }
+    public DataCollectException(String message, Throwable cause) { super(message, cause); }
 }
