@@ -1,4 +1,4 @@
-package cz.cuni.matfyz.collector.wrappers.abstractwrapper;
+package cz.cuni.matfyz.collector.wrappers.exceptions;
 
 public class DataSaveException extends WrapperException {
     public DataSaveException(Throwable cause) { super(cause); }

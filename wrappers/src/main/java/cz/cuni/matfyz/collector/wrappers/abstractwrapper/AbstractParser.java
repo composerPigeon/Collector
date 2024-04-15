@@ -1,11 +1,11 @@
 package cz.cuni.matfyz.collector.wrappers.abstractwrapper;
 
 import cz.cuni.matfyz.collector.model.DataModel;
+import cz.cuni.matfyz.collector.wrappers.exceptions.ParseException;
+import cz.cuni.matfyz.collector.wrappers.cachedresult.CachedResult;
 
-public abstract class AbstractParser<P> {
-    protected String _datasetName;
-    public AbstractParser(String datasetName) {
-        _datasetName = datasetName;
-    }
-    public abstract DataModel parseExplainTree(String forQuery, P explainTree) throws ExplainParseException;
+public abstract class AbstractParser<TPlan, TResult> {
+    public abstract void parseExplainTree(DataModel model, TPlan explainTree) throws ParseException;
+    public abstract CachedResult parseResult(TResult result) throws ParseException;
+    public abstract CachedResult parseMainResult(TResult result, DataModel withModel) throws ParseException;
 }

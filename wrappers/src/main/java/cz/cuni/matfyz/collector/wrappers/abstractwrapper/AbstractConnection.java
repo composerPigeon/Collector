@@ -1,14 +1,17 @@
 package cz.cuni.matfyz.collector.wrappers.abstractwrapper;
 
-public abstract class AbstractConnection<P, R> implements AutoCloseable {
-    protected P _mainPlan;
-    protected R _mainResult;
-    protected String _lastQuery;
+import cz.cuni.matfyz.collector.model.DataModel;
+import cz.cuni.matfyz.collector.wrappers.exceptions.QueryExecutionException;
+import cz.cuni.matfyz.collector.wrappers.cachedresult.CachedResult;
 
-    public abstract void executeMainQuery(String query) throws QueryExecutionException;
-    public R getMainQueryResult() { return _mainResult; }
-    public P getExplainTree() {
-        return _mainPlan;
+public abstract class AbstractConnection<TPlan, TResult> implements AutoCloseable {
+
+    protected AbstractParser<TPlan, TResult> _parser;
+
+    public AbstractConnection(AbstractParser<TPlan, TResult> parser) {
+        _parser = parser;
     }
-    public abstract R executeQuery(String query) throws QueryExecutionException;
+
+    public abstract CachedResult executeQuery(String query) throws QueryExecutionException;
+    public abstract CachedResult executeMainQuery(String query, DataModel toModel) throws QueryExecutionException;
 }

@@ -1,4 +1,4 @@
-package cz.cuni.matfyz.collector.wrappers.abstractwrapper;
+package cz.cuni.matfyz.collector.wrappers.abstractwrapper.exceptions;
 
 public class QueryExecutionException extends WrapperException {
     public QueryExecutionException(String message) { super(message); }
