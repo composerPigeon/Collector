@@ -2,60 +2,58 @@ package cz.cuni.matfyz.collector.wrappers.postgresql;
 
 import cz.cuni.matfyz.collector.model.DataModel;
 import cz.cuni.matfyz.collector.wrappers.abstractwrapper.*;
-import cz.cuni.matfyz.collector.wrappers.abstractwrapper.exceptions.DataSaveException;
-import cz.cuni.matfyz.collector.wrappers.abstractwrapper.exceptions.QueryExecutionException;
+import cz.cuni.matfyz.collector.wrappers.exceptions.DataCollectException;
+import cz.cuni.matfyz.collector.wrappers.exceptions.QueryExecutionException;
 import cz.cuni.matfyz.collector.wrappers.cachedresult.CachedResult;
-import cz.cuni.matfyz.collector.wrappers.cachedresult.MainCachedResult;
 
+import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.util.HashSet;
 import java.util.Set;
 
-class PostgresDataSaver extends AbstractDataSaver {
-    private final PostgresConnection _connection;
-    public PostgresDataSaver(PostgresConnection connection, String datasetName) {
-        super(datasetName);
-        _connection = connection;
+class PostgresDataCollector extends AbstractDataCollector<String, ResultSet> {
+    public PostgresDataCollector(PostgresConnection connection, DataModel model, String datasetName) {
+        super(datasetName, model, connection);
     }
 
     //saving of dataset data
-    private void _savePageSize(DataModel toModel) throws QueryExecutionException {
+    private void _savePageSize() throws QueryExecutionException {
         CachedResult result = _connection.executeQuery(PostgresResources.getPageSizeQuery());
         if (result.next()) {
             int pageSize = result.getInt("current_setting");
-            toModel.toDatasetData().setDataSetPageSize(pageSize);
+            _model.toDatasetData().setDataSetPageSize(pageSize);
         }
     }
-    private void _saveDatasetSizeInPages(int size, DataModel toModel) {
-        int pageSize = toModel.getPageSize();
+    private void _saveDatasetSizeInPages(int size) {
+        int pageSize = _model.getPageSize();
         if (pageSize > 0) {
             int sizeInPages = (int) Math.ceil((double)size / (double)pageSize);
-            toModel.toDatasetData().setDataSetSizeInPages(sizeInPages);
+            _model.toDatasetData().setDataSetSizeInPages(sizeInPages);
         }
     }
-    public void _saveDatasetData(DataModel toModel) throws QueryExecutionException {
+    public void _saveDatasetData() throws QueryExecutionException {
         CachedResult result = _connection.executeQuery(PostgresResources.getDatasetSizeQuery(_datasetName));
         if (result.next()) {
             int dataSetSize = result.getInt("pg_database_size");
-            toModel.toDatasetData().setDataSetSize(dataSetSize);
-            _saveDatasetSizeInPages(dataSetSize, toModel);
+            _model.toDatasetData().setDataSetSize(dataSetSize);
+            _saveDatasetSizeInPages(dataSetSize);
         }
     }
 
-    //Saving of tables data
-    private void _saveDistRatioForCol(String tableName, String colName, DataModel toModel) throws QueryExecutionException {
+    //Saving of columns data
+    private void _saveDistRatioForCol(String tableName, String colName) throws QueryExecutionException {
         CachedResult res = _connection.executeQuery(PostgresResources.getDistRatioColQuery(tableName, colName));
         if (res.next()) {
             double ratio = res.getDouble("n_distinct");
-            toModel.toDatasetData().setColumnDistinctRatio(tableName, colName, ratio);
+            _model.toDatasetData().setColumnDistinctRatio(tableName, colName, ratio);
         }
 
     }
-    private void _saveColSize(String tableName, String colName, DataModel toModel) throws QueryExecutionException {
+    private void _saveColSize(String tableName, String colName) throws QueryExecutionException {
         CachedResult result = _connection.executeQuery(PostgresResources.getColSizeQuery(tableName, colName));
         if (result.next()) {
             int size = result.getInt("avg_width");
-            toModel.toDatasetData().setColumnByteSize(tableName, colName, size);
+            _model.toDatasetData().setColumnByteSize(tableName, colName, size);
         }
     }
     private Set<String> _getColumnNames(String tableName) throws QueryExecutionException {
@@ -68,88 +66,99 @@ class PostgresDataSaver extends AbstractDataSaver {
         }
         return names;
     }
-    private void _saveColumnData(String tableName, DataModel toModel) throws QueryExecutionException {
+    private void _saveColumnData(String tableName) throws QueryExecutionException {
         for (String columnName: _getColumnNames(tableName)) {
-            _saveColSize(tableName, columnName, toModel);
-            _saveDistRatioForCol(tableName, columnName, toModel);
+            _saveColSize(tableName, columnName);
+            _saveDistRatioForCol(tableName, columnName);
         }
     }
 
-    private void _saveTableSizeInPages(String tableName, DataModel toModel) throws QueryExecutionException {
+    // Saving of tables data
+    private void _saveTableRowCount(String tableName) throws QueryExecutionException {
+        CachedResult result = _connection.executeQuery(PostgresResources.getRowCountForTableQuery(tableName));
+        if (result.next()) {
+            int rowCount = result.getInt("reltuples");
+            _model.toDatasetData().setTableRowCount(tableName, rowCount);
+        }
+    }
+    private void _saveTableSizeInPages(String tableName) throws QueryExecutionException {
         CachedResult result = _connection.executeQuery(PostgresResources.getTableSizeInPagesQuery(tableName));
         if (result.next()) {
             int sizeInPages = result.getInt("relpages");
-           toModel.toDatasetData().setTableSizeInPages(tableName, sizeInPages);
+           _model.toDatasetData().setTableSizeInPages(tableName, sizeInPages);
         }
     }
-    private void _saveTableSize(String tableName, DataModel toModel) throws QueryExecutionException {
+    private void _saveTableSize(String tableName) throws QueryExecutionException {
         CachedResult result = _connection.executeQuery(PostgresResources.getTableSizeQuery(tableName));
         if (result.next()){
             int size = result.getInt("pg_total_relation_size");
-            toModel.toDatasetData().setTableByteSize(tableName, size);
+            _model.toDatasetData().setTableByteSize(tableName, size);
         }
     }
-    private void _saveTableRowCount(String tableName, DataModel toModel) throws QueryExecutionException {
-        CachedResult result = _connection.executeQuery(PostgresResources.getRowCountForTableQuery(tableName));
-        if (result.next()) {
-            int count = result.getInt("reltuples");
-            toModel.toDatasetData().setTableRowCount(tableName, count);
-        }
-    }
-    private void _saveTableData(DataModel toModel) throws QueryExecutionException, SQLException {
-        for (String tableName : toModel.getTableNames()) {
-            _saveTableSizeInPages(tableName, toModel);
-            _saveTableSize(tableName, toModel);
-            _saveTableRowCount(tableName, toModel);
-            _saveColumnData(tableName, toModel);
+    private void _saveTableData() throws QueryExecutionException, SQLException {
+        for (String tableName : _model.getTableNames()) {
+            _saveTableRowCount(tableName);
+            _saveTableSizeInPages(tableName);
+            _saveTableSize(tableName);
+            _saveColumnData(tableName);
         }
     }
 
     //saving of index data
-    private void _saveIndexData(DataModel toModel) {
-        for (String indexName: toModel.getIndexNames()) {
-            //gather and save index data
+    private void _saveIndexRowCount(String indexName) throws QueryExecutionException {
+        CachedResult result = _connection.executeQuery(PostgresResources.getRowCountForTableQuery(indexName));
+        if (result.next()) {
+            int rowCount = result.getInt("reltuples");
+            _model.toDatasetData().setIndexRowCount(indexName, rowCount);
+        }
+    }
+    private void _saveIndexSizeInPages(String indexName) throws QueryExecutionException {
+        CachedResult result = _connection.executeQuery(PostgresResources.getTableSizeInPagesQuery(indexName));
+        if (result.next()) {
+            int sizeInPages = result.getInt("relpages");
+            _model.toDatasetData().setIndexSizeInPages(indexName, sizeInPages);
+        }
+    }
+    private void _saveIndexSize(String indexName) throws QueryExecutionException {
+        CachedResult result = _connection.executeQuery(PostgresResources.getTableSizeQuery(indexName));
+        if (result.next()) {
+            int size = result.getInt("pg_total_relation_size");
+            _model.toDatasetData().setIndexByteSize(indexName, size);
+        }
+    }
+    private void _saveIndexData() throws QueryExecutionException {
+        for (String indexName: _model.getIndexNames()) {
+            _saveIndexRowCount(indexName);
+            _saveIndexSizeInPages(indexName);
+            _saveIndexSize(indexName);
         }
     }
 
 
-    //saving of result data
-    private  int _getResultRowSizeInBytes(MainCachedResult result) throws SQLException {
-        int rowSize = 0;
-        for (int i = 0; i < result.getColumnCount(); i++) {
-            rowSize += result.getColumnSize(i);
-        }
-        return rowSize;
-    }
 
-    private void _saveResultData(MainCachedResult result, DataModel model) throws DataSaveException {
-        try {
-            int rowCount = result.getRowCount();
-            model.toResultData().setRowCount(rowCount);
+    private void _saveResultData(CachedResult result) throws DataCollectException {
+        int rowCount = result.getRowCount();
+        _model.toResultData().setRowCount(rowCount);
 
-            int rowSize = _getResultRowSizeInBytes(result);
-            int sizeInBytes = rowSize * rowCount;
-            model.toResultData().setByteSize(sizeInBytes);
+        int sizeInBytes = result.getByteSize();
+        _model.toResultData().setByteSize(sizeInBytes);
 
-            int pageSize = model.getPageSize();
-            if (pageSize > 0)
-                model.toResultData().setSizeInPages((int)Math.ceil((double) sizeInBytes / pageSize));
-
-        } catch (SQLException e) {
-            throw new DataSaveException(e);
-        }
+        int pageSize = _model.getPageSize();
+        if (pageSize > 0)
+            _model.toResultData().setSizeInPages((int)Math.ceil((double) sizeInBytes / pageSize));
     }
 
     @Override
-    public void saveData(MainCachedResult result, DataModel dataModel) throws DataSaveException {
+    public DataModel collectData(CachedResult result) throws DataCollectException {
         try {
-            _savePageSize(dataModel);
-            _saveDatasetData(dataModel);
-            _saveTableData(dataModel);
-            _saveIndexData(dataModel);
-            _saveResultData(result, dataModel);
+            _savePageSize();
+            _saveDatasetData();
+            _saveIndexData();
+            _saveTableData();
+            _saveResultData(result);
+            return _model;
         } catch (QueryExecutionException | SQLException e) {
-            throw new DataSaveException(e);
+            throw new DataCollectException(e);
         }
 
     }

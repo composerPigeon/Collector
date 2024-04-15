@@ -20,7 +20,7 @@ public abstract class PostgresResources {
         return "select pg_total_relation_size('" + tableName + "');";
     }
     public static String getConstraintsCountForTableQuery(String tableName) {
-        return "select relcheck from pg_class where relname '" + tableName + "';";
+        return "select relcheck from pg_class where relname = '" + tableName + "';";
     }
     public static String getRowCountForTableQuery(String tableName) {
         return "select reltuples from pg_class where relname = '" + tableName + "';";
@@ -34,5 +34,9 @@ public abstract class PostgresResources {
     }
     public static String getColSizeQuery(String tableName, String colName) {
         return "select avg_width from pg_stats where tablename = '" + tableName + "' and attname = '" + colName + "';";
+    }
+
+    public static String getTableNameForIndexQuery(String indexName) {
+        return "select tablename from pg_indexes where indexname = '" + indexName + "';";
     }
 }

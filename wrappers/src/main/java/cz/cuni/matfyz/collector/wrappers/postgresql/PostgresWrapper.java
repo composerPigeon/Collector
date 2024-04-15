@@ -2,29 +2,28 @@ package cz.cuni.matfyz.collector.wrappers.postgresql;
 
 import cz.cuni.matfyz.collector.wrappers.abstractwrapper.AbstractWrapper;
 import cz.cuni.matfyz.collector.model.DataModel;
-import cz.cuni.matfyz.collector.wrappers.abstractwrapper.WrapperException;
+import cz.cuni.matfyz.collector.wrappers.cachedresult.CachedResult;
+import cz.cuni.matfyz.collector.wrappers.exceptions.WrapperException;
 
 import java.sql.*;
 
 public class PostgresWrapper extends AbstractWrapper<String, ResultSet> {
+    private final PostgresParser _parser;
     public PostgresWrapper(String link, String datasetName) {
         super(link, datasetName);
+        _parser =  new PostgresParser();
     }
 
     @Override
     public DataModel executeQuery(String query) throws WrapperException {
         try (
-           var connection = new PostgresConnection(_link + '/' + _datasetName, "", "");
+           var connection = new PostgresConnection(_link + '/' + _datasetName, "", "", _parser);
         ) {
-            var parser = new PostgresParser(_datasetName);
-            var saver = new PostgresDataSaver(connection, _datasetName);
-            connection.executeMainQuery(query);
+            DataModel dataModel = new DataModel(query, PostgresResources.DATABASE_NAME, _datasetName);
+            CachedResult result = connection.executeMainQuery(query, dataModel);
 
-            DataModel dataModel = parser.parseExplainTree(connection.getExplainTree());
-            saver.saveDataTo(dataModel);
-
-            return dataModel;
-
+            var collector = new PostgresDataCollector(connection, dataModel, _datasetName);
+            return collector.collectData(result);
         } catch (SQLException e) {
             throw new WrapperException(e);
         }
@@ -34,5 +33,4 @@ public class PostgresWrapper extends AbstractWrapper<String, ResultSet> {
     public String toString() {
         return "Connection link: " + _link + "\n";
     }
-
 }
