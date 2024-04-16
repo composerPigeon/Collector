@@ -10,6 +10,7 @@ public class TableData {
     public Integer _size; //size of table in bytes
     public Integer _sizeInPages; //size of tables in pages on disk
     public Integer _rowCount; //number of rows
+    public Integer _constraintCount;
 
     private final HashMap<String, ColumnData> _columns;
 
@@ -19,19 +20,29 @@ public class TableData {
         _size = null;
         _sizeInPages = null;
         _rowCount = null;
+        _constraintCount = null;
     }
 
     //Tables setting methods
     public void setByteSize(int size) {
-        if (_size == null) {_size = size;}
+        if (_size == null)
+            _size = size;
     }
 
     public void setSizeInPages(int sizeInPages) {
-        if(_sizeInPages == null) {_sizeInPages = sizeInPages;}
+        if(_sizeInPages == null)
+            _sizeInPages = sizeInPages;
     }
 
     public void setRowCount(int count) {
-        if (_rowCount == null) {_rowCount = count;}
+        if (_rowCount == null)
+            _rowCount = count;
+    }
+
+    public void setConstraintCount(int count) {
+        if (_constraintCount == null) {
+            _constraintCount = count;
+        }
     }
 
     //Columns setting methods

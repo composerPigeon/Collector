@@ -1,5 +1,7 @@
 package cz.cuni.matfyz.collector.model;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
+
 public class ColumnData {
 
     private final String _name;
@@ -16,6 +18,7 @@ public class ColumnData {
         if (_size == null) {_size = size;}
     }
 
+    @JsonIgnore
     public int getByteSize() { return _size; }
 
     public void setDistinctRatio(double ratio) {
