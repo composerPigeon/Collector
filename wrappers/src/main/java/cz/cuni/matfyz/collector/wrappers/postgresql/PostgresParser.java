@@ -86,12 +86,13 @@ public class PostgresParser extends AbstractParser<String, ResultSet> {
             CachedResult.Builder builder,
             ResultSetMetaData metData,
             ResultSet resultSet,
-            boolean addSize
+            boolean collectColumnTypes
     ) throws SQLException {
 
         for (int i = 1; i <= metData.getColumnCount(); i++) {
             String columnName = metData.getColumnName(i);
             String className = metData.getColumnClassName(i);
+            String typeName = metData.getColumnTypeName(i);
 
             Object value;
             if (className.equals("java.lang.Double")) {
@@ -102,9 +103,8 @@ public class PostgresParser extends AbstractParser<String, ResultSet> {
                 value = resultSet.getString(i);
             }
             builder.toLastRecordAddValue(columnName, value);
-            if (addSize) {
-                //TODO: Get ColumnSize
-                builder.addSize(0);
+            if (collectColumnTypes) {
+                builder.addColumnType(columnName, typeName);
             }
         }
     }

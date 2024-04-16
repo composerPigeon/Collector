@@ -20,7 +20,7 @@ public abstract class PostgresResources {
         return "select pg_total_relation_size('" + tableName + "');";
     }
     public static String getConstraintsCountForTableQuery(String tableName) {
-        return "select relcheck from pg_class where relname = '" + tableName + "';";
+        return "select relchecks from pg_class where relname = '" + tableName + "';";
     }
     public static String getRowCountForTableQuery(String tableName) {
         return "select reltuples from pg_class where relname = '" + tableName + "';";
@@ -38,5 +38,13 @@ public abstract class PostgresResources {
 
     public static String getTableNameForIndexQuery(String indexName) {
         return "select tablename from pg_indexes where indexname = '" + indexName + "';";
+    }
+
+    public static String getTableNameForColumnQuery(String columnName, String columnType) {
+        return " select a.attname, c.relname, t.typname from pg_class as c inner join pg_attribute as a on a.attrelid = c.oid inner join pg_type as t on a.atttypid = t.oid where a.attname = '" + columnName + "' and c.relkind = 'r' and t.typname = '" + columnType + "';";
+    }
+
+    public static String getCacheSizeQuery() {
+        return "select cast(setting as int) * pg_size_bytes(unit) as shared_buffers from pg_settings where name='shared_buffers';";
     }
 }

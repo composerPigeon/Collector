@@ -5,6 +5,7 @@ import cz.cuni.matfyz.collector.wrappers.abstractwrapper.*;
 import cz.cuni.matfyz.collector.wrappers.exceptions.DataCollectException;
 import cz.cuni.matfyz.collector.wrappers.exceptions.QueryExecutionException;
 import cz.cuni.matfyz.collector.wrappers.cachedresult.CachedResult;
+import cz.cuni.matfyz.collector.wrappers.neo4j.Neo4jResources;
 
 import java.sql.ResultSet;
 import java.sql.SQLException;
@@ -31,13 +32,25 @@ class PostgresDataCollector extends AbstractDataCollector<String, ResultSet> {
             _model.toDatasetData().setDataSetSizeInPages(sizeInPages);
         }
     }
-    public void _saveDatasetData() throws QueryExecutionException {
+    private void _saveDatasetDataSizes() throws QueryExecutionException {
         CachedResult result = _connection.executeQuery(PostgresResources.getDatasetSizeQuery(_datasetName));
         if (result.next()) {
             int dataSetSize = result.getInt("pg_database_size");
             _model.toDatasetData().setDataSetSize(dataSetSize);
             _saveDatasetSizeInPages(dataSetSize);
         }
+    }
+    private void _saveDatasetCacheSize() throws QueryExecutionException {
+        CachedResult result = _connection.executeQuery(PostgresResources.getCacheSizeQuery());
+        if (result.next()) {
+            int size = result.getInt("shared_buffers");
+            _model.toDatasetData().setDataSetCacheSize(size);
+        }
+    }
+    private void _saveDatasetData() throws QueryExecutionException {
+        _savePageSize();
+        _saveDatasetDataSizes();
+        _saveDatasetCacheSize();
     }
 
     //Saving of columns data
@@ -81,6 +94,13 @@ class PostgresDataCollector extends AbstractDataCollector<String, ResultSet> {
             _model.toDatasetData().setTableRowCount(tableName, rowCount);
         }
     }
+    private void _saveTableConstraintCount(String tableName) throws QueryExecutionException {
+        CachedResult result = _connection.executeQuery(PostgresResources.getConstraintsCountForTableQuery(tableName));
+        if (result.next()) {
+            int count = result.getInt("relchecks");
+            _model.toDatasetData().setTableConstraintCount(tableName, count);
+        }
+    }
     private void _saveTableSizeInPages(String tableName) throws QueryExecutionException {
         CachedResult result = _connection.executeQuery(PostgresResources.getTableSizeInPagesQuery(tableName));
         if (result.next()) {
@@ -95,9 +115,10 @@ class PostgresDataCollector extends AbstractDataCollector<String, ResultSet> {
             _model.toDatasetData().setTableByteSize(tableName, size);
         }
     }
-    private void _saveTableData() throws QueryExecutionException, SQLException {
+    private void _saveTableData() throws QueryExecutionException {
         for (String tableName : _model.getTableNames()) {
             _saveTableRowCount(tableName);
+            _saveTableConstraintCount(tableName);
             _saveTableSizeInPages(tableName);
             _saveTableSize(tableName);
             _saveColumnData(tableName);
@@ -105,6 +126,13 @@ class PostgresDataCollector extends AbstractDataCollector<String, ResultSet> {
     }
 
     //saving of index data
+    private void _saveIndexTableName(String indexName) throws QueryExecutionException {
+        CachedResult result = _connection.executeQuery(PostgresResources.getTableNameForIndexQuery(indexName));
+        if (result.next()) {
+            String tableName = result.getString("tablename");
+            _model.toDatasetData().addTable(tableName);
+        }
+    }
     private void _saveIndexRowCount(String indexName) throws QueryExecutionException {
         CachedResult result = _connection.executeQuery(PostgresResources.getRowCountForTableQuery(indexName));
         if (result.next()) {
@@ -128,6 +156,7 @@ class PostgresDataCollector extends AbstractDataCollector<String, ResultSet> {
     }
     private void _saveIndexData() throws QueryExecutionException {
         for (String indexName: _model.getIndexNames()) {
+            _saveIndexTableName(indexName);
             _saveIndexRowCount(indexName);
             _saveIndexSizeInPages(indexName);
             _saveIndexSize(indexName);
@@ -136,13 +165,29 @@ class PostgresDataCollector extends AbstractDataCollector<String, ResultSet> {
 
 
 
-    private void _saveResultData(CachedResult result) throws DataCollectException {
-        int rowCount = result.getRowCount();
+    private String _getTableNameForColumn(String columnName, String columnType) throws QueryExecutionException, DataCollectException {
+        CachedResult result = _connection.executeQuery(PostgresResources.getTableNameForColumnQuery(columnName, columnType));
+        while (result.next()) {
+            String tableName = result.getString("relname");
+            if (_model.getTableNames().contains(tableName)) {
+                return tableName;
+            }
+        }
+        throw new DataCollectException("No Table for ColumnName " + columnName + " was found");
+    }
+
+    private void _saveResultData(CachedResult mainResult) throws QueryExecutionException, DataCollectException {
+        int rowCount = mainResult.getRowCount();
         _model.toResultData().setRowCount(rowCount);
 
-        int sizeInBytes = result.getByteSize();
-        _model.toResultData().setByteSize(sizeInBytes);
+        int sizeInBytes = 0;
+        for (String columnName : mainResult.getColumnNames()) {
+            String tableName = _getTableNameForColumn(columnName, mainResult.getColumnType(columnName));
+            sizeInBytes += _model.getColumnByteSize(tableName, columnName);
+        }
+        sizeInBytes *= rowCount;
 
+        _model.toResultData().setByteSize(sizeInBytes);
         int pageSize = _model.getPageSize();
         if (pageSize > 0)
             _model.toResultData().setSizeInPages((int)Math.ceil((double) sizeInBytes / pageSize));
@@ -151,13 +196,12 @@ class PostgresDataCollector extends AbstractDataCollector<String, ResultSet> {
     @Override
     public DataModel collectData(CachedResult result) throws DataCollectException {
         try {
-            _savePageSize();
             _saveDatasetData();
             _saveIndexData();
             _saveTableData();
             _saveResultData(result);
             return _model;
-        } catch (QueryExecutionException | SQLException e) {
+        } catch (QueryExecutionException e) {
             throw new DataCollectException(e);
         }
 
