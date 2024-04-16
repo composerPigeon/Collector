@@ -8,9 +8,9 @@ public class Neo4jResources {
     public static String getExplainPlanQuery(String query) {
         return "profile " + query;
     }
-    public static String getNodesQuery(String nodeLabel) { return "match (n:" + nodeLabel + ") return *;"; }
+    public static String getNodesOfSpecificLabelQuery(String nodeLabel) { return "match (n:" + nodeLabel + ") return *;"; }
 
-    public static String getRelationsQuery(String edgeLabel) { return "match ()-[e:" + edgeLabel + "]->() return e;"; }
+    public static String getEdgesOfSpecificLabelQuery(String edgeLabel) { return "match ()-[e:" + edgeLabel + "]->() return e;"; }
     public static String getIndexDataQuery(String indexType, String label, String property) {
         return "show indexes yield name, type, labelsOrTypes, properties where type = \"" + indexType + "\" and \"" + label + "\" in labelsOrTypes and \"" + property + "\" in properties;";
     }
@@ -23,7 +23,6 @@ public class Neo4jResources {
     public static String getConstraintCountForLabelQuery(String label) {
         return "show constraints yield labelsOrTypes where \"" + label + "\" in labelsOrTypes return count(*) as count;";
     }
-
     public static String getAllNodesQuery() {
         return "match (n) return n;";
     }
@@ -34,16 +33,34 @@ public class Neo4jResources {
     public static String getPageCacheSizeQuery() {
         return "show settings yield name, value where name=\"server.memory.pagecache.size\";";
     }
+    public static String getNodePropertiesForLabelQuery(String label) {
+        return "call apoc.meta.nodeTypeProperties({includeLabels: [\"" + label + "\"]}) yield propertyName;";
+    }
+
+    public static String getEdgePropertiesForLabelQuery(String label) {
+        return "call apoc.meta.relTypeProperties({includeLabels: [\"" + label + "\"]}) yield propertyName;";
+    }
+    public static String getNodePropertyTypeAndMandatoryQuery(String label, String propertyName) {
+        return "call apoc.meta.nodeTypeProperties({includeLabels: [\"" + label + "\"]}) yield propertyName, propertyTypes, mandatory where propertyName = \"" + propertyName + "\" return propertyName, propertyTypes, mandatory;\n";
+    }
+    public static String getEdgePropertyTypeAndMandatoryQuery(String label, String propertyName) {
+        return "call apoc.meta.relTypeProperties({includeLabels: [\"" + label + "\"]}) yield propertyName, propertyTypes, mandatory where propertyName = \"" + propertyName + "\" return propertyName, propertyTypes, mandatory;\n";
+    }
+    public static String getIsNodeLabelQuery(String label) {
+        return "return apoc.meta.nodes.count([\"Movie\"]) > 0 as isNodeLabel;";
+    }
 
     public static class DefaultSizes {
         public static int getAvgColumnSize(Object object) {
             if (object instanceof Integer || object instanceof Double || object instanceof Boolean || object instanceof LocalDate || object instanceof ZonedDateTime)
-                return 41;
+                return SMALL_PROPERTY_SIZE;
             else
-                return 128;
+                return BIG_PROPERTY_SIZE;
         }
 
         public static int NODE_SIZE = 15;
+        public static int BIG_PROPERTY_SIZE = 128;
+        public static int SMALL_PROPERTY_SIZE = 41;
         public static int EDGE_SIZE = 34;
         public static int PAGE_SIZE = 8192;
     }

@@ -10,6 +10,11 @@
 ## Command for starting postgresql@14
 - postgres -D /opt/homebrew/var/postgresql@14
 
+## Odkazy tutorialy
+- https://spring.io/guides/tutorials/rest
+- https://www.tutorialspoint.com/jackson_annotations/jackson_annotations_jsonignore.htm
+- https://fasterxml.github.io/jackson-annotations/javadoc/2.5/com/fasterxml/jackson/annotation/JsonIgnore.html
+
 ## Poznámky
 ### Objektový návrh
 - Rozdělení Wrapperu na Connection, Parser a Saver pro rozdělení funkčnosti jednotlivých častí wrapperu a zároveň specifikování a možnost optimalizace pro multithread běh
@@ -17,5 +22,9 @@
   - wrapper může držet data, a objekty důležité pro spojení s databází, které jsou ThreadSafe (Driver Neo4j)
   - Connection naopak pracuje s objekty, které nejsou ThreadSafe
 - ResultSet (Postrgres) a Result (Neo4j) není vhodné vracet z metod, jsou totiž mutable a zároveň není bezpečné z nich číst, pokud se uzavře connection
-  - Connection bude mít v sobě parser a saver, a bude vracet DataseDataModel a ResultDataModel, které se mergují do modelu
-### 
+  - Parser tedy parsuje příslušné výsledky na MainCachedResult případně CachedResult
+
+### Neo4j configurace
+- Je nutné nainstalovat apoc knihovnu podle následujícíh [pokynů](https://neo4j.com/docs/apoc/current/installation/)
+- následně je nutné v souboru ./conf/neo4j.conf nastavit `dbms.security.procedures.unrestricted=apoc.meta.nodeTypeProperties`
+  - povolí se tak spouštení následujících procedur

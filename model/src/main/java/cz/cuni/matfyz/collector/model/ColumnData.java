@@ -11,7 +11,7 @@ public class ColumnData {
     public ColumnData(String name) {
         _name = name;
         _size = null;
-        _ratio = Double.NaN;
+        _ratio = null;
     }
 
     public void setByteSize(int size) {
@@ -22,7 +22,7 @@ public class ColumnData {
     public int getByteSize() { return _size; }
 
     public void setDistinctRatio(double ratio) {
-        if (Double.isNaN(_ratio)) {_ratio = ratio;}
+        if (_ratio == null) {_ratio = ratio;}
     }
 
 }

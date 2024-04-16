@@ -1,26 +1,21 @@
-
-plugins {
-    id 'application'
-}
+apply plugin: 'application'
+apply plugin: 'java'
+mainClassName = 'program.WrappersProgram'
 
 repositories {
     // Use Maven Central for resolving dependencies.
     mavenCentral()
-
 }
 
 dependencies {
     // This is the postgresql jdbc driver.
-    implementation 'org.postgresql:postgresql:42.2.27'
+    implementation 'org.postgresql:postgresql:42.7.3'
 
     // json dependency for json parsing
     implementation 'com.fasterxml.jackson.core:jackson-databind:2.15.3'
 
-    //neo4j jdbc driver
-    implementation 'org.neo4j:neo4j-jdbc-bolt:5.0.0'
-
     //neo4j native driver
-    implementation 'org.neo4j.driver:neo4j-java-driver:5.7.0'
+    implementation 'org.neo4j.driver:neo4j-java-driver:5.19.0'
 
     //mongodb native driver
     implementation 'org.mongodb:mongodb-driver-sync:4.11.1'
@@ -36,9 +31,4 @@ java {
     toolchain {
         languageVersion = JavaLanguageVersion.of(17)
     }
-}
-
-application {
-    // Define the main class for the application.
-    mainClass = 'cz.cuni.matfyz.collector.wrappers.program.WrappersProgram'
 }
