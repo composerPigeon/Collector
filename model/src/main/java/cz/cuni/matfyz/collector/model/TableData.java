@@ -1,16 +1,18 @@
 package cz.cuni.matfyz.collector.model;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
+
 import java.util.HashMap;
 import java.util.Set;
 
 public class TableData {
 
+    @JsonIgnore
     final private String _name;
-
-    public Integer _size; //size of table in bytes
-    public Integer _sizeInPages; //size of tables in pages on disk
-    public Integer _rowCount; //number of rows
-    public Integer _constraintCount;
+    public Long _size; //size of table in bytes
+    public Long _sizeInPages; //size of tables in pages on disk
+    public Long _rowCount; //number of rows
+    public Long _constraintCount;
 
     private final HashMap<String, ColumnData> _columns;
 
@@ -24,22 +26,22 @@ public class TableData {
     }
 
     //Tables setting methods
-    public void setByteSize(int size) {
+    public void setByteSize(long size) {
         if (_size == null)
             _size = size;
     }
 
-    public void setSizeInPages(int sizeInPages) {
+    public void setSizeInPages(long sizeInPages) {
         if(_sizeInPages == null)
             _sizeInPages = sizeInPages;
     }
 
-    public void setRowCount(int count) {
+    public void setRowCount(long count) {
         if (_rowCount == null)
             _rowCount = count;
     }
 
-    public void setConstraintCount(int count) {
+    public void setConstraintCount(long count) {
         if (_constraintCount == null) {
             _constraintCount = count;
         }
@@ -51,7 +53,7 @@ public class TableData {
             _columns.get(colName).setByteSize(size);
         }
         else {
-            _columns.put(colName, new ColumnData(colName));
+            _columns.put(colName, new ColumnData());
             _columns.get(colName).setByteSize(size);
         }
     }
@@ -68,8 +70,28 @@ public class TableData {
             _columns.get(colName).setDistinctRatio(ratio);
         }
         else {
-            _columns.put(colName, new ColumnData(colName));
+            _columns.put(colName, new ColumnData());
             _columns.get(colName).setDistinctRatio(ratio);
+        }
+    }
+
+    public void setColumnType(String colName, String type) {
+        if(_columns.containsKey(colName)) {
+            _columns.get(colName).setType(type);
+        }
+        else {
+            _columns.put(colName, new ColumnData());
+            _columns.get(colName).setType(type);
+        }
+    }
+
+    public void setColumnMandatory(String colName, boolean value) {
+        if(_columns.containsKey(colName)) {
+            _columns.get(colName).setMandatory(value);
+        }
+        else {
+            _columns.put(colName, new ColumnData());
+            _columns.get(colName).setMandatory(value);
         }
     }
 }

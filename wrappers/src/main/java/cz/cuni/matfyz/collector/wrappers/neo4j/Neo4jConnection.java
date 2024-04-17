@@ -8,8 +8,9 @@ import cz.cuni.matfyz.collector.wrappers.cachedresult.CachedResult;
 
 import org.neo4j.driver.*;
 import org.neo4j.driver.summary.Plan;
+import org.neo4j.driver.summary.ResultSummary;
 
-public class Neo4jConnection extends AbstractConnection<Plan, Result> {
+public class Neo4jConnection extends AbstractConnection<ResultSummary, Result> {
     private final Session _session;
     public Neo4jConnection(Driver neo4jDriver, String datasetName, Neo4jParser parser) {
         super(parser);
@@ -23,7 +24,7 @@ public class Neo4jConnection extends AbstractConnection<Plan, Result> {
         try {
             Result result = _session.run(Neo4jResources.getExplainPlanQuery(query));
             var cachedResult = _parser.parseMainResult(result, toModel);
-            _parser.parseExplainTree(toModel, result.consume().plan());
+            _parser.parseExplainTree(toModel, result.consume());
             return cachedResult;
         } catch (ParseException e) {
             throw new QueryExecutionException(e);

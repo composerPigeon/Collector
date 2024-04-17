@@ -2,6 +2,7 @@ package cz.cuni.matfyz.collector.wrappers.neo4j;
 
 import java.time.LocalDate;
 import java.time.ZonedDateTime;
+import java.util.List;
 
 public class Neo4jResources {
     public static final String DATABASE_NAME = "Neo4j";
@@ -51,11 +52,18 @@ public class Neo4jResources {
     }
 
     public static class DefaultSizes {
-        public static int getAvgColumnSize(Object object) {
-            if (object instanceof Integer || object instanceof Double || object instanceof Boolean || object instanceof LocalDate || object instanceof ZonedDateTime)
-                return SMALL_PROPERTY_SIZE;
-            else
+        public static int getAvgColumnSizeByValue(Object value) {
+            if (value instanceof String || value instanceof List)
                 return BIG_PROPERTY_SIZE;
+            else
+                return SMALL_PROPERTY_SIZE;
+        }
+
+        public static int getAvgColumnSizeByType(String type) {
+            if ("String".equals(type) || "List".equals(type))
+                return BIG_PROPERTY_SIZE;
+            else
+                return SMALL_PROPERTY_SIZE;
         }
 
         public static int NODE_SIZE = 15;

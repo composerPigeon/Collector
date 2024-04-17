@@ -6,10 +6,10 @@ import java.util.HashMap;
 import java.util.Set;
 
 public class DatasetData {
-    private Integer _dataSetSize; //size of dataset in bytes
-    private Integer _dataSetSizeInPages; //size of dataset in pages
+    private Long _dataSetSize; //size of dataset in bytes
+    private Long _dataSetSizeInPages; //size of dataset in pages
     private Integer _pageSize;
-    private Integer _cacheSize;
+    private Long _cacheSize;
     
     private final HashMap<String, TableData> _tables;
     private final HashMap<String, IndexData> _indexes;
@@ -25,12 +25,12 @@ public class DatasetData {
     }
 
     //Database setting methods
-    public void setDataSetSize(int size) {
+    public void setDataSetSize(long size) {
         if(_dataSetSize == null)
             _dataSetSize = size;
     }
 
-    public void setDataSetSizeInPages(int dataSetSizeInPages) {
+    public void setDataSetSizeInPages(long dataSetSizeInPages) {
         if (_dataSetSizeInPages == null) { _dataSetSizeInPages = dataSetSizeInPages; }
     }
     public void setDataSetPageSize(int pageSize) {
@@ -42,10 +42,13 @@ public class DatasetData {
         return _pageSize;
     }
 
-    public void setDataSetCacheSize(int size) { if(_cacheSize == null) { _cacheSize = size; } }
+    public void setDataSetCacheSize(long size) {
+        if(_cacheSize == null)
+            _cacheSize = size;
+    }
 
     //Tables setting methods
-    public void setTableByteSize(String tableName, int size) {
+    public void setTableByteSize(String tableName, long size) {
         if (_tables.containsKey(tableName)) {
             _tables.get(tableName).setByteSize(size);
         }
@@ -55,7 +58,7 @@ public class DatasetData {
         }
     }
 
-    public void setTableSizeInPages(String tableName, int sizeInPages) {
+    public void setTableSizeInPages(String tableName, long sizeInPages) {
         if (_tables.containsKey(tableName)) {
             _tables.get(tableName).setSizeInPages(sizeInPages);
         }
@@ -65,7 +68,7 @@ public class DatasetData {
         }
     }
 
-    public void setTableRowCount(String tableName, int count) {
+    public void setTableRowCount(String tableName, long count) {
         if (_tables.containsKey(tableName)) {
             _tables.get(tableName).setRowCount(count);
         }
@@ -75,7 +78,7 @@ public class DatasetData {
         }
     }
 
-    public void setTableConstraintCount(String tableName, int count) {
+    public void setTableConstraintCount(String tableName, long count) {
         if (_tables.containsKey(tableName)) {
             _tables.get(tableName).setConstraintCount(count);
         } else {
@@ -84,32 +87,32 @@ public class DatasetData {
         }
     }
 
-    public void setIndexByteSize(String inxName, int size) {
+    public void setIndexByteSize(String inxName, long size) {
         if (_indexes.containsKey(inxName)) {
             _indexes.get(inxName).setByteSize(size);
         }
         else {
-            _indexes.put(inxName, new IndexData(inxName));
+            _indexes.put(inxName, new IndexData());
             _indexes.get(inxName).setByteSize(size);
         }
     }
 
-    public void setIndexSizeInPages(String inxName, int sizeInPages) {
+    public void setIndexSizeInPages(String inxName, long sizeInPages) {
         if (_indexes.containsKey(inxName)) {
             _indexes.get(inxName).setSizeInPages(sizeInPages);
         }
         else {
-            _indexes.put(inxName, new IndexData(inxName));
+            _indexes.put(inxName, new IndexData());
             _indexes.get(inxName).setSizeInPages(sizeInPages);
         }
     }
 
-    public void setIndexRowCount(String inxName, int count) {
+    public void setIndexRowCount(String inxName, long count) {
         if (_indexes.containsKey(inxName)) {
             _indexes.get(inxName).setRowCount(count);
         }
         else {
-            _indexes.put(inxName, new IndexData(inxName));
+            _indexes.put(inxName, new IndexData());
             _indexes.get(inxName).setRowCount(count);
         }
     }
@@ -131,7 +134,7 @@ public class DatasetData {
     }
     public void addIndex(String inxName) {
         if(!_indexes.containsKey(inxName)) {
-            _indexes.put(inxName, new IndexData(inxName));
+            _indexes.put(inxName, new IndexData());
         }
     }
 
@@ -160,6 +163,26 @@ public class DatasetData {
         else {
             _tables.put(tableName, new TableData(tableName));
             _tables.get(tableName).setColumnDistinctRatio(colName, ratio);
+        }
+    }
+
+    public void setColumnType(String tableName, String colName, String type) {
+        if(_tables.containsKey(tableName)) {
+            _tables.get(tableName).setColumnType(colName, type);
+        }
+        else {
+            _tables.put(tableName, new TableData(tableName));
+            _tables.get(tableName).setColumnType(colName, type);
+        }
+    }
+
+    public void setColumnMandatory(String tableName, String colName, boolean value) {
+        if(_tables.containsKey(tableName)) {
+            _tables.get(tableName).setColumnMandatory(colName, value);
+        }
+        else {
+            _tables.put(tableName, new TableData(tableName));
+            _tables.get(tableName).setColumnMandatory(colName, value);
         }
     }
 }

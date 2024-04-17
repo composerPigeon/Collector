@@ -1,22 +1,19 @@
 package cz.cuni.matfyz.collector.wrappers.neo4j;
 
 import cz.cuni.matfyz.collector.model.DataModel;
+import cz.cuni.matfyz.collector.model.ResultData;
 import cz.cuni.matfyz.collector.wrappers.abstractwrapper.AbstractDataCollector;
 import cz.cuni.matfyz.collector.wrappers.cachedresult.CachedResult;
 import cz.cuni.matfyz.collector.wrappers.exceptions.DataCollectException;
 import cz.cuni.matfyz.collector.wrappers.exceptions.ParseException;
 import cz.cuni.matfyz.collector.wrappers.exceptions.QueryExecutionException;
 import org.neo4j.driver.Result;
-import org.neo4j.driver.summary.Plan;
+import org.neo4j.driver.summary.ResultSummary;
 
-import javax.xml.crypto.Data;
 import java.util.ArrayList;
-import java.util.HashSet;
 import java.util.List;
-import java.util.Set;
-import java.util.stream.Stream;
 
-public class Neo4jDataCollector extends AbstractDataCollector<Plan, Result> {
+public class Neo4jDataCollector extends AbstractDataCollector<ResultSummary, Result> {
 
     public Neo4jDataCollector(Neo4jConnection connection, DataModel model, String datasetName) {
         super(datasetName, model, connection);
@@ -98,6 +95,8 @@ public class Neo4jDataCollector extends AbstractDataCollector<Plan, Result> {
             } else {
                 _model.toDatasetData().setColumnByteSize(label, property, Neo4jResources.DefaultSizes.SMALL_PROPERTY_SIZE);
             }
+            _model.toDatasetData().setColumnType(label, property, type);
+            _model.toDatasetData().setColumnMandatory(label, property, mandatory);
         }
     }
     private List<String> _getPropertyNames(String query) throws QueryExecutionException {
@@ -127,7 +126,7 @@ public class Neo4jDataCollector extends AbstractDataCollector<Plan, Result> {
         while (result.next()) {
             var record = result.getRecord();
             for (var column : record.entrySet()) {
-                propertiesSize += Neo4jResources.DefaultSizes.getAvgColumnSize(column.getValue());
+                propertiesSize += Neo4jResources.DefaultSizes.getAvgColumnSizeByValue(column.getValue());
             }
         }
         return new int[]{
@@ -141,7 +140,7 @@ public class Neo4jDataCollector extends AbstractDataCollector<Plan, Result> {
         while (result.next()) {
             var record = result.getRecord();
             for (var column : record.entrySet()) {
-                propertiesSize += Neo4jResources.DefaultSizes.getAvgColumnSize(column.getValue());
+                propertiesSize += Neo4jResources.DefaultSizes.getAvgColumnSizeByValue(column.getValue());
             }
         }
         return new int[]{
@@ -151,7 +150,7 @@ public class Neo4jDataCollector extends AbstractDataCollector<Plan, Result> {
     private void _saveTableConstraintCount(String label) throws QueryExecutionException {
         CachedResult result = _connection.executeQuery(Neo4jResources.getConstraintCountForLabelQuery(label));
         if (result.next()) {
-            int count = result.getInt("count");
+            long count = result.getLong("count");
             _model.toDatasetData().setTableConstraintCount(label, count);
         }
     }
@@ -209,13 +208,34 @@ public class Neo4jDataCollector extends AbstractDataCollector<Plan, Result> {
             _saveIndexSizes(inxName, names, isNode);
         }
     }
+
+    private void _saveColumnDataForResult() {
+
+    }
+
+    private void _saveResultData(CachedResult result) {
+        long size = result.getByteSize();
+        _model.toResultData().setByteSize(size);
+
+        long count = result.getRowCount();
+        _model.toResultData().setRowCount(count);
+
+        long sizeInPages = (long) Math.ceil((double) size / Neo4jResources.DefaultSizes.PAGE_SIZE);
+        _model.toResultData().setSizeInPages(sizeInPages);
+
+        for (String colName : result.getColumnNames()) {
+            String type = result.getColumnType(colName);
+            _model.toResultData().setColumnType(colName, type);
+            _model.toResultData().setColumnByteSize(colName, Neo4jResources.DefaultSizes.getAvgColumnSizeByType(type));
+        }
+    }
     @Override
     public DataModel collectData(CachedResult result) throws DataCollectException {
         try {
             _saveDatasetData();
             _saveIndexData();
             _saveTableData();
-
+            _saveResultData(result);
             return _model;
         } catch (QueryExecutionException | ParseException e) {
             throw new DataCollectException(e);

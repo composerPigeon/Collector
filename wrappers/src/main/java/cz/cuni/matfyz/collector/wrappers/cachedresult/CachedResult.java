@@ -7,10 +7,10 @@ import java.util.*;
 public class CachedResult {
     private final List<Map<String, Object>> _records;
     private final Map<String, String> _columnTypes;
-    private final int _byteSize;
+    private final long _byteSize;
     private int _cursor;
 
-    protected CachedResult(List<Map<String, Object>> records, Map<String, String> columnTypes, int byteSize) {
+    protected CachedResult(List<Map<String, Object>> records, Map<String, String> columnTypes, long byteSize) {
         _records = records;
         _byteSize = byteSize;
         _columnTypes = columnTypes;
@@ -69,11 +69,26 @@ public class CachedResult {
         } else if (value instanceof Boolean booleanValue) {
             return booleanValue;
         } else if (value instanceof String strValue) {
-            return Boolean.getBoolean(strValue);
+            return Boolean.parseBoolean(strValue);
         } else {
             throw new ClassCastException();
         }
     }
+    public long getLong(String colName) {
+        Object value = _get(colName);
+        if (value == null) {
+            throw  new ClassCastException("Cannot cast null to long");
+        } else if (value instanceof Long longValue) {
+            return longValue;
+        } else if (value instanceof Integer intValue) {
+            return intValue;
+        } else if (value instanceof String strValue) {
+            return Long.parseLong(strValue);
+        } else {
+            throw new ClassCastException();
+        }
+    }
+
     public <T> List<T> getList(String columnName, T[] type) {
         return (List<T>)_get(columnName);
     }
@@ -92,12 +107,12 @@ public class CachedResult {
     public int getRowCount() {
         return _records.size();
     }
-    public int getByteSize() { return _byteSize; }
+    public long getByteSize() { return _byteSize; }
 
     public static class Builder {
         private final List<Map<String, Object>> _records;
         private final Map<String, String> _columnTypes;
-        protected int _byteSize;
+        protected long _byteSize;
         public Builder() {
             _records = new ArrayList<>();
             _columnTypes = new HashMap<>();
@@ -106,7 +121,7 @@ public class CachedResult {
         public void addEmptyRecord() {
             _records.add(new LinkedHashMap<>());
         }
-        public void addSize(int value) { _byteSize += value; }
+        public void addSize(long value) { _byteSize += value; }
 
         public void addColumnType(String columnName, String columnType) {
             if (!_columnTypes.containsKey(columnName)) {
