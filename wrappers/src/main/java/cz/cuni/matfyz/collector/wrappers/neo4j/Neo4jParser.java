@@ -1,6 +1,5 @@
 package cz.cuni.matfyz.collector.wrappers.neo4j;
 
-import cz.cuni.matfyz.collector.model.ColumnData;
 import cz.cuni.matfyz.collector.model.DataModel;
 import cz.cuni.matfyz.collector.wrappers.abstractwrapper.AbstractParser;
 import cz.cuni.matfyz.collector.wrappers.exceptions.ParseException;
@@ -25,12 +24,12 @@ public class Neo4jParser extends AbstractParser<ResultSummary, Result> {
 
     private void _parseExecutionTime(DataModel model, ResultSummary summary ) {
         long nanoseconds = summary.resultAvailableAfter(TimeUnit.NANOSECONDS);
-        model.toResultData().setExecutionTime((double) nanoseconds / (1_000_000));
+        model.resultData().setExecutionTime((double) nanoseconds / (1_000_000));
     }
     private void _parseTableName(DataModel model, Plan operator) {
         String details = operator.arguments().get("Details").asString();
         String tableName = details.split(":")[1];
-        model.toDatasetData().addTable(tableName);
+        model.datasetData().addTable(tableName);
     }
 
     private String[] _parseIndexIdentifier(String identifier) {
@@ -59,7 +58,7 @@ public class Neo4jParser extends AbstractParser<ResultSummary, Result> {
         String indexType = details[0];
         String[] indexIdentifiers = _parseIndexIdentifier(details[2].split(":")[1]);
 
-        model.toDatasetData().addIndex(indexType + ':' + indexIdentifiers[0] + ':' + indexIdentifiers[1]);
+        model.datasetData().addIndex(indexType + ':' + indexIdentifiers[0] + ':' + indexIdentifiers[1]);
     }
 
     public void _parseOperator(DataModel model, Plan operator) {
@@ -81,29 +80,6 @@ public class Neo4jParser extends AbstractParser<ResultSummary, Result> {
     }
 
     // Parse Result
-    private Object _parseToObject(Value value) throws ParseException {
-        if (value.isNull())
-            return null;
-        else if (value instanceof IntegerValue intVal)
-            return intVal.asInt();
-        else if (value instanceof FloatValue floatValue)
-            return floatValue.asDouble();
-        else if (value instanceof BooleanValue booleanValue)
-            return booleanValue.asBoolean();
-        else if (value instanceof StringValue stringValue)
-            return stringValue.asString();
-        else if (value instanceof ListValue listValue)
-            return listValue.asList();
-        else if (value instanceof DateValue dateValue)
-            return dateValue.asLocalDate();
-        else if (value instanceof DateTimeValue dateTimeValue)
-            return dateTimeValue.asZonedDateTime();
-        else if (value instanceof NullValue)
-            return null;
-        else
-            throw new ParseException("ValueType" + value.toString() + "needs to be parsed");
-    }
-
     private Set<Map.Entry<String, PropertyData>> _parseNodeToMap(Node node) throws ParseException {
         var map = new HashMap<String, PropertyData>();
         for (String colName : node.keys()) {

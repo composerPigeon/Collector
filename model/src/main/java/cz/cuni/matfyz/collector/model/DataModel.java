@@ -29,10 +29,10 @@ public class DataModel {
         _resultData = new ResultData();
     }
 
-    public DatasetData toDatasetData() {
+    public DatasetData datasetData() {
         return _datasetData;
     }
-    public ResultData toResultData() {
+    public ResultData resultData() {
         return _resultData;
     }
 
