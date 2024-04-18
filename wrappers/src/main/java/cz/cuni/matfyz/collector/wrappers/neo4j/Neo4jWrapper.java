@@ -13,9 +13,9 @@ import org.neo4j.driver.summary.Plan;
 public class Neo4jWrapper extends AbstractWrapper<Plan, Result> {
     private final Driver _driver;
     private final Neo4jParser _parser;
-    public Neo4jWrapper(String link, String datasetName) {
-        super(link, datasetName);
-        _driver = GraphDatabase.driver(link, AuthTokens.basic(datasetName,"MiGWwErj5UxFfac" ));
+    public Neo4jWrapper(String host, String datasetName, String userName, String password) {
+        super(host, datasetName, userName, password);
+        _driver = GraphDatabase.driver(host + '/' + datasetName, AuthTokens.basic(userName, password));
         _parser = new Neo4jParser();
     }
 

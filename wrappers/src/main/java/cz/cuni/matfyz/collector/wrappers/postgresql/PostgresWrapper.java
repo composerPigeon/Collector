@@ -9,15 +9,15 @@ import java.sql.*;
 
 public class PostgresWrapper extends AbstractWrapper<String, ResultSet> {
     private final PostgresParser _parser;
-    public PostgresWrapper(String link, String datasetName) {
-        super(link, datasetName);
+    public PostgresWrapper(String host, String datasetName, String user, String password) {
+        super(host, datasetName, user, password);
         _parser =  new PostgresParser();
     }
 
     @Override
     public DataModel executeQuery(String query) throws WrapperException {
         try (
-           var connection = new PostgresConnection(_link + '/' + _datasetName, "", "", _parser);
+           var connection = new PostgresConnection(_hostName + '/' + _datasetName, _userName, _password, _parser);
         ) {
             DataModel dataModel = new DataModel(query, PostgresResources.DATABASE_NAME, _datasetName);
             CachedResult result = connection.executeMainQuery(query, dataModel);
@@ -31,6 +31,6 @@ public class PostgresWrapper extends AbstractWrapper<String, ResultSet> {
 
     @Override
     public String toString() {
-        return "Connection link: " + _link + "\n";
+        return "Connection link: " + _hostName + '/' + _datasetName + "\n";
     }
 }

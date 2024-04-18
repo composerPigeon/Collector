@@ -15,7 +15,7 @@ public class MongoWrapper extends AbstractWrapper<Document, List<Document>> {
     public MongoClient _client;
     public MongoDatabase _database;
     public MongoWrapper(String link, String datasetName) {
-        super(link, datasetName);
+        super(link, datasetName, "", "");
         _client = MongoClients.create(link);
         _database = _client.getDatabase(datasetName);
     }

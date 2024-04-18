@@ -9,3 +9,5 @@ rootProject.name = "Collector"
 //include('server')
 include "wrappers"
 include "model"
+include 'server'
+
