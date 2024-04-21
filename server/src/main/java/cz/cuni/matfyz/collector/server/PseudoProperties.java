@@ -1,19 +1,46 @@
 package cz.cuni.matfyz.collector.server;
 
+import java.util.HashSet;
+import java.util.Set;
+
 public class PseudoProperties {
-    public static class Noe4j {
-        public static final String INSTANCE_NAME = "neo4j";
-        public static final String HOST = "bolt://localhost:7687";
-        public static final String DATASET_NAME = "neo4j";
-        public static final String USER = "neo4j";
-        public static final String PASSWORD = "MiGWwErj5UxFfac";
+    private static final Set<DbInstance> _instances = new HashSet<>();
+
+    public static void loadDbInstances() {
+        _instances.add(new DbInstance(
+                DbType.Neo4j,
+                "neo4j",
+                "bolt://localhost:7687",
+                "neo4j",
+                "neo4j",
+                "MiGWwErj5UxFfac"
+        ));
+        _instances.add(new DbInstance(
+                DbType.PostgreSQL,
+                "postgres",
+                "jdbc:postgresql://localhost:5432",
+                "josefholubec",
+                "",
+                ""
+        ));
     }
 
-    public static class Postgres {
-        public static final String INSTANCE_NAME = "Postgres";
-        public static final String HOST = "jdbc:postgresql://localhost:5432";
-        public static final String DATASET_NAME = "josefholubec";
-        public static final String USER = "";
-        public static final String PASSWORD = "";
+    public static Set<DbInstance> getDbInstances() {
+        return _instances;
+    }
+
+    public record DbInstance(
+            DbType dbType,
+            String instanceName,
+            String hostName,
+            String datasetName,
+            String userName,
+            String password
+    ) {}
+
+    public enum DbType {
+        Neo4j,
+        PostgreSQL,
+        MongoDB
     }
 }

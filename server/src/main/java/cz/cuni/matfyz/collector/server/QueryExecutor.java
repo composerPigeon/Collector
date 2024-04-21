@@ -3,6 +3,7 @@ package cz.cuni.matfyz.collector.server;
 import cz.cuni.matfyz.collector.model.DataModel;
 import cz.cuni.matfyz.collector.wrappers.abstractwrapper.AbstractWrapper;
 import cz.cuni.matfyz.collector.wrappers.exceptions.WrapperException;
+import cz.cuni.matfyz.collector.wrappers.mongodb.MongoWrapper;
 import cz.cuni.matfyz.collector.wrappers.neo4j.Neo4jWrapper;
 import cz.cuni.matfyz.collector.wrappers.postgresql.PostgresWrapper;
 
@@ -16,18 +17,32 @@ public class QueryExecutor {
     private final Map<String, AbstractWrapper> _wrappers;
     private QueryExecutor() {
         _wrappers = new HashMap<>();
-        _wrappers.put(PseudoProperties.Noe4j.INSTANCE_NAME, new Neo4jWrapper(
-                PseudoProperties.Noe4j.HOST,
-                PseudoProperties.Noe4j.DATASET_NAME,
-                PseudoProperties.Noe4j.USER,
-                PseudoProperties.Noe4j.PASSWORD
-        ));
-        _wrappers.put(PseudoProperties.Postgres.INSTANCE_NAME, new PostgresWrapper(
-                PseudoProperties.Postgres.HOST,
-                PseudoProperties.Postgres.DATASET_NAME,
-                PseudoProperties.Postgres.USER,
-                PseudoProperties.Postgres.PASSWORD
-        ));
+        for (PseudoProperties.DbInstance instance : PseudoProperties.getDbInstances())  {
+            _addWrapper(instance.dbType(), instance);
+        }
+    }
+
+    private void _addWrapper(PseudoProperties.DbType type, PseudoProperties.DbInstance instance) {
+        switch (type) {
+            case Neo4j -> _wrappers.put(instance.instanceName(), new Neo4jWrapper(
+                    instance.hostName(),
+                    instance.datasetName(),
+                    instance.userName(),
+                    instance.password()
+            ));
+            case PostgreSQL -> _wrappers.put(instance.instanceName(), new PostgresWrapper(
+                    instance.hostName(),
+                    instance.datasetName(),
+                    instance.userName(),
+                    instance.password()
+            ));
+            case MongoDB -> _wrappers.put(instance.instanceName(), new MongoWrapper(
+                    instance.hostName(),
+                    instance.datasetName(),
+                    instance.userName(),
+                    instance.password()
+            ));
+        }
     }
 
     public DataModel execute(String instanceName, String query) {
