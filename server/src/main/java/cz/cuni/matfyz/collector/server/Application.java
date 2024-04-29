@@ -6,13 +6,15 @@ import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
 import org.springframework.context.ApplicationContext;
 import org.springframework.context.annotation.Bean;
+import org.springframework.core.env.Environment;
 
 @SpringBootApplication
 public class Application {
 
     public static void main(String[] args) {
         PseudoProperties.loadDbInstances();
-        SpringApplication.run(Application.class, args);
+        Environment env = SpringApplication.run(Application.class, args).getEnvironment();
+        System.out.println("Server is running on port: " + env.getProperty("local.server.port"));
     }
 
     @Bean

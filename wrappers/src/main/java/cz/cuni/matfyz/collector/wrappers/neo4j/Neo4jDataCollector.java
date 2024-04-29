@@ -89,11 +89,8 @@ public class Neo4jDataCollector extends AbstractDataCollector<ResultSummary, Res
         if (result.next()) {
             boolean mandatory = result.getBoolean("mandatory");
             String type = result.getList("propertyTypes", new String[]{}).get(0);
-            if ("List".equals(type) || "String".equals(type)) {
-                _model.datasetData().setColumnByteSize(label, property, Neo4jResources.DefaultSizes.BIG_PROPERTY_SIZE);
-            } else {
-                _model.datasetData().setColumnByteSize(label, property, Neo4jResources.DefaultSizes.SMALL_PROPERTY_SIZE);
-            }
+            int columnSize = Neo4jResources.DefaultSizes.getAvgColumnSizeByType(type);
+            _model.datasetData().setColumnByteSize(label, property, columnSize);
             _model.datasetData().setColumnType(label, property, type);
             _model.datasetData().setColumnMandatory(label, property, mandatory);
         }

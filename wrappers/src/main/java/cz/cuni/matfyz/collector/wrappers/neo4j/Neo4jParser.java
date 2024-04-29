@@ -26,9 +26,34 @@ public class Neo4jParser extends AbstractParser<ResultSummary, Result> {
         long nanoseconds = summary.resultAvailableAfter(TimeUnit.NANOSECONDS);
         model.resultData().setExecutionTime((double) nanoseconds / (1_000_000));
     }
-    private void _parseTableName(DataModel model, Plan operator) {
+    private void _parseNodeTableName(DataModel model, Plan operator) {
         String details = operator.arguments().get("Details").asString();
         String tableName = details.split(":")[1];
+        model.datasetData().addTable(tableName);
+    }
+
+    private String _parseRelationDetailsForLabel(String details) {
+        StringBuilder buffer = new StringBuilder();
+        Boolean isInEdge = null;
+        for (char ch : details.toCharArray()) {
+            if (isInEdge == null) {
+                if (ch == '[')
+                    isInEdge = false;
+            } else if (!isInEdge){
+                if (ch == ':')
+                    isInEdge = true;
+            } else {
+                if (ch == ']')
+                    break;
+                else
+                    buffer.append(ch);
+            }
+        }
+        return buffer.toString();
+    }
+    private void _parseRelationTableName(DataModel model, Plan operator) {
+        String details = operator.arguments().get("Details").asString();
+        String tableName = _parseRelationDetailsForLabel(details);
         model.datasetData().addTable(tableName);
     }
 
@@ -62,8 +87,10 @@ public class Neo4jParser extends AbstractParser<ResultSummary, Result> {
     }
 
     public void _parseOperator(DataModel model, Plan operator) {
-        if (operator.operatorType().contains("NodeByLabelScan")) {
-            _parseTableName(model, operator);
+        if (operator.operatorType().contains("NodeByLabel")) {
+            _parseNodeTableName(model, operator);
+        } else if (operator.operatorType().contains("RelationshipType")) {
+            _parseRelationTableName(model, operator);
         } else if (operator.operatorType().contains("Index")) {
             _parseIndexName(model, operator);
         }

@@ -9,7 +9,7 @@ public class Neo4jResources {
     public static String getExplainPlanQuery(String query) {
         return "profile " + query;
     }
-    public static String getNodesOfSpecificLabelQuery(String nodeLabel) { return "match (n:" + nodeLabel + ") return *;"; }
+    public static String getNodesOfSpecificLabelQuery(String nodeLabel) { return "match (n:" + nodeLabel + ") return n;"; }
 
     public static String getEdgesOfSpecificLabelQuery(String edgeLabel) { return "match ()-[e:" + edgeLabel + "]->() return e;"; }
     public static String getIndexDataQuery(String indexType, String label, String property) {
@@ -39,16 +39,16 @@ public class Neo4jResources {
     }
 
     public static String getEdgePropertiesForLabelQuery(String label) {
-        return "call apoc.meta.relTypeProperties({includeLabels: [\"" + label + "\"]}) yield propertyName;";
+        return "call apoc.meta.relTypeProperties({rels: [\"" + label + "\"]}) yield propertyName;";
     }
     public static String getNodePropertyTypeAndMandatoryQuery(String label, String propertyName) {
         return "call apoc.meta.nodeTypeProperties({includeLabels: [\"" + label + "\"]}) yield propertyName, propertyTypes, mandatory where propertyName = \"" + propertyName + "\" return propertyName, propertyTypes, mandatory;\n";
     }
     public static String getEdgePropertyTypeAndMandatoryQuery(String label, String propertyName) {
-        return "call apoc.meta.relTypeProperties({includeLabels: [\"" + label + "\"]}) yield propertyName, propertyTypes, mandatory where propertyName = \"" + propertyName + "\" return propertyName, propertyTypes, mandatory;\n";
+        return "call apoc.meta.relTypeProperties({rels: [\"" + label + "\"]}) yield propertyName, propertyTypes, mandatory where propertyName = \"" + propertyName + "\" return propertyName, propertyTypes, mandatory;\n";
     }
     public static String getIsNodeLabelQuery(String label) {
-        return "return apoc.meta.nodes.count([\"Movie\"]) > 0 as isNodeLabel;";
+        return "return apoc.meta.nodes.count([\"" + label + "\"]) > 0 as isNodeLabel;";
     }
 
     public static class DefaultSizes {
@@ -60,7 +60,7 @@ public class Neo4jResources {
         }
 
         public static int getAvgColumnSizeByType(String type) {
-            if ("String".equals(type) || "List".equals(type))
+            if ("String".equals(type) || "List".equals(type) || type.contains("Array"))
                 return BIG_PROPERTY_SIZE;
             else
                 return SMALL_PROPERTY_SIZE;
