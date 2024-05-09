@@ -7,10 +7,10 @@ import cz.cuni.matfyz.collector.wrappers.exceptions.QueryExecutionException;
 import cz.cuni.matfyz.collector.wrappers.cachedresult.CachedResult;
 
 import java.sql.*;
-public class PostgresConnection extends AbstractConnection<String, ResultSet> {
+public class PostgresConnection extends AbstractConnection<String, ResultSet, String> {
     private final Connection _connection;
     private final Statement _statement;
-    public PostgresConnection(String link, String user, String password, PostgresParser parser) throws SQLException {
+    public PostgresConnection(String link, PostgresParser parser) throws SQLException {
         super(parser);
         _connection = DriverManager.getConnection(link);
         _connection.setReadOnly(true);

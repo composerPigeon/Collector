@@ -51,6 +51,10 @@ public class Neo4jResources {
         return "return apoc.meta.nodes.count([\"" + label + "\"]) > 0 as isNodeLabel;";
     }
 
+    public static String getConnectionLink(String host, int port, String datasetName) {
+        return "bolt://" + host + ':' + port + '/' + datasetName;
+    }
+
     public static class DefaultSizes {
         public static int getAvgColumnSizeByValue(Object value) {
             if (value instanceof String || value instanceof List)

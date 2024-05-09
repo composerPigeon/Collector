@@ -50,4 +50,13 @@ public abstract class PostgresResources {
     public static String getCacheSizeQuery() {
         return "select cast(setting as int) * pg_size_bytes(unit) as shared_buffers from pg_settings where name='shared_buffers';";
     }
+
+    public static String getConnectionLink(String host, int port, String datasetName, String user, String password) {
+        String rawLink = "jdbc:postgresql://" + host + ':' + port + '/' + datasetName;
+        if (user.isEmpty() || password.isEmpty()) {
+            return rawLink;
+        } else {
+            return rawLink + "?user=" + user + "&password=" + password;
+        }
+    }
 }

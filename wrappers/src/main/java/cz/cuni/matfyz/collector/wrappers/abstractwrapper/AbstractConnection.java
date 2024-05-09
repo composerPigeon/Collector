@@ -4,7 +4,7 @@ import cz.cuni.matfyz.collector.model.DataModel;
 import cz.cuni.matfyz.collector.wrappers.exceptions.QueryExecutionException;
 import cz.cuni.matfyz.collector.wrappers.cachedresult.CachedResult;
 
-public abstract class AbstractConnection<TPlan, TResult> implements AutoCloseable {
+public abstract class AbstractConnection<TPlan, TResult, TQuery> implements AutoCloseable {
 
     protected AbstractParser<TPlan, TResult> _parser;
 
@@ -12,6 +12,6 @@ public abstract class AbstractConnection<TPlan, TResult> implements AutoCloseabl
         _parser = parser;
     }
 
-    public abstract CachedResult executeQuery(String query) throws QueryExecutionException;
-    public abstract CachedResult executeMainQuery(String query, DataModel toModel) throws QueryExecutionException;
+    public abstract CachedResult executeQuery(TQuery query) throws QueryExecutionException;
+    public abstract CachedResult executeMainQuery(TQuery query, DataModel toModel) throws QueryExecutionException;
 }

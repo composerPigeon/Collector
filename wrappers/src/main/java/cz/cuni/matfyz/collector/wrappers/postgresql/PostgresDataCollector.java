@@ -10,7 +10,7 @@ import java.sql.ResultSet;
 import java.util.HashSet;
 import java.util.Set;
 
-class PostgresDataCollector extends AbstractDataCollector<String, ResultSet> {
+class PostgresDataCollector extends AbstractDataCollector<String, ResultSet, String> {
     public PostgresDataCollector(PostgresConnection connection, DataModel model, String datasetName) {
         super(datasetName, model, connection);
     }

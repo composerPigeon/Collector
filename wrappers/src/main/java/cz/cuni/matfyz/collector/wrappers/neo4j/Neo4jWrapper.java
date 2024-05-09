@@ -10,12 +10,12 @@ import org.neo4j.driver.GraphDatabase;
 import org.neo4j.driver.Result;
 import org.neo4j.driver.summary.Plan;
 
-public class Neo4jWrapper extends AbstractWrapper<Plan, Result> {
+public class Neo4jWrapper extends AbstractWrapper {
     private final Driver _driver;
     private final Neo4jParser _parser;
-    public Neo4jWrapper(String host, String datasetName, String userName, String password) {
-        super(host, datasetName, userName, password);
-        _driver = GraphDatabase.driver(host + '/' + datasetName, AuthTokens.basic(userName, password));
+    public Neo4jWrapper(String host, int port, String datasetName, String userName, String password) {
+        super(host, port, datasetName, userName, password);
+        _driver = GraphDatabase.driver(Neo4jResources.getConnectionLink(host, port, datasetName), AuthTokens.basic(userName, password));
         _parser = new Neo4jParser();
     }
 

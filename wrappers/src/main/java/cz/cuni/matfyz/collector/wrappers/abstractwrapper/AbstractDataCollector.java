@@ -4,12 +4,12 @@ import cz.cuni.matfyz.collector.model.DataModel;
 import cz.cuni.matfyz.collector.wrappers.cachedresult.CachedResult;
 import cz.cuni.matfyz.collector.wrappers.exceptions.DataCollectException;
 
-public abstract class AbstractDataCollector<TPlan, TResult> {
+public abstract class AbstractDataCollector<TPlan, TResult, TQuery> {
     protected String _datasetName;
     protected DataModel _model;
-    protected AbstractConnection<TPlan, TResult> _connection;
+    protected AbstractConnection<TPlan, TResult, TQuery> _connection;
 
-    public AbstractDataCollector(String datasetName, DataModel model, AbstractConnection<TPlan, TResult> connection) {
+    public AbstractDataCollector(String datasetName, DataModel model, AbstractConnection<TPlan, TResult, TQuery> connection) {
         _datasetName = datasetName;
         _model = model;
         _connection = connection;

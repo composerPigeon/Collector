@@ -12,7 +12,7 @@ import org.neo4j.driver.summary.ResultSummary;
 import java.util.ArrayList;
 import java.util.List;
 
-public class Neo4jDataCollector extends AbstractDataCollector<ResultSummary, Result> {
+public class Neo4jDataCollector extends AbstractDataCollector<ResultSummary, Result, String> {
 
     public Neo4jDataCollector(Neo4jConnection connection, DataModel model, String datasetName) {
         super(datasetName, model, connection);
@@ -88,7 +88,7 @@ public class Neo4jDataCollector extends AbstractDataCollector<ResultSummary, Res
                 _connection.executeQuery(Neo4jResources.getEdgePropertyTypeAndMandatoryQuery(label, property));
         if (result.next()) {
             boolean mandatory = result.getBoolean("mandatory");
-            String type = result.getList("propertyTypes", new String[]{}).get(0);
+            String type = result.getList("propertyTypes", String.class).get(0);
             int columnSize = Neo4jResources.DefaultSizes.getAvgColumnSizeByType(type);
             _model.datasetData().setColumnByteSize(label, property, columnSize);
             _model.datasetData().setColumnType(label, property, type);
