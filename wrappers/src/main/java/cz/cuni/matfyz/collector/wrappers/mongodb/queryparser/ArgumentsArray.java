@@ -1,28 +1,64 @@
 package cz.cuni.matfyz.collector.wrappers.mongodb.queryparser;
 
+import com.fasterxml.jackson.core.JsonProcessingException;
+import com.fasterxml.jackson.databind.ObjectMapper;
+import cz.cuni.matfyz.collector.wrappers.exceptions.ParseException;
+
 import org.bson.Document;
+import org.bson.json.JsonParseException;
 
 import java.util.ArrayList;
 import java.util.List;
 
 public class ArgumentsArray {
+
+    private static String getErrorMessageForInvalidType(String expectedType, String givenValue) {
+        return "Argument was expected to be " + expectedType + ". Instead " + givenValue + " was given.";
+    }
     private String[] _array;
 
     private ArgumentsArray(String[] array) {
         _array = array;
     }
 
-    public String getString(int index) {
+    public String getString(int index){
         return _array[index];
     }
-    public Document getDocument(int index) {
-        return Document.parse(_array[index]);
+    public Document getDocument(int index) throws ParseException {
+        try {
+            return Document.parse(_array[index]);
+        } catch (JsonParseException e){
+            throw new ParseException(getErrorMessageForInvalidType("Document", _array[index]), e);
+        }
+
     }
-    public int getInteger(int index) {
-        return Integer.parseInt(_array[index]);
+    public Document[] getDocumentArray(int index) throws ParseException {
+        try {
+            ObjectMapper mapper = new ObjectMapper();
+            return mapper.readValue(_array[index], Document[].class);
+        } catch (JsonProcessingException e) {
+            throw new ParseException(getErrorMessageForInvalidType("DocumentArray", _array[index]), e);
+        }
     }
-    public double getDouble(int index) {
-        return Double.parseDouble(_array[index]);
+
+    public boolean getBoolean(int index) {
+        return Boolean.parseBoolean(_array[index]);
+    }
+
+    public int getInteger(int index) throws ParseException {
+        try {
+            return Integer.parseInt(_array[index]);
+        } catch (NumberFormatException e) {
+            throw new ParseException(getErrorMessageForInvalidType("Integer", _array[index]), e);
+        }
+
+    }
+    public double getDouble(int index) throws ParseException {
+        try {
+            return Double.parseDouble(_array[index]);
+        } catch (NumberFormatException e) {
+            throw new ParseException(getErrorMessageForInvalidType("Double", _array[index]), e);
+        }
     }
 
     public int size() {
@@ -65,7 +101,7 @@ public class ArgumentsArray {
             if (state.type == ArgParseType.Out) {
                 if (ch == '"')
                     state.type = ArgParseType.InDoubleString;
-                if (ch == '\'')
+                else if (ch == '\'')
                     state.type = ArgParseType.InString;
                 else if (ch == '{') {
                     state.type = ArgParseType.InObject;
@@ -132,5 +168,16 @@ public class ArgumentsArray {
         }
 
         return new ArgumentsArray(args.toArray(String[]::new));
+    }
+
+    @Override
+    public String toString() {
+        StringBuilder buffer = new StringBuilder();
+        for (int i = 0; i < _array.length; i++) {
+            buffer.append(_array[i]);
+            if (i < _array.length - 1)
+                buffer.append(", ");
+        }
+        return buffer.toString();
     }
  }
