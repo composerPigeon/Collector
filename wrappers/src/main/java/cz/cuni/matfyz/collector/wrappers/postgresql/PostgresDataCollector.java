@@ -59,15 +59,17 @@ class PostgresDataCollector extends AbstractDataCollector<String, ResultSet, Str
             int size = res.getInt("avg_width");
             _model.datasetData().setColumnDistinctRatio(tableName, colName, ratio);
             _model.datasetData().setColumnByteSize(tableName, colName, size);
-            _model.datasetData().setColumnMandatory(tableName, colName, true);
         }
 
     }
-    private void _saveTypeForCol(String tableName, String colName) throws QueryExecutionException {
-        CachedResult result = _connection.executeQuery(PostgresResources.getColTypeQuery(tableName, colName));
+    private void _saveTypeAndMandatoryForCol(String tableName, String colName) throws QueryExecutionException {
+        CachedResult result = _connection.executeQuery(PostgresResources.getColTypeAndMandatoryQuery(tableName, colName));
         if (result.next()) {
             String type = result.getString("typname");
             _model.datasetData().setColumnType(tableName, colName, type);
+
+            boolean mandatory = result.getBoolean("attnotnull");
+            _model.datasetData().setColumnMandatory(tableName, colName, mandatory);
         }
     }
 
@@ -84,7 +86,7 @@ class PostgresDataCollector extends AbstractDataCollector<String, ResultSet, Str
     private void _saveColumnData(String tableName) throws QueryExecutionException {
         for (String columnName: _getColumnNames(tableName)) {
             _saveSpecificDataForCol(tableName, columnName);
-            _saveTypeForCol(tableName, columnName);
+            _saveTypeAndMandatoryForCol(tableName, columnName);
         }
     }
 
