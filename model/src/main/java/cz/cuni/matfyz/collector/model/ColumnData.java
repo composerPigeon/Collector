@@ -2,6 +2,9 @@ package cz.cuni.matfyz.collector.model;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
 
+import java.util.LinkedHashMap;
+import java.util.Map;
+
 public class ColumnData {
 
     private Integer _size; //size in bytes
@@ -35,6 +38,19 @@ public class ColumnData {
 
     public void setDistinctRatio(double ratio) {
         if (_ratio == null) {_ratio = ratio;}
+    }
+
+    public Map<String, Object> toMap() {
+        Map<String, Object> map = new LinkedHashMap<>();
+        if (_size != null)
+            map.put("size", _size);
+        if (_ratio != null)
+            map.put("ratio", _ratio);
+        if (_type != null)
+            map.put("type", _type);
+        if (_mandatory != null)
+            map.put("mandatory", _mandatory);
+        return map;
     }
 
 }

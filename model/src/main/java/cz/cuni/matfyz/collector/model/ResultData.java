@@ -1,5 +1,8 @@
 package cz.cuni.matfyz.collector.model;
 
+import java.util.LinkedHashMap;
+import java.util.Map;
+
 public class ResultData {
 
     private Double _executionTime;
@@ -32,5 +35,13 @@ public class ResultData {
     }
     public void setColumnType(String columnName, String columnType) {
         _resultTable.setColumnType(columnName, columnType);
+    }
+
+    public Map<String, Object> toMap() {
+        Map<String, Object> map = new LinkedHashMap<>();
+        if (_executionTime != null)
+            map.put("executionTime", _executionTime);
+        map.put("resultTable", _resultTable.toMap());
+        return map;
     }
 }

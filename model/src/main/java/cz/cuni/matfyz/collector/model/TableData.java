@@ -3,6 +3,8 @@ package cz.cuni.matfyz.collector.model;
 import com.fasterxml.jackson.annotation.JsonIgnore;
 
 import java.util.HashMap;
+import java.util.LinkedHashMap;
+import java.util.Map;
 import java.util.Set;
 
 public class TableData {
@@ -93,5 +95,27 @@ public class TableData {
             _columns.put(colName, new ColumnData());
             _columns.get(colName).setMandatory(value);
         }
+    }
+
+    public Map<String, Object> _parseColumnsToMap() {
+        Map<String, Object> map = new LinkedHashMap<>();
+        for (var entry : _columns.entrySet()) {
+            map.put(entry.getKey(), entry.getValue().toMap());
+        }
+        return map;
+    }
+
+    public Map<String, Object> toMap() {
+        Map<String, Object> map = new LinkedHashMap<>();
+        if (_size != null)
+            map.put("size", _size);
+        if (_sizeInPages != null)
+            map.put("sizeInPages", _sizeInPages);
+        if (_rowCount != null)
+            map.put("rowCount", _rowCount);
+        if (_constraintCount != null)
+            map.put("constraintCount", _constraintCount);
+        map.put("columns", _parseColumnsToMap());
+        return map;
     }
 }

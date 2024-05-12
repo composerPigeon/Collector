@@ -2,8 +2,7 @@ package cz.cuni.matfyz.collector.model;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
 
-import java.util.HashMap;
-import java.util.Set;
+import java.util.*;
 
 public class DatasetData {
     private Long _dataSetSize; //size of dataset in bytes
@@ -184,5 +183,38 @@ public class DatasetData {
             _tables.put(tableName, new TableData(tableName));
             _tables.get(tableName).setColumnMandatory(colName, value);
         }
+    }
+
+    private Map<String, Object> _parseTablesToMap() {
+        Map<String, Object> map = new LinkedHashMap<>();
+        for (var entry : _tables.entrySet()) {
+            map.put(entry.getKey(), entry.getValue().toMap());
+        }
+        return map;
+    }
+
+    private Map<String, Object> _parseIndexesToMap() {
+        Map<String, Object> map = new LinkedHashMap<>();
+        for (var entry : _indexes.entrySet()) {
+            map.put(entry.getKey(), entry.getValue().toMap());
+        }
+        return map;
+    }
+
+    public Map<String, Object> toMap() {
+        Map<String, Object> result = new LinkedHashMap<>();
+        if (_dataSetSize != null)
+            result.put("datasetSize", _dataSetSize);
+        if (_dataSetSizeInPages != null)
+            result.put("datasetSizeInPages", _dataSetSizeInPages);
+        if (_pageSize != null)
+            result.put("pageSize", _pageSize);
+        if (_cacheSize != null)
+            result.put("cacheSize", _cacheSize);
+
+        result.put("tables", _parseTablesToMap());
+        result.put("indexes", _parseIndexesToMap());
+
+        return result;
     }
 }

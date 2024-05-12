@@ -7,8 +7,7 @@ import com.fasterxml.jackson.annotation.PropertyAccessor;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 
-import java.util.Set;
-import java.util.HashSet;
+import java.util.*;
 
 public class DataModel {
 
@@ -52,11 +51,27 @@ public class DataModel {
         return _datasetData.getDataSetPageSize();
     }
 
-    public String toJson() throws JsonProcessingException {
-        ObjectMapper objectMapper = new ObjectMapper();
-        objectMapper.setSerializationInclusion(JsonInclude.Include.NON_NULL);
-        objectMapper.setVisibility(PropertyAccessor.FIELD, Visibility.ANY);
+    public String toJson() {
+        try {
+            ObjectMapper objectMapper = new ObjectMapper();
+            objectMapper.setSerializationInclusion(JsonInclude.Include.NON_NULL);
+            objectMapper.setVisibility(PropertyAccessor.FIELD, Visibility.ANY);
 
-        return objectMapper.writerWithDefaultPrettyPrinter().writeValueAsString(this);
+            return objectMapper.writerWithDefaultPrettyPrinter().writeValueAsString(this);
+        } catch (JsonProcessingException e) {
+            e.printStackTrace();
+            return null;
+        }
+    }
+
+    public Map<String, Object> toMap() {
+        Map<String, Object> result = new LinkedHashMap<>();
+
+        result.put("query", _query);
+        result.put("databaseName", _databaseName);
+        result.put("datasetName", _datasetName);
+        result.put("datasetData", _datasetData.toMap());
+        result.put("resultData", _resultData.toMap());
+        return result;
     }
 }
