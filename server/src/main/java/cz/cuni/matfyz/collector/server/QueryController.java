@@ -1,31 +1,36 @@
 package cz.cuni.matfyz.collector.server;
 
-import com.fasterxml.jackson.core.JsonProcessingException;
-import cz.cuni.matfyz.collector.model.DataModel;
+import cz.cuni.matfyz.collector.server.executions.ExecutionsManager;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.Map;
 
 @RestController
-public class HelloController {
+public class QueryController {
+
+    @Autowired
+    private ExecutionsManager _manager;
 
     @PostMapping("/")
-    public String executeQuery(@RequestBody Map<String, Object> request) {
+    public String createQuery(@RequestBody Map<String, Object> request) {
         try {
             if (request.containsKey("instance") && request.containsKey("query")) {
                 String instanceName = (String)request.get("instance");
                 String query = (String)request.get("query");
-                DataModel model = QueryExecutor.getInstance().execute(instanceName, query);
-                System.out.println(model.toJson());
-                return "Query was successfully executed";
+                return _manager.createExecution(instanceName, query);
             } else {
                 return "Invalid body";
             }
-        } catch (JsonProcessingException e) {
+        } catch (Exception e) {
             e.printStackTrace();
-            return e.getMessage();
+            return null;
         }
+    }
 
+    @GetMapping("/")
+    public String getQuery(@RequestBody String executionId) {
+         return _manager.getExecutionState(executionId);
     }
 
 
