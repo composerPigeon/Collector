@@ -5,6 +5,8 @@
 .idea
 .DS_Store
 
+MongoTestingData/
+
 # Ignore Gradle build output directory
 build
 
