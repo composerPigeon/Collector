@@ -7,14 +7,10 @@ import java.util.Map.Entry;
 
 public class CachedResult {
     private final List<Map<String, Object>> _records;
-    private final Map<String, String> _columnTypes;
-    private final long _byteSize;
     private int _cursor;
 
-    protected CachedResult(List<Map<String, Object>> records, Map<String, String> columnTypes, long byteSize) {
+    protected CachedResult(List<Map<String, Object>> records) {
         _records = records;
-        _byteSize = byteSize;
-        _columnTypes = columnTypes;
         _cursor = -1;
     }
 
@@ -25,6 +21,10 @@ public class CachedResult {
 
     public void refresh() { _cursor = -1; }
     public Map<String, Object> getRecord() { return _records.get(_cursor); }
+
+    public boolean containsCol(String colName) {
+        return _records.get(_cursor).containsKey(colName);
+    }
 
     private Object _get(String colName) {
         return _records.get(_cursor).getOrDefault(colName, null);
@@ -130,40 +130,19 @@ public class CachedResult {
         throw new ClassCastException();
     }
 
-    public String getColumnType(String columnName) {
-        return _columnTypes.get(columnName);
-    }
-    public Set<String> getColumnNames() {
-        return _columnTypes.keySet();
-    }
-    public int getColumnCount() {
-        return _columnTypes.size();
-    }
-
-
     public int getRowCount() {
         return _records.size();
     }
-    public long getByteSize() { return _byteSize; }
 
     public static class Builder {
         private final List<Map<String, Object>> _records;
-        private final Map<String, String> _columnTypes;
-        protected long _byteSize;
+
+
         public Builder() {
             _records = new ArrayList<>();
-            _columnTypes = new HashMap<>();
-            _byteSize = 0;
         }
         public void addEmptyRecord() {
             _records.add(new LinkedHashMap<>());
-        }
-        public void addSize(long value) { _byteSize += value; }
-
-        public void addColumnType(String columnName, String columnType) {
-            if (!_columnTypes.containsKey(columnName)) {
-                _columnTypes.put(columnName, columnType);
-            }
         }
 
         public void toLastRecordAddValue(String colName, Object value) {
@@ -171,7 +150,7 @@ public class CachedResult {
             _records.get(lastInx).put(colName, value);
         }
         public CachedResult toResult() {
-            return new CachedResult(_records, _columnTypes, _byteSize);
+            return new CachedResult(_records);
         }
     }
 }

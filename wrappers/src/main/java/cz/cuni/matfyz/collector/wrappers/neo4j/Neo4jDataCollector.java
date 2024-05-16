@@ -3,6 +3,7 @@ package cz.cuni.matfyz.collector.wrappers.neo4j;
 import cz.cuni.matfyz.collector.model.DataModel;
 import cz.cuni.matfyz.collector.wrappers.abstractwrapper.AbstractDataCollector;
 import cz.cuni.matfyz.collector.wrappers.cachedresult.CachedResult;
+import cz.cuni.matfyz.collector.wrappers.cachedresult.ConsumedResult;
 import cz.cuni.matfyz.collector.wrappers.exceptions.DataCollectException;
 import cz.cuni.matfyz.collector.wrappers.exceptions.ParseException;
 import cz.cuni.matfyz.collector.wrappers.exceptions.QueryExecutionException;
@@ -205,7 +206,7 @@ public class Neo4jDataCollector extends AbstractDataCollector<ResultSummary, Res
         }
     }
 
-    private void _saveResultData(CachedResult result) {
+    private void _saveResultData(ConsumedResult result) {
         long size = result.getByteSize();
         _model.resultData().setByteSize(size);
 
@@ -222,7 +223,7 @@ public class Neo4jDataCollector extends AbstractDataCollector<ResultSummary, Res
         }
     }
     @Override
-    public DataModel collectData(CachedResult result) throws DataCollectException {
+    public DataModel collectData(ConsumedResult result) throws DataCollectException {
         try {
             _saveDatasetData();
             _saveIndexData();

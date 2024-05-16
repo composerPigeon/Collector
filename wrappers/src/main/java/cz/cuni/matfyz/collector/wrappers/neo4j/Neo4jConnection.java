@@ -2,6 +2,7 @@ package cz.cuni.matfyz.collector.wrappers.neo4j;
 
 import cz.cuni.matfyz.collector.model.DataModel;
 import cz.cuni.matfyz.collector.wrappers.abstractwrapper.*;
+import cz.cuni.matfyz.collector.wrappers.cachedresult.ConsumedResult;
 import cz.cuni.matfyz.collector.wrappers.exceptions.ParseException;
 import cz.cuni.matfyz.collector.wrappers.exceptions.QueryExecutionException;
 import cz.cuni.matfyz.collector.wrappers.cachedresult.CachedResult;
@@ -20,7 +21,7 @@ public class Neo4jConnection extends AbstractConnection<ResultSummary, Result, S
     }
 
     @Override
-    public CachedResult executeMainQuery(String query, DataModel toModel) throws QueryExecutionException {
+    public ConsumedResult executeMainQuery(String query, DataModel toModel) throws QueryExecutionException {
         try {
             Result result = _session.run(Neo4jResources.getExplainPlanQuery(query));
             var cachedResult = _parser.parseMainResult(result, toModel);

@@ -20,7 +20,7 @@ public class CommandBuilder {
         return "Invalid number of arguments in collection method " + functionName;
     }
     private static String invalidNumberOfArgumentsInCursorFunction(String functionName) {
-        return "Invalid number of arguments in cursor method ";
+        return "Invalid number of arguments in cursor method " + functionName;
     }
     private static String nonExistentFunctionErrorMessage(String functionName) {
         return "Function " + functionName + " does not exist or is not supported.";
@@ -28,6 +28,8 @@ public class CommandBuilder {
     private static String invalidOptionErrorMessage(String optionName, String functionName) {
         return "Option " + optionName + " is not supported in method " + functionName + ".";
     }
+
+    private static String INVALID_COUNT_USAGE_MSG = "Count cursor method is supported only on Cursor returned from find() function.";
 
     private Document _command;
     private ReturnType _returnType;
@@ -87,6 +89,7 @@ public class CommandBuilder {
 
     private void _updateWithCollectionAggregate(FunctionItem function) throws ParseException {
         _command.put("aggregate", _collectionName);
+        _command.put("cursor", new Document()); //TODO: hoe to parse from input
         switch (function.args.size()) {
             case 0:
                 break;
@@ -227,10 +230,18 @@ public class CommandBuilder {
 
     private void _updateWithCursorCount(FunctionItem function) throws ParseException {
         if (function.args.size() == 0) {
-            Document newCommand = new Document();
-            newCommand.put("count", _collectionName);
-            newCommand.put("query", _command);
-            _command = newCommand;
+            if (_command.containsKey("find")) {
+                _command.remove("find");
+                _command.put("count", _collectionName);
+                if (_command.containsKey("filter")) {
+                    Document filterDoc = _command.get("filter", Document.class);
+                    _command.remove("filter");
+                    _command.put("query", filterDoc);
+                }
+            } else {
+                throw new ParseException(INVALID_COUNT_USAGE_MSG);
+            }
+
         } else {
             throw new ParseException(invalidNumberOfArgumentsInCursorFunction(function.name));
         }

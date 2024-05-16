@@ -2,6 +2,7 @@ package cz.cuni.matfyz.collector.wrappers.abstractwrapper;
 
 import cz.cuni.matfyz.collector.model.DataModel;
 import cz.cuni.matfyz.collector.wrappers.cachedresult.CachedResult;
+import cz.cuni.matfyz.collector.wrappers.cachedresult.ConsumedResult;
 import cz.cuni.matfyz.collector.wrappers.exceptions.DataCollectException;
 
 public abstract class AbstractDataCollector<TPlan, TResult, TQuery> {
@@ -15,5 +16,5 @@ public abstract class AbstractDataCollector<TPlan, TResult, TQuery> {
         _connection = connection;
     }
 
-    public abstract DataModel collectData(CachedResult result) throws DataCollectException;
+    public abstract DataModel collectData(ConsumedResult result) throws DataCollectException;
 }

@@ -2,6 +2,7 @@ package cz.cuni.matfyz.collector.wrappers.neo4j;
 
 import cz.cuni.matfyz.collector.model.DataModel;
 import cz.cuni.matfyz.collector.wrappers.abstractwrapper.AbstractParser;
+import cz.cuni.matfyz.collector.wrappers.cachedresult.ConsumedResult;
 import cz.cuni.matfyz.collector.wrappers.exceptions.ParseException;
 import cz.cuni.matfyz.collector.wrappers.cachedresult.CachedResult;
 
@@ -128,36 +129,24 @@ public class Neo4jParser extends AbstractParser<ResultSummary, Result> {
     }
 
 
-    private void _addDataToBuilder(CachedResult.Builder builder, Record record, boolean addSize, boolean collectColumnData) throws ParseException {
+    private void _addDataToBuilder(CachedResult.Builder builder, Record record) throws ParseException {
         for (Pair<String, Value> pair : record.fields()) {
             if (pair.value() instanceof NodeValue nodeValue) {
                 for (Map.Entry<String, PropertyData> entry : _parseNodeToMap(nodeValue.asNode())) {
                     PropertyData propData = entry.getValue();
                     builder.toLastRecordAddValue(entry.getKey(), propData.getValue());
-                    if (addSize)
-                        builder.addSize(Neo4jResources.DefaultSizes.getAvgColumnSizeByType(propData.getType()));
-                    if (collectColumnData)
-                        builder.addColumnType(entry.getKey(), propData.getType());
                 }
             }
             else if (pair.value() instanceof RelationshipValue relationshipValue) {
                 for (Map.Entry<String, PropertyData> entry : _parseRelationToMap(relationshipValue.asRelationship())) {
                     PropertyData propData = entry.getValue();
                     builder.toLastRecordAddValue(entry.getKey(), propData.getValue());
-                    if (addSize)
-                        builder.addSize(Neo4jResources.DefaultSizes.getAvgColumnSizeByType(propData.getType()));
-                    if (collectColumnData)
-                        builder.addColumnType(entry.getKey(), propData.getType());
                 }
             }
             else {
                 PropertyData propData = PropertyData.fromValue(pair.value());
                 if (propData != null) {
                     builder.toLastRecordAddValue(pair.key(), propData.getValue());
-                    if (addSize)
-                        builder.addSize(Neo4jResources.DefaultSizes.getAvgColumnSizeByType(propData.getType()));
-                    if (collectColumnData)
-                        builder.addColumnType(pair.key(), propData.getType());
                 }
             }
         }
@@ -169,18 +158,45 @@ public class Neo4jParser extends AbstractParser<ResultSummary, Result> {
         while (result.hasNext()) {
             var record = result.next();
             builder.addEmptyRecord();
-            _addDataToBuilder(builder, record, false, false);
+            _addDataToBuilder(builder, record);
         }
         return builder.toResult();
     }
 
+    // Parse Main Result
+    private void _consumeDataToBuilder(ConsumedResult.Builder builder, Record record) throws ParseException {
+        for (Pair<String, Value> pair : record.fields()) {
+            if (pair.value() instanceof NodeValue nodeValue) {
+                for (Map.Entry<String, PropertyData> entry : _parseNodeToMap(nodeValue.asNode())) {
+                    PropertyData propData = entry.getValue();
+                    builder.addByteSize(Neo4jResources.DefaultSizes.getAvgColumnSizeByType(propData.getType()));
+                    builder.addColumnType(entry.getKey(), propData.getType());
+                }
+            }
+            else if (pair.value() instanceof RelationshipValue relationshipValue) {
+                for (Map.Entry<String, PropertyData> entry : _parseRelationToMap(relationshipValue.asRelationship())) {
+                    PropertyData propData = entry.getValue();
+                    builder.addByteSize(Neo4jResources.DefaultSizes.getAvgColumnSizeByType(propData.getType()));
+                    builder.addColumnType(entry.getKey(), propData.getType());
+                }
+            }
+            else {
+                PropertyData propData = PropertyData.fromValue(pair.value());
+                if (propData != null) {
+                    builder.addByteSize(Neo4jResources.DefaultSizes.getAvgColumnSizeByType(propData.getType()));
+                    builder.addColumnType(pair.key(), propData.getType());
+                }
+            }
+        }
+    }
+
     @Override
-    public CachedResult parseMainResult(Result result, DataModel withModel) throws ParseException {
-        var builder = new CachedResult.Builder();
+    public ConsumedResult parseMainResult(Result result, DataModel withModel) throws ParseException {
+        var builder = new ConsumedResult.Builder();
         while (result.hasNext()) {
             var record = result.next();
-            builder.addEmptyRecord();
-            _addDataToBuilder(builder, record, true, true);
+            builder.addRecord();
+            _consumeDataToBuilder(builder, record);
         }
         return builder.toResult();
     }

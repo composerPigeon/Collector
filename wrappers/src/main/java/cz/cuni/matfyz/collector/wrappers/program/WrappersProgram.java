@@ -3,32 +3,50 @@ package cz.cuni.matfyz.collector.wrappers.program;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import cz.cuni.matfyz.collector.model.DataModel;
 import cz.cuni.matfyz.collector.wrappers.exceptions.WrapperException;
+import cz.cuni.matfyz.collector.wrappers.mongodb.MongoWrapper;
 import cz.cuni.matfyz.collector.wrappers.neo4j.Neo4jWrapper;
 import cz.cuni.matfyz.collector.wrappers.postgresql.PostgresWrapper;
 
 public class WrappersProgram {
     public static void main(String[] args) {
-        //localhost:27017
 
-        //Neo4jWrapper neo4jWrapper = new Neo4jWrapper("bolt://localhost:7687/neo4j", "neo4j");
+        try {
+            MongoWrapper mongoWrapper = new MongoWrapper(
+                    "localhost",
+                    27017,
+                    "test",
+                    "",
+                    ""
+            );
 
-        //DataModel neo4jModel = neo4jWrapper.executeQuery("MATCH (nineties:Movie) WHERE nineties.released >= 1990 AND nineties.released < 2000 RETURN nineties.title");
+            DataModel mongoModel = mongoWrapper.executeQuery("db.costumers.find()");
+            System.out.println(mongoModel.toJson());
 
-        //System.out.println(neo4jModel.toJson());
+            Neo4jWrapper neo4jWrapper = new Neo4jWrapper(
+                    "localhost",
+                    7687,
+                    "neo4j",
+                    "neo4j",
+                    "MiGWwErj5UxFfac"
+            );
 
-        //try (Neo4JConnection nativeConnection = new Neo4JConnection("bolt://localhost:7687/neo4j", "neo4j", "MiGWwErj5UxFfac")) {
-        //    System.out.println(nativeConnection.executeQueryWithExplain("MATCH (n:Train) return n"));
-        //}
+            DataModel neo4jModel = neo4jWrapper.executeQuery("MATCH (n) RETURN n;");
+            System.out.println(neo4jModel.toJson());
 
-        //PostgresWrapper postgresWrapper = new PostgresWrapper("jdbc:postgresql://localhost:5432", "josefholubec");
+            PostgresWrapper postgresWrapper = new PostgresWrapper(
+                    "localhost",
+                    5432,
+                    "josefholubec",
+                    "",
+                    ""
+            );
 
-        //DataModel postgresModel1 = postgresWrapper.executeQuery("select * from fact_trendings where videoid = 'I6hswz4rIrU'");
+            DataModel postgresModel = postgresWrapper.executeQuery("SELECT * FROM fact_trendings;");
+            System.out.println(postgresModel.toJson());
 
-        //System.out.println(postgresModel1.toJson());
-
-        //DataModel postgresModel2 = postgresWrapper.executeQuery("select * from super_trendings;");
-
-        //System.out.println(postgresModel2.toJson());
+        } catch (WrapperException e) {
+            e.printStackTrace();
+        }
 
     }
 }

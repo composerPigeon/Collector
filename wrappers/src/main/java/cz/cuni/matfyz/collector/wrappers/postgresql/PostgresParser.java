@@ -11,6 +11,7 @@ import java.util.Map;
 
 import cz.cuni.matfyz.collector.model.DataModel;
 import cz.cuni.matfyz.collector.wrappers.abstractwrapper.AbstractParser;
+import cz.cuni.matfyz.collector.wrappers.cachedresult.ConsumedResult;
 import cz.cuni.matfyz.collector.wrappers.exceptions.ParseException;
 import cz.cuni.matfyz.collector.wrappers.cachedresult.CachedResult;
 
@@ -83,14 +84,12 @@ public class PostgresParser extends AbstractParser<String, ResultSet> {
     private void _addDataToBuilder(
             CachedResult.Builder builder,
             ResultSetMetaData metData,
-            ResultSet resultSet,
-            boolean collectColumnTypes
+            ResultSet resultSet
     ) throws SQLException {
 
         for (int i = 1; i <= metData.getColumnCount(); i++) {
             String columnName = metData.getColumnName(i);
             String className = metData.getColumnClassName(i);
-            String typeName = metData.getColumnTypeName(i);
 
             Object value;
             if (className.equals("java.lang.Double")) {
@@ -101,9 +100,6 @@ public class PostgresParser extends AbstractParser<String, ResultSet> {
                 value = resultSet.getString(i);
             }
             builder.toLastRecordAddValue(columnName, value);
-            if (collectColumnTypes) {
-                builder.addColumnType(columnName, typeName);
-            }
         }
     }
 
@@ -114,7 +110,7 @@ public class PostgresParser extends AbstractParser<String, ResultSet> {
             while (resultSet.next()) {
                 ResultSetMetaData metaData = resultSet.getMetaData();
                 builder.addEmptyRecord();
-                _addDataToBuilder(builder, metaData, resultSet, false);
+                _addDataToBuilder(builder, metaData, resultSet);
             }
             return builder.toResult();
         } catch (SQLException e) {
@@ -122,14 +118,24 @@ public class PostgresParser extends AbstractParser<String, ResultSet> {
         }
     }
 
+    // Parse Main Result
+    private void _consumeDataToBuilder(ConsumedResult.Builder builder, ResultSetMetaData metaData, ResultSet resultSet) throws SQLException {
+        for (int i = 1; i <= metaData.getColumnCount(); i++) {
+            String columnName = metaData.getColumnName(i);
+            String typeName = metaData.getColumnTypeName(i);
+
+            builder.addColumnType(columnName, typeName);
+        }
+    }
+
     @Override
-    public CachedResult parseMainResult(ResultSet resultSet, DataModel model) throws ParseException {
+    public ConsumedResult parseMainResult(ResultSet resultSet, DataModel model) throws ParseException {
         try {
-            var builder = new CachedResult.Builder();
+            var builder = new ConsumedResult.Builder();
             ResultSetMetaData metaData = resultSet.getMetaData();
             while (resultSet.next()) {
-                builder.addEmptyRecord();
-                _addDataToBuilder(builder, metaData, resultSet, true);
+                builder.addRecord();
+                _consumeDataToBuilder(builder, metaData, resultSet);
             }
             return builder.toResult();
         } catch (SQLException e) {

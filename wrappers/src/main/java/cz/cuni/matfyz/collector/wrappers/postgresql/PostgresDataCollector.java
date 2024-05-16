@@ -2,6 +2,7 @@ package cz.cuni.matfyz.collector.wrappers.postgresql;
 
 import cz.cuni.matfyz.collector.model.DataModel;
 import cz.cuni.matfyz.collector.wrappers.abstractwrapper.*;
+import cz.cuni.matfyz.collector.wrappers.cachedresult.ConsumedResult;
 import cz.cuni.matfyz.collector.wrappers.exceptions.DataCollectException;
 import cz.cuni.matfyz.collector.wrappers.exceptions.QueryExecutionException;
 import cz.cuni.matfyz.collector.wrappers.cachedresult.CachedResult;
@@ -180,11 +181,11 @@ class PostgresDataCollector extends AbstractDataCollector<String, ResultSet, Str
         throw new DataCollectException("No Table for ColumnName " + columnName + " was found");
     }
 
-    private void _saveResultData(CachedResult mainResult) throws QueryExecutionException, DataCollectException {
-        int rowCount = mainResult.getRowCount();
+    private void _saveResultData(ConsumedResult mainResult) throws QueryExecutionException, DataCollectException {
+        long rowCount = mainResult.getRowCount();
         _model.resultData().setRowCount(rowCount);
 
-        int sizeInBytes = 0;
+        long sizeInBytes = 0;
         for (String columnName : mainResult.getColumnNames()) {
             String colType = mainResult.getColumnType(columnName);
             String tableName = _getTableNameForColumn(columnName, colType);
@@ -202,7 +203,7 @@ class PostgresDataCollector extends AbstractDataCollector<String, ResultSet, Str
     }
 
     @Override
-    public DataModel collectData(CachedResult result) throws DataCollectException {
+    public DataModel collectData(ConsumedResult result) throws DataCollectException {
         try {
             _saveDatasetData();
             _saveIndexData();

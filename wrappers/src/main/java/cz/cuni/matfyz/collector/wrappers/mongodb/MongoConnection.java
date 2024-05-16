@@ -6,6 +6,7 @@ import cz.cuni.matfyz.collector.model.DataModel;
 import cz.cuni.matfyz.collector.wrappers.abstractwrapper.AbstractConnection;
 
 import cz.cuni.matfyz.collector.wrappers.cachedresult.CachedResult;
+import cz.cuni.matfyz.collector.wrappers.cachedresult.ConsumedResult;
 import cz.cuni.matfyz.collector.wrappers.exceptions.ParseException;
 import cz.cuni.matfyz.collector.wrappers.exceptions.QueryExecutionException;
 import org.bson.Document;
@@ -31,19 +32,17 @@ public class MongoConnection extends AbstractConnection<Document, Document, Docu
     }
 
     @Override
-    public CachedResult executeMainQuery(Document query, DataModel toModel) throws QueryExecutionException {
+    public ConsumedResult executeMainQuery(Document query, DataModel toModel) throws QueryExecutionException {
         try {
             Document result = _database.runCommand(query);
             Document explainTree = _database.runCommand(MongoResources.getExplainCommand(query));
             _parser.parseExplainTree(toModel, explainTree);
-            return _parser.parseResult(result);
+            return _parser.parseMainResult(result, toModel);
         } catch (MongoException | ParseException e) {
             throw new QueryExecutionException(e);
         }
     }
 
     @Override
-    public void close() {
-
-    }
+    public void close() {}
 }

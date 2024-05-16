@@ -2,6 +2,7 @@ package cz.cuni.matfyz.collector.wrappers.postgresql;
 
 import cz.cuni.matfyz.collector.model.DataModel;
 import cz.cuni.matfyz.collector.wrappers.abstractwrapper.*;
+import cz.cuni.matfyz.collector.wrappers.cachedresult.ConsumedResult;
 import cz.cuni.matfyz.collector.wrappers.exceptions.ParseException;
 import cz.cuni.matfyz.collector.wrappers.exceptions.QueryExecutionException;
 import cz.cuni.matfyz.collector.wrappers.cachedresult.CachedResult;
@@ -17,7 +18,7 @@ public class PostgresConnection extends AbstractConnection<String, ResultSet, St
         _statement = _connection.createStatement();
     }
     @Override
-    public CachedResult executeMainQuery(String query, DataModel toModel) throws QueryExecutionException {
+    public ConsumedResult executeMainQuery(String query, DataModel toModel) throws QueryExecutionException {
         try (ResultSet planResult = _statement.executeQuery(PostgresResources.getExplainPlanQuery(query))) {
             if (planResult.next()) {
                 _parser.parseExplainTree(toModel, planResult.getString("QUERY PLAN"));

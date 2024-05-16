@@ -21,7 +21,7 @@ public class MongoWrapper extends AbstractWrapper {
         super(host, port, datasetName, user, password);
         _client = MongoClients.create(MongoResources.getConnectionLink(host, port, user, password));
         _database = _client.getDatabase(datasetName);
-        _parser = new MongoParser();
+        _parser = new MongoParser(_database);
     }
 
     @Override
