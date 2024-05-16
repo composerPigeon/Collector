@@ -3,6 +3,7 @@ package cz.cuni.matfyz.collector.server;
 import cz.cuni.matfyz.collector.model.DataModel;
 import cz.cuni.matfyz.collector.persistor.AbstractPersistor;
 import cz.cuni.matfyz.collector.persistor.MongoPersistor;
+import cz.cuni.matfyz.collector.persistor.PersistorException;
 import cz.cuni.matfyz.collector.server.configurationproperties.PersistorProperties;
 import cz.cuni.matfyz.collector.server.executions.Execution;
 import cz.cuni.matfyz.collector.server.executions.ExecutionState;
@@ -29,15 +30,15 @@ public class PersistorContainer {
         );
     }
 
-    public void saveExecutionResult(String instanceName, DataModel model) {
+    public void saveExecutionResult(String instanceName, DataModel model) throws PersistorException {
         _persistor.saveExecution(instanceName, model);
     }
 
-    public String getExecutionResult(String uuid) {
+    public String getExecutionResult(String uuid)  throws PersistorException {
         return _persistor.getExecutionResult(uuid);
     }
 
-    public ExecutionState getExecutionState(String uuid) {
+    public ExecutionState getExecutionState(String uuid) throws PersistorException {
         if (_persistor.getExecutionStatus(uuid))
             return ExecutionState.Processed;
         else
