@@ -23,7 +23,7 @@ public class QueryScheduler {
     @Scheduled(fixedRate = 5000)
     public void execute() {
         try {
-            for(Execution execution : _manager.getExecutionsFromQueue()) {
+            for (Execution execution : _manager.getExecutionsFromQueue()) {
                 try {
                     if (_wrappers.contains(execution.instanceName())) {
                         _manager.setExecutionRunning(execution.uuid());
@@ -32,16 +32,17 @@ public class QueryScheduler {
                     }
                     System.out.println("Execution " + execution.uuid() + " was successfully executed");
                 } catch (WrapperException e) {
-                    //_manager.removeExecution(execution.uuid());
                     _logger.atError().setCause(e).log("Execution " + execution.uuid() + " couldn't be evaluated.");
+                    _manager.saveError(execution.uuid(), e.getMessage());
                 } catch (ExecutionManagerException e) {
                     _logger.atError().setCause(e).log(e.getMessage());
+                    _manager.saveError(execution.uuid(), e.getMessage());
                 }
-
             }
-
+        } catch (ExecutionManagerException e) {
+            _logger.atError().setCause(e).log(e.getMessage());
         } catch (Exception e) {
-            _logger.atError().setCause(e).log("Error occurred during execution of Scheduler");
+            _logger.atError().setCause(e).log("Error during executing waiting executions from queue.");
         }
     }
 }

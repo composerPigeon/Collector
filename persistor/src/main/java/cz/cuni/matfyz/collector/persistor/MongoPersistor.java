@@ -37,11 +37,26 @@ public class MongoPersistor extends AbstractPersistor {
     }
 
     @Override
+    public void saveExecutionError(String uuid, String errMsg) throws PersistorException {
+        try {
+            Document document = new Document();
+            document.put("id", uuid);
+            document.put("error", errMsg);
+            _database.getCollection("executions").insertOne(document);
+        } catch (MongoException e) {
+            throw new PersistorException(e);
+        }
+    }
+
+    @Override
     public String getExecutionResult(String uuid) throws PersistorException {
         try {
             var result = _database.getCollection("executions").find(new Document("id", uuid));
             for (var document : result) {
-                return document.get("model", Document.class).toJson();
+                if (document.containsKey("model"))
+                    return document.get("model", Document.class).toJson();
+                else
+                    return document.getString("error");
             }
             return null;
         } catch (MongoException e) {

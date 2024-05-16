@@ -72,7 +72,7 @@ public class ExecutionsManager {
 
     }
 
-    public void removeExecution(String uuid) throws ExecutionManagerException {
+    public void removeExecutionFromQueue(String uuid) throws ExecutionManagerException {
         try {
             _queue.removeExecution(uuid);
         } catch (QueueExecutionsException e) {
@@ -85,11 +85,21 @@ public class ExecutionsManager {
     public void saveResult(String uuid, DataModel model) throws ExecutionManagerException {
         try {
             _persistor.saveExecutionResult(uuid, model);
-            removeExecution(uuid);
+            removeExecutionFromQueue(uuid);
         } catch (PersistorException e) {
-            String errMsg = ErrorMessages.saveExecutionResult(uuid);
+            String errMsg = ErrorMessages.saveExecutionResultErrorMsg(uuid);
             throw new ExecutionManagerException(errMsg, e);
         }
 
+    }
+
+    public void saveError(String uuid, String errorMsg) throws ExecutionManagerException {
+        try {
+            _persistor.saveExecutionError(uuid, errorMsg);
+            removeExecutionFromQueue(uuid);
+        } catch (PersistorException e) {
+            String errMsg = ErrorMessages.saveExecutionErrorErrorMsg(uuid);
+            throw new ExecutionManagerException(errMsg, e);
+        }
     }
 }

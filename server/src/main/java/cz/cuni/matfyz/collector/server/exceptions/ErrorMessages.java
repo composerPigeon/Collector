@@ -21,10 +21,13 @@ public abstract class ErrorMessages {
         return "Error removing execution " + uuid + " from queue.";
     }
 
-    public static String saveExecutionResult(String uuid) {
+    public static String saveExecutionResultErrorMsg(String uuid) {
         return "Error saving execution " + uuid + " result.";
     }
 
+    public static String saveExecutionErrorErrorMsg(String uuid) {
+        return "Error saving execution " + uuid + " error.";
+    }
     public static String unexpectedErrorMsg() {
         return "Unexpected error occurred.";
     }

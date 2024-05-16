@@ -30,8 +30,12 @@ public class PersistorContainer {
         );
     }
 
-    public void saveExecutionResult(String instanceName, DataModel model) throws PersistorException {
-        _persistor.saveExecution(instanceName, model);
+    public void saveExecutionResult(String uuid, DataModel model) throws PersistorException {
+        _persistor.saveExecution(uuid, model);
+    }
+
+    public void saveExecutionError(String uuid, String errorMsg) throws PersistorException {
+        _persistor.saveExecutionError(uuid, errorMsg);
     }
 
     public String getExecutionResult(String uuid)  throws PersistorException {
