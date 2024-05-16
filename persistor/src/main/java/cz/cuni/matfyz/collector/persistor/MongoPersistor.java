@@ -37,11 +37,21 @@ public class MongoPersistor extends AbstractPersistor {
     }
 
     @Override
-    public String getExecution(String uuid) {
+    public String getExecutionResult(String uuid) {
         var result = _database.getCollection("executions").find(new Document("id", uuid));
         for (var document : result) {
             return document.get("model", Document.class).toJson();
         }
         return null;
+    }
+
+    @Override
+    public boolean getExecutionStatus(String uuid) {
+        try (var resultIter = _database.getCollection("executions").find(new Document("id", uuid)).iterator()) {
+            return resultIter.hasNext();
+        } catch (MongoException e) {
+            e.printStackTrace();
+            return false;
+        }
     }
 }

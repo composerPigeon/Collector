@@ -1,8 +1,11 @@
 package cz.cuni.matfyz.collector.server;
 
+import cz.cuni.matfyz.collector.model.DataModel;
 import cz.cuni.matfyz.collector.persistor.AbstractPersistor;
 import cz.cuni.matfyz.collector.persistor.MongoPersistor;
 import cz.cuni.matfyz.collector.server.configurationproperties.PersistorProperties;
+import cz.cuni.matfyz.collector.server.executions.Execution;
+import cz.cuni.matfyz.collector.server.executions.ExecutionState;
 import jakarta.annotation.PostConstruct;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
@@ -26,7 +29,18 @@ public class PersistorContainer {
         );
     }
 
-    public AbstractPersistor getPersistor() {
-        return _persistor;
+    public void saveExecutionResult(String instanceName, DataModel model) {
+        _persistor.saveExecution(instanceName, model);
+    }
+
+    public String getExecutionResult(String uuid) {
+        return _persistor.getExecutionResult(uuid);
+    }
+
+    public ExecutionState getExecutionState(String uuid) {
+        if (_persistor.getExecutionStatus(uuid))
+            return ExecutionState.Processed;
+        else
+            return ExecutionState.NotFound;
     }
 }

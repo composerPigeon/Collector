@@ -8,7 +8,7 @@ import org.springframework.stereotype.Component;
 @Component
 public class ExecutionsManager {
     @Autowired
-    private PersistorContainer _persistorContainer;
+    private PersistorContainer _persistor;
 
     @Autowired
     private ExecutionsQueue _queue;
@@ -17,13 +17,20 @@ public class ExecutionsManager {
         return _queue.createExecution(instanceName, query);
     }
 
-    // returns model if exists or status in queue
-    public String getExecutionState(String uuid) {
-        String result = _persistorContainer.getPersistor().getExecution(uuid);
-        if (result == null) {
-            result = _queue.getExecutionStatus(uuid);
+    public ExecutionState getExecutionState(String uuid) {
+        ExecutionState result = _queue.getExecutionState(uuid);
+        if (result == ExecutionState.NotFound) {
+            result = _persistor.getExecutionState(uuid);
         }
-        return (result == null) ? "Execution does not exists" : result;
+        return result;
+    }
+
+    public void setExecutionRunning(String uuid) {
+        _queue.setRunning(uuid);
+    }
+
+    public String getExecutionResult(String uuid) {
+        return _persistor.getExecutionResult(uuid);
     }
 
     public Execution getExecutionFromQueue() {
@@ -31,7 +38,7 @@ public class ExecutionsManager {
     }
 
     public void saveResult(String uuid, DataModel model) {
-        _persistorContainer.getPersistor().saveExecution(uuid, model);
+        _persistor.saveExecutionResult(uuid, model);
         _queue.removeExecution(uuid);
     }
 }

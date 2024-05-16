@@ -6,5 +6,7 @@ public abstract class AbstractPersistor {
     public abstract void saveExecution(String uuid, DataModel model);
 
     //returns null if execution doesn't exists
-    public abstract String getExecution(String uuid);
+    public abstract String getExecutionResult(String uuid);
+
+    public abstract boolean getExecutionStatus(String uuid);
 }

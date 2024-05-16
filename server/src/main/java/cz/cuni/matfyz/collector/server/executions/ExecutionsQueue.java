@@ -64,23 +64,23 @@ public class ExecutionsQueue {
         }
     }
 
-    public String getExecutionStatus(String uuid) {
+    public ExecutionState getExecutionState(String uuid) {
         try (Statement statement = DriverManager.getConnection(_connectionString, _userName, _password).createStatement()) {
             ResultSet resultSet = statement.executeQuery("SELECT isrunning FROM executions WHERE uuid = '" + uuid + "' ;");
 
             if (resultSet.next()) {
                 boolean isRunning = resultSet.getBoolean("isrunning");
                 if (isRunning)
-                    return "Running";
+                    return ExecutionState.Running;
                 else
-                    return "Waiting";
+                    return ExecutionState.Waiting;
             }
 
             resultSet.close();
-            return null;
+            return ExecutionState.NotFound;
         } catch (SQLException e) {
             e.printStackTrace();
-            return e.getMessage();
+            return ExecutionState.NotFound;
         }
     }
 
