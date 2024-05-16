@@ -31,6 +31,15 @@ public class MongoDataCollector extends AbstractDataCollector<Document, Document
         }
     }
 
+    private void _saveCacheDatasetSize() throws QueryExecutionException {
+        CachedResult stats = _connection.executeQuery(MongoResources.getServerStatsCommand());
+
+        if (stats.next()) {
+            long size = stats.getDocument("wiredTiger").get("cache", Document.class).getLong("maximum bytes configured");
+            _model.datasetData().setDataSetCacheSize(size);
+        }
+    }
+
     private void _saveDatasetData() throws QueryExecutionException {
         CachedResult stats = _connection.executeQuery(MongoResources.getDatasetStatsCommand());
 
@@ -40,6 +49,7 @@ public class MongoDataCollector extends AbstractDataCollector<Document, Document
             long sizeInPages = (long) Math.ceil((double)size / _model.getPageSize());
             _model.datasetData().setDataSetSizeInPages(sizeInPages);
         }
+        _saveCacheDatasetSize();
     }
 
 

@@ -104,6 +104,10 @@ public class MongoResources {
         return new Document("dbStats", 1);
     }
 
+    public static Document getServerStatsCommand() {
+        return new Document("serverStatus", 1);
+    }
+
     public static String getConnectionLink(String host, int port, String user, String password) {
         if (user.isEmpty() || password.isEmpty())
             return "mongodb://" + host + ':' + port;
