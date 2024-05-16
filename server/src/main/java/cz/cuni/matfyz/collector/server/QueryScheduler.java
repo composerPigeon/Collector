@@ -1,6 +1,7 @@
 package cz.cuni.matfyz.collector.server;
 
 import cz.cuni.matfyz.collector.model.DataModel;
+import cz.cuni.matfyz.collector.server.exceptions.ErrorMessages;
 import cz.cuni.matfyz.collector.server.exceptions.ExecutionManagerException;
 import cz.cuni.matfyz.collector.server.executions.Execution;
 import cz.cuni.matfyz.collector.server.executions.ExecutionsManager;
@@ -29,14 +30,17 @@ public class QueryScheduler {
                         _manager.setExecutionRunning(execution.uuid());
                         DataModel result = _wrappers.executeQuery(execution.instanceName(), execution.query());
                         _manager.saveResult(execution.uuid(), result);
+                    } else {
+                        _logger.atError().log(ErrorMessages.nonExistentWrapper(execution.uuid(), execution.instanceName()));
+                        _manager.saveError(execution.uuid(), ErrorMessages.nonExistentWrapper(execution.uuid(), execution.instanceName()));
                     }
                     System.out.println("Execution " + execution.uuid() + " was successfully executed");
-                } catch (WrapperException e) {
-                    _logger.atError().setCause(e).log("Execution " + execution.uuid() + " couldn't be evaluated.");
-                    _manager.saveError(execution.uuid(), e.getMessage());
-                } catch (ExecutionManagerException e) {
+                } catch (WrapperException | ExecutionManagerException e) {
                     _logger.atError().setCause(e).log(e.getMessage());
                     _manager.saveError(execution.uuid(), e.getMessage());
+                } catch (Exception e) {
+                    _logger.atError().setCause(e).log(e.getMessage());
+                    _manager.saveError(execution.uuid(), ErrorMessages.unexpectedErrorMsg());
                 }
             }
         } catch (ExecutionManagerException e) {
