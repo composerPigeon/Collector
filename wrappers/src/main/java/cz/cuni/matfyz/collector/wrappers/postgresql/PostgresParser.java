@@ -142,4 +142,19 @@ public class PostgresParser extends AbstractParser<String, ResultSet> {
             throw new ParseException(e);
         }
     }
+
+    @Override
+    public ConsumedResult parseResultAndConsume(ResultSet resultSet) throws ParseException {
+        try {
+            var builder = new ConsumedResult.Builder();
+            ResultSetMetaData metaData = resultSet.getMetaData();
+            while (resultSet.next()) {
+                builder.addRecord();
+                _consumeDataToBuilder(builder, metaData, resultSet);
+            }
+            return builder.toResult();
+        } catch (SQLException e) {
+            throw new ParseException(e);
+        }
+    }
 }

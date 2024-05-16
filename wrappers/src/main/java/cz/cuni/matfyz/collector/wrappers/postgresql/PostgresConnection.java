@@ -41,6 +41,15 @@ public class PostgresConnection extends AbstractConnection<String, ResultSet, St
     }
 
     @Override
+    public ConsumedResult executeQueryAndConsume(String query) throws QueryExecutionException {
+        try (ResultSet rs = _statement.executeQuery(query)){
+            return _parser.parseResultAndConsume(rs);
+        } catch (SQLException | ParseException e) {
+            throw new QueryExecutionException(e);
+        }
+    }
+
+    @Override
     public void close() throws SQLException {
         _statement.close();
         _connection.close();

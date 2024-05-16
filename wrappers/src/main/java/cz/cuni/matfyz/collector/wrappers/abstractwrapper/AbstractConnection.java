@@ -14,5 +14,6 @@ public abstract class AbstractConnection<TPlan, TResult, TQuery> implements Auto
     }
 
     public abstract CachedResult executeQuery(TQuery query) throws QueryExecutionException;
+    public abstract ConsumedResult executeQueryAndConsume(TQuery query) throws QueryExecutionException;
     public abstract ConsumedResult executeMainQuery(TQuery query, DataModel toModel) throws QueryExecutionException;
 }

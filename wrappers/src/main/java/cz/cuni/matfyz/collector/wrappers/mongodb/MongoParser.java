@@ -150,10 +150,12 @@ public class MongoParser extends AbstractParser<Document, Document> {
             return;
         }
 
-        long cursorId = cursor.getLong("id");
-        if (cursorId != 0) {
-            Document result = _database.runCommand(MongoResources.getNextBatchOfCursorCommand(cursorId, collectionName));
-            _parseMainCursorResult(result.get("cursor", Document.class), builder, collectionName);
+        if (collectionName != null) {
+            long cursorId = cursor.getLong("id");
+            if (cursorId != 0) {
+                Document result = _database.runCommand(MongoResources.getNextBatchOfCursorCommand(cursorId, collectionName));
+                _parseMainCursorResult(result.get("cursor", Document.class), builder, collectionName);
+            }
         }
     }
 
@@ -169,7 +171,23 @@ public class MongoParser extends AbstractParser<Document, Document> {
         else {
             builder.addRecord();
             RawBsonDocument sizeDoc = RawBsonDocument.parse(result.toJson());
-            //TODO: better process
+            builder.addByteSize(sizeDoc.getByteBuffer().remaining());
+            _parseColumnTypes(sizeDoc, builder);
+        }
+        return builder.toResult();
+    }
+
+    @Override
+    public ConsumedResult parseResultAndConsume(Document result) throws ParseException {
+        ConsumedResult.Builder builder = new ConsumedResult.Builder();
+        if (result.containsKey("cursor")) {
+            _parseMainCursorResult(result.get("cursor", Document.class), builder, null);
+        }
+        else {
+            builder.addRecord();
+            RawBsonDocument sizeDoc = RawBsonDocument.parse(result.toJson());
+            builder.addByteSize(sizeDoc.getByteBuffer().remaining());
+            _parseColumnTypes(sizeDoc, builder);
         }
         return builder.toResult();
     }

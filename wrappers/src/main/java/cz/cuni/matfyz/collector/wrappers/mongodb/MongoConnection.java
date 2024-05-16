@@ -44,5 +44,15 @@ public class MongoConnection extends AbstractConnection<Document, Document, Docu
     }
 
     @Override
+    public ConsumedResult executeQueryAndConsume(Document query) throws QueryExecutionException {
+        try {
+            Document result = _database.runCommand(query);
+            return _parser.parseResultAndConsume(result);
+        } catch (MongoException | ParseException e) {
+            throw new QueryExecutionException(e);
+        }
+    }
+
+    @Override
     public void close() {}
 }

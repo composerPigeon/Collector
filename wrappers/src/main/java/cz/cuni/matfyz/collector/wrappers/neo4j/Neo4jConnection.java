@@ -8,6 +8,7 @@ import cz.cuni.matfyz.collector.wrappers.exceptions.QueryExecutionException;
 import cz.cuni.matfyz.collector.wrappers.cachedresult.CachedResult;
 
 import org.neo4j.driver.*;
+import org.neo4j.driver.exceptions.Neo4jException;
 import org.neo4j.driver.summary.Plan;
 import org.neo4j.driver.summary.ResultSummary;
 
@@ -24,10 +25,20 @@ public class Neo4jConnection extends AbstractConnection<ResultSummary, Result, S
     public ConsumedResult executeMainQuery(String query, DataModel toModel) throws QueryExecutionException {
         try {
             Result result = _session.run(Neo4jResources.getExplainPlanQuery(query));
-            var cachedResult = _parser.parseMainResult(result, toModel);
+            var consumedResult = _parser.parseMainResult(result, toModel);
             _parser.parseExplainTree(toModel, result.consume());
-            return cachedResult;
-        } catch (ParseException e) {
+            return consumedResult;
+        } catch (Neo4jException | ParseException e) {
+            throw new QueryExecutionException(e);
+        }
+    }
+
+    @Override
+    public ConsumedResult executeQueryAndConsume(String query) throws QueryExecutionException {
+        try {
+            Result result = _session.run(query);
+            return _parser.parseResultAndConsume(result);
+        } catch (Neo4jException | ParseException e) {
             throw new QueryExecutionException(e);
         }
     }
@@ -37,7 +48,7 @@ public class Neo4jConnection extends AbstractConnection<ResultSummary, Result, S
         try {
             Result result = _session.run(query);
             return _parser.parseResult(result);
-        } catch (ParseException e) {
+        } catch (Neo4jException | ParseException e) {
             throw new QueryExecutionException(e);
         }
     }

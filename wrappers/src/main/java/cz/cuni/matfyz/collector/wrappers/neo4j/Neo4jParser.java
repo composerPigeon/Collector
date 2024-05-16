@@ -201,6 +201,17 @@ public class Neo4jParser extends AbstractParser<ResultSummary, Result> {
         return builder.toResult();
     }
 
+    @Override
+    public ConsumedResult parseResultAndConsume(Result result) throws ParseException {
+        var builder = new ConsumedResult.Builder();
+        while(result.hasNext()) {
+            var record = result.next();
+            builder.addRecord();
+            _consumeDataToBuilder(builder, record);
+        }
+        return builder.toResult();
+    }
+
     private static class PropertyData {
         private Object _value;
         private String _type;
