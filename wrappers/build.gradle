@@ -20,6 +20,9 @@ dependencies {
     //mongodb native driver
     implementation 'org.mongodb:mongodb-driver-sync:4.11.1'
 
+    //SLF4J
+    implementation 'org.slf4j:slf4j-api:1.7.25'
+
     // model
     implementation project(':model')
 }

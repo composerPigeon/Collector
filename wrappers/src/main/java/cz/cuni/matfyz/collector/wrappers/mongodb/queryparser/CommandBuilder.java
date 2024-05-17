@@ -5,6 +5,7 @@ import org.bson.Document;
 
 import javax.print.Doc;
 import java.util.Collection;
+import java.util.List;
 import java.util.Set;
 import java.util.function.Function;
 
@@ -29,7 +30,7 @@ public class CommandBuilder {
         return "Option " + optionName + " is not supported in method " + functionName + ".";
     }
 
-    private static String INVALID_COUNT_USAGE_MSG = "Count cursor method is supported only on Cursor returned from find() function.";
+    private static final String INVALID_COUNT_USAGE_MSG = "Count cursor method is supported only on Cursor returned from find() function.";
 
     private Document _command;
     private ReturnType _returnType;
@@ -63,8 +64,8 @@ public class CommandBuilder {
             _command.put(keyName, documentValue);
     }
 
-    private void _updateWithDocumentArrayValue(String keyName, Document[] arrayDocValue) {
-        if (arrayDocValue.length > 0)
+    private void _updateWithDocumentArrayValue(String keyName, List<Document> arrayDocValue) {
+        if (!arrayDocValue.isEmpty())
             _command.put(keyName, arrayDocValue);
     }
 
@@ -89,15 +90,15 @@ public class CommandBuilder {
 
     private void _updateWithCollectionAggregate(FunctionItem function) throws ParseException {
         _command.put("aggregate", _collectionName);
-        _command.put("cursor", new Document()); //TODO: hoe to parse from input
+        _command.put("cursor", new Document());
         switch (function.args.size()) {
             case 0:
                 break;
             case 1:
-                _updateWithDocumentArrayValue("pipeline", function.args.getDocumentArray(0));
+                _updateWithDocumentArrayValue("pipeline", function.args.getDocumentList(0));
                 break;
             case 2:
-                _updateWithDocumentArrayValue("pipeline", function.args.getDocumentArray(0));
+                _updateWithDocumentArrayValue("pipeline", function.args.getDocumentList(0));
                 _updateWithOptions(function.name, function.args.getDocument(1));
                 break;
             default:
@@ -154,15 +155,16 @@ public class CommandBuilder {
         _returnType = ReturnType.None;
     }
 
+    // Results for count, distinct and aggregate methods heave different format and also will require more specific explain tree parsing
     private void _updateWithCollectionFunction(FunctionItem function) throws ParseException {
         if ("find".equals(function.name))
             _updateWithCollectionFind(function);
-        else if ("aggregate".equals(function.name))
-            _updateWithCollectionAggregate(function);
-        else if ("count".equals(function.name))
-            _updateWithCollectionCount(function);
-        else if ("distinct".equals(function.name))
-            _updateWithCollectionDistinct(function);
+        //else if ("aggregate".equals(function.name))
+        //    _updateWithCollectionAggregate(function);
+        //else if ("count".equals(function.name))
+        //    _updateWithCollectionCount(function);
+        //else if ("distinct".equals(function.name))
+        //    _updateWithCollectionDistinct(function);
         else
             throw new ParseException(nonExistentFunctionErrorMessage(function.name));
     }
@@ -264,8 +266,10 @@ public class CommandBuilder {
                 break;
             case "hint":
                 _updateWithCursorHint(function);
-            case "count":
-                _updateWithCursorCount(function);
+                break;
+            //case "count":
+            //    _updateWithCursorCount(function);
+            //    break;
             default:
                 throw new ParseException(nonExistentFunctionErrorMessage(function.name));
         }

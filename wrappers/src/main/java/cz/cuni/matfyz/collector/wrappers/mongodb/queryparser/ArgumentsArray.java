@@ -8,6 +8,7 @@ import org.bson.Document;
 import org.bson.json.JsonParseException;
 
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
 
 public class ArgumentsArray {
@@ -32,10 +33,10 @@ public class ArgumentsArray {
         }
 
     }
-    public Document[] getDocumentArray(int index) throws ParseException {
+    public List<Document> getDocumentList(int index) throws ParseException {
         try {
             ObjectMapper mapper = new ObjectMapper();
-            return mapper.readValue(_array[index], Document[].class);
+            return Arrays.stream(mapper.readValue(_array[index], Document[].class)).toList();
         } catch (JsonProcessingException e) {
             throw new ParseException(getErrorMessageForInvalidType("DocumentArray", _array[index]), e);
         }

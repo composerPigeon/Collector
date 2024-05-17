@@ -13,10 +13,15 @@ public class MongoResources {
     public static final String DATABASE_NAME = "MongoDB";
 
     public static Document getExplainCommand(Document command) {
-        Document newCommand = new Document();
-        newCommand.put("explain", command);
-        newCommand.put("verbosity", "executionStats");
-        return newCommand;
+        if (command.containsKey("aggregate")) {
+            command.put("explain", true);
+            return command;
+        } else {
+            Document newCommand = new Document();
+            newCommand.put("explain", command);
+            newCommand.put("verbosity", "executionStats");
+            return newCommand;
+        }
     }
     public static Document getCollectionStatsCommand(String collectionName) {
         return new Document("collStats", collectionName);

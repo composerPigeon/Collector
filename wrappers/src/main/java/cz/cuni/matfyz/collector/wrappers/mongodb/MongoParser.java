@@ -82,6 +82,8 @@ public class MongoParser extends AbstractParser<Document, Document> {
             return "long";
         else if (value.isObjectId())
             return "objectId";
+        else if (value.isString())
+            return "string";
         else
             return null;
     }
