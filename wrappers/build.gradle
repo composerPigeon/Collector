@@ -1,6 +1,4 @@
-apply plugin: 'application'
 apply plugin: 'java'
-mainClassName = 'program.WrappersProgram'
 
 repositories {
     // Use Maven Central for resolving dependencies.
@@ -22,6 +20,7 @@ dependencies {
 
     //SLF4J
     implementation 'org.slf4j:slf4j-api:1.7.25'
+    implementation 'org.slf4j:slf4j-simple:1.7.25'
 
     // model
     implementation project(':model')

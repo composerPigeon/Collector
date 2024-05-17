@@ -23,6 +23,7 @@ public class WrappersProgram {
         DataModel mongoModel = mongoWrapper.executeQuery("db.costumers.find()");
         System.out.println(mongoModel.toJson());
 
+        // It will fail for this command, beacuse we do not support count() function
         //mongoModel = mongoWrapper.executeQuery("db.costumers.find().count()");
         //System.out.println(mongoModel.toJson());
 
@@ -31,6 +32,10 @@ public class WrappersProgram {
 
         mongoModel = mongoWrapper.executeQuery("db.costumers.find({\"customer_id\": { \"$gt\": 30 }})");
         System.out.println(mongoModel.toJson());
+
+        // It will fail for this command, beacuse we do not support aggregate() function
+        //mongoModel = mongoWrapper.executeQuery("db.costumers.aggregate()");
+        //System.out.println(mongoModel.toJson());
     }
     public static void main(String[] args) {
 
