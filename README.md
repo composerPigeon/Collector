@@ -1,30 +1,64 @@
 # Collector
 
-# Links to other monitoring systems
-- [Zabbix](https://www.zabbix.com)
-- [Prometheus](https://prometheus.io)
-- [loggly](https://www.loggly.com)
-- [ELK stack](https://www.elastic.co/guide/index.html)
-- [Data script presentation about Prometheus and so](https://www.datascript.cz/morning-talks/prometheus-mimir-loki-tempo-parca/?utm_source=46664-WebaMorningTalks&utm_medium=email&utm_term=13922069436&utm_content=Prometheus&utm_campaign=Morning%20Talks%202023%20kveten--20230427)
+## Uživatelská dokumentace
+### Instalace
+- po naklonování projektu z gitu je nutné projekt postavit a stáhnout všechny potřebné závislosti
+  - to se provede spuštěním `./gradlew build`
+- následně je třeba projekt spustit pomocí `./gradlew bootRun`
+  - server do konzole na posledním řádku vypíše na jakém běží portu (měl by to být port 8080)
 
-## Command for starting postgresql@14
-- postgres -D /opt/homebrew/var/postgresql@14
+### Nastavení persistoru a instancí
+- v modulu serveru se nachází ve složce `src/main/java/resources` soubor `application.properties`
+- z tohoto souboru se načtou všechny informace, podle nichž se server k jedntlivým instancím a persistoru připojí
 
-## Odkazy tutorialy
-- https://spring.io/guides/tutorials/rest
-- https://www.tutorialspoint.com/jackson_annotations/jackson_annotations_jsonignore.htm
-- https://fasterxml.github.io/jackson-annotations/javadoc/2.5/com/fasterxml/jackson/annotation/JsonIgnore.html
+#### Nastavení instancí
+- pomocí vlastnosti `dbType` se zvolí nad jakou databázi se wrapper inicializuje
+  - povolené hodnoty jsou `PostgreSQL`, `MongoDB` a `Neo4j`
+- pomocí hodnot `hostName`, `port`, `datsetName`, `userName`, `password` se následně na tuto instanci připojí
+  - `datasetName` je název kolekce nebo datové sady případně grafu, se kterým má na dané instanci wrapper pracovat
+- `instanceName` je pak uživatelem zvolený identifikátor dané instance, který musí být unikátní pro správné fungování celé aplikace
+- příklad:
+```
+wrappers[1].dbType=PostgreSQL
+wrappers[1].instanceName=postgres
+wrappers[1].hostName=localhost
+wrappers[1].port=5432
+wrappers[1].datasetName=josefholubec
+wrappers[1].credentials.userName=<USER_NAME>
+wrappers[1].credentials.password=<PASSWORD>
+```
 
-## Poznámky
-### Objektový návrh
-- Rozdělení Wrapperu na Connection, Parser a Saver pro rozdělení funkčnosti jednotlivých častí wrapperu a zároveň specifikování a možnost optimalizace pro multithread běh
-- Connection se vytváří pro každou exekuci a analýzu dotazu => Jeden Wrapper pro paralelní spouštění anaklýzy dotazů
-  - wrapper může držet data, a objekty důležité pro spojení s databází, které jsou ThreadSafe (Driver Neo4j)
-  - Connection naopak pracuje s objekty, které nejsou ThreadSafe
-- ResultSet (Postrgres) a Result (Neo4j) není vhodné vracet z metod, jsou totiž mutable a zároveň není bezpečné z nich číst, pokud se uzavře connection
-  - Parser tedy parsuje příslušné výsledky na MainCachedResult případně CachedResult
+#### Nastavení peristoru
+- zde se používají pouze hodnoty `hostName`, `port`, `datasetName`, `userName` a `password`, které plní stejnou funkci jako u instancí výše
+```
+persistor.hostName=localhost
+persistor.port=27017
+persistor.datasetName=queries
+persistor.credentials.userName=<USER_NAME>
+persistor.credentials.password=<PASSWORD>
+```
 
-### Neo4j configurace
-- Je nutné nainstalovat apoc knihovnu podle následujícíh [pokynů](https://neo4j.com/docs/apoc/current/installation/)
-- následně je nutné v souboru ./conf/neo4j.conf nastavit `dbms.security.procedures.unrestricted=apoc.meta.nodeTypeProperties`
-  - povolí se tak spouštení následujících procedur
+### REST API
+- POST na adresu `<SERVER>/query`
+  - v těle POST requestu musí být obsažen json dokument, který má dvě položky `instance` a `query`
+    - pole `instance` musí obsahovat identifikátor instance databáze, nad kterou se dotaz z pole `query` spustí
+    - hodnoty obou polí se předpokladají, že budou řetězce (Stringy)
+    - tento příkaz následně vytvoří novou úlohu (v kódu koncept Execution) s náhodně vygenerovaným identifikátorem, který se pošle klientovi při úspěšném uložení do fronty jako výsledek operace
+      - Úloha je pak plánovačem časem spuštěna a dotaz se vyhodnotí nad příslušnou instancí a výsledek se nakonec uloží do persistoru
+- GET na adresu `<SERVER>/query/<EXECUTION_ID>/state`
+  - tento příkaz získá status příslušné úlohy
+  - výsledek může nabývat tří validních hodnot `Waiting` (pokud úloha stále čeká ve frontě), `Running` (pokud úloha byla již spuštěna plánovačem, ale její výsledek stále nebyl uložen), `Processed` (pokud byla úloha vyhodnocena a výsledek byl uložen)
+  - případně pokud záznam neexistuje, server vrátí chybu 404 a informaci o neexistenci dané úlohy v systému
+- GET na adresu `<SERVER>/query/<EXECUTION_ID>/result`
+  - tento příkaz získá výsledek úlohy, pokud její stav už je `Processed`
+    - v opačném případě vrátí chybu 404, jelikož záznam nebyl nalezen
+  - Výsledkem této operace je buď json obsahující naměřené statistiky dotazu, pokud úloha byla korektně vyhodnocena a uložena
+  - Nebo může být výsledkem chybová hláška, pokud při vyhodnocení nastala nějaká chyba
+    - vy vyjímečných případech, kdy nejde uložit ani chybová hláška (došlo k chybě při zápisu chyby) se úloha úplně smaže z fronty
+- GET na adresu `<SERVER>/instances/list`
+  - je příkaz, který vrátí list json dokumentů, kde každý obsahuje pole `instanceName` a `type`, vrátí se tak výčet všech databázových instancí, které je možné použít pro vyhodnocování dotazů
+    - `instanceName` má jako hodnotu název instance (defacto její unikátní identifikátor)
+    - `type` pak vrací informaci o jakou databázi jde, může nabývat 3 hodnot:
+      - `MongoDB` pro instanci databáze MongoDB
+      - `Neo4j` pro instanci databáze Neo4j
+      - `PostgreSQL` pro instanci databáze PostgreSQL
