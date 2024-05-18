@@ -5,12 +5,10 @@ import cz.cuni.matfyz.collector.wrappers.exceptions.WrapperException;
 import cz.cuni.matfyz.collector.wrappers.mongodb.MongoWrapper;
 import cz.cuni.matfyz.collector.wrappers.neo4j.Neo4jWrapper;
 import cz.cuni.matfyz.collector.wrappers.postgresql.PostgresWrapper;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-
+import java.util.logging.Logger;
 public class WrappersProgram {
 
-    private static Logger _logger = LoggerFactory.getLogger(WrappersProgram.class);
+    private static final Logger _logger = Logger.getLogger(WrappersProgram.class.getName());
     private static void mongoTests() throws WrapperException {
         MongoWrapper mongoWrapper = new MongoWrapper(
                 "localhost",
@@ -66,7 +64,7 @@ public class WrappersProgram {
             System.out.println(postgresModel.toJson());
 
         } catch (WrapperException e) {
-            _logger.error(e.getMessage(), e);
+            _logger.severe(e.getMessage());
         }
 
     }
