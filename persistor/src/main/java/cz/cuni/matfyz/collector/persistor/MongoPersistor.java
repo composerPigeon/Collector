@@ -7,6 +7,9 @@ import com.mongodb.client.MongoDatabase;
 import cz.cuni.matfyz.collector.model.DataModel;
 import org.bson.Document;
 
+/**
+ * Implementation of Abstract persistor using Mongo native driver
+ */
 public class MongoPersistor extends AbstractPersistor {
 
     public MongoClient _client;
@@ -17,6 +20,14 @@ public class MongoPersistor extends AbstractPersistor {
         _database = _client.getDatabase(datasetName);
     }
 
+    /**
+     * Method for building connection link of inputed params
+     * @param hostName hostName of database
+     * @param port port of database
+     * @param userName userName to authenticate
+     * @param password password to authenticate
+     * @return created link
+     */
     private String _buildConnectionLink(String hostName, int port, String userName, String password) {
         if (userName.isEmpty() || password.isEmpty())
             return "mongodb://" + hostName + ':' + port;
@@ -24,6 +35,12 @@ public class MongoPersistor extends AbstractPersistor {
             return "mongodb://" + userName + ':' + password + '@' + hostName + ':' + port;
     }
 
+    /**
+     * Method for saving execution result to mongodb
+     * @param uuid id of execution
+     * @param model model of collected statistical data for this execution
+     * @throws PersistorException when MongoException occur during process
+     */
     @Override
     public void saveExecution(String uuid, DataModel model) throws PersistorException {
         try {
@@ -36,6 +53,12 @@ public class MongoPersistor extends AbstractPersistor {
         }
     }
 
+    /**
+     *  Method for saving execution error if occured to mongodb
+     * @param uuid id of execution
+     * @param errMsg error message
+     * @throws PersistorException when MongoException occur during process
+     */
     @Override
     public void saveExecutionError(String uuid, String errMsg) throws PersistorException {
         try {
@@ -48,6 +71,12 @@ public class MongoPersistor extends AbstractPersistor {
         }
     }
 
+    /**
+     * Method for getting execution result from mongodb
+     * @param uuid id of execution
+     * @return model or error message or null if execution do not exist
+     * @throws PersistorException
+     */
     @Override
     public String getExecutionResult(String uuid) throws PersistorException {
         try {
@@ -65,6 +94,12 @@ public class MongoPersistor extends AbstractPersistor {
 
     }
 
+    /**
+     * Method for getting execution state
+     * @param uuid id of execution
+     * @return true if execution is present in mongodb and false otherwise
+     * @throws PersistorException
+     */
     @Override
     public boolean getExecutionStatus(String uuid) throws PersistorException {
         try (var resultIter = _database.getCollection("executions").find(new Document("id", uuid)).iterator()) {
