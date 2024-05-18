@@ -16,6 +16,9 @@ import org.springframework.stereotype.Component;
 
 import java.util.*;
 
+/**
+ * Class for initializing all wrappers from properties and then provide API to use them for execution of queries
+ */
 @Component
 public class WrappersContainer {
 
@@ -24,6 +27,9 @@ public class WrappersContainer {
 
     private Map<String, AbstractWrapper> _wrappers;
 
+    /**
+     * Method for initializing all wrappers from properties
+     */
     @PostConstruct
     public void init() {
         _wrappers = new HashMap<>();
@@ -54,10 +60,10 @@ public class WrappersContainer {
         }
     }
 
-    public Map<String, AbstractWrapper> getWrappers() {
-        return _wrappers;
-    }
-
+    /**
+     * Method for listing all wrappers
+     * @return lit of maps, where each map contain selected infos about wrapper
+     */
     public List<Map<String, Object>> list() {
         List<Map<String, Object>> list = new ArrayList<>();
 
@@ -76,9 +82,22 @@ public class WrappersContainer {
         return list;
     }
 
+    /**
+     * Method for checking if instance of instanceName exists
+     * @param instanceName identifier of instance
+     * @return true if instance of instanceName exist
+     */
     public boolean contains(String instanceName) {
         return _wrappers.containsKey(instanceName);
     }
+
+    /**
+     * Method for evaluating query over specified instance
+     * @param instanceName instance identifier
+     * @param query query to be evaluated
+     * @return DataModel instance of collected data
+     * @throws WrapperException when some WrapperException occur during process
+     */
     public DataModel executeQuery(String instanceName, String query) throws WrapperException {
         return _wrappers.get(instanceName).executeQuery(query);
     }

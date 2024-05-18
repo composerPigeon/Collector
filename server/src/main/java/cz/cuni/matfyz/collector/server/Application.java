@@ -11,6 +11,9 @@ import org.springframework.context.annotation.Bean;
 import org.springframework.core.env.Environment;
 import org.springframework.scheduling.annotation.EnableScheduling;
 
+/**
+ * Entry class of spring boot application
+ */
 @SpringBootApplication
 @ConfigurationPropertiesScan("cz.cuni.matfyz.collector.server.configurationproperties")
 @EnableScheduling

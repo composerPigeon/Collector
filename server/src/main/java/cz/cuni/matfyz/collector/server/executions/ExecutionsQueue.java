@@ -16,6 +16,9 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.UUID;
 
+/**
+ * Class representing queue of executions before they are evaluated and their results saved. It is implemented with in memory H2 database
+ */
 @Component
 public class ExecutionsQueue {
     private String _connectionString;
@@ -23,6 +26,10 @@ public class ExecutionsQueue {
     private String _password;
     private long _count;
 
+    /**
+     * Init method that initialize database in such way, that it will create executions table inside the database
+     * @throws QueueExecutionsException when some SQLException during table initialization occur
+     */
     private void _initDatabase() throws QueueExecutionsException {
         try (Statement statement = DriverManager.getConnection(_connectionString, _userName, _password).createStatement()) {
             String createTableQuery = """
@@ -41,6 +48,11 @@ public class ExecutionsQueue {
             throw new QueueExecutionsException(e);
         }
     }
+
+    /**
+     * Init method that initialize database
+     * @throws QueueExecutionsException when some org.h2.Driver is not found
+     */
     @PostConstruct
     public void init() throws QueueExecutionsException {
         try {
@@ -58,6 +70,13 @@ public class ExecutionsQueue {
 
     }
 
+    /**
+     * Method for creating execution id and inserting it into queue
+     * @param instanceName instance name on which query should be execute
+     * @param query query to be executed
+     * @return execution id of newly inserted query
+     * @throws QueueExecutionsException when some SQLException occur during process
+     */
     public String createExecution(String instanceName, String query) throws QueueExecutionsException {
         try (Statement statement = DriverManager.getConnection(_connectionString, _userName, _password).createStatement()) {
             String uuid = UUID.randomUUID().toString();
@@ -71,6 +90,12 @@ public class ExecutionsQueue {
         }
     }
 
+    /**
+     * Method for getting execution state from queue
+     * @param uuid execution id
+     * @return execution state gathered from queue
+     * @throws QueueExecutionsException when some SQLException occur during process
+     */
     public ExecutionState getExecutionState(String uuid) throws QueueExecutionsException {
         try (Statement statement = DriverManager.getConnection(_connectionString, _userName, _password).createStatement()) {
             ResultSet resultSet = statement.executeQuery("SELECT isrunning FROM executions WHERE uuid = '" + uuid + "' ;");
@@ -90,6 +115,11 @@ public class ExecutionsQueue {
         }
     }
 
+    /**
+     * Method for setting execution to running state
+     * @param uuid execution identifier
+     * @throws QueueExecutionsException when some SQLException occur during process
+     */
     public void setRunning(String uuid) throws QueueExecutionsException {
         try (Statement statement = DriverManager.getConnection(_connectionString, _userName, _password).createStatement()) {
             statement.executeUpdate("UPDATE executions SET isrunning = true WHERE uuid = '" + uuid + "' ;");
@@ -98,6 +128,11 @@ public class ExecutionsQueue {
         }
     }
 
+    /**
+     * Method for getting list of waiting executions from queue to be executed by scheduler
+     * @return list of executions
+     * @throws QueueExecutionsException when some SQLException occur during process
+     */
     public List<Execution> getExecutions() throws QueueExecutionsException {
         try (Statement statement = DriverManager.getConnection(_connectionString, _userName, _password).createStatement()) {
             ResultSet result = statement.executeQuery("SELECT * FROM executions WHERE isrunning = false ORDER BY count ASC;");
@@ -120,6 +155,11 @@ public class ExecutionsQueue {
         }
     }
 
+    /**
+     * Method for removing execution from queu after it's query result was saved
+     * @param uuid execution identifier
+     * @throws QueueExecutionsException when some SQLException occur during process
+     */
     public void removeExecution(String uuid) throws QueueExecutionsException {
         try (Statement statement = DriverManager.getConnection(_connectionString, _userName, _password).createStatement()){
             statement.executeUpdate("DELETE FROM executions WHERE uuid = '" + uuid + "' ;");

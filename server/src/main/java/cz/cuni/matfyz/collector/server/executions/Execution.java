@@ -1,5 +1,8 @@
 package cz.cuni.matfyz.collector.server.executions;
 
+/**
+ * Class representing record from queue
+ */
 public record Execution(
         String uuid,
         long count,

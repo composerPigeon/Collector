@@ -6,6 +6,9 @@ import org.springframework.boot.context.properties.bind.ConstructorBinding;
 
 import java.util.List;
 
+/**
+ * Class that initialize all instances into list
+ */
 @ConfigurationProperties
 @ConfigurationPropertiesScan
 public class WrappersProperties {

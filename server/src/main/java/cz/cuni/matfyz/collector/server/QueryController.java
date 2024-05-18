@@ -16,6 +16,9 @@ import org.springframework.web.server.ResponseStatusException;
 import java.util.Map;
 import java.util.List;
 
+/**
+ * Class representing all endpoints of server
+ */
 @RestController
 public class QueryController {
 
@@ -27,6 +30,11 @@ public class QueryController {
 
     private final Logger _logger = LoggerFactory.getLogger(QueryController.class);
 
+    /**
+     * Endpoint for creating new execution
+     * @param request json object that will be parsed into Map(String, Object)
+     * @return newly created execution's id
+     */
     @PostMapping("/query")
     public String createQuery(@RequestBody Map<String, Object> request) {
         try {
@@ -58,6 +66,11 @@ public class QueryController {
         }
     }
 
+    /**
+     * Endpoint for getting execution's state
+     * @param executionId execution identifier
+     * @return string that represents execution state
+     */
     @GetMapping("/query/{id}/state")
     public String getStatus(@PathVariable("id") String executionId) {
         try {
@@ -85,6 +98,11 @@ public class QueryController {
         }
     }
 
+    /**
+     * Endpoint for getting execution's result
+     * @param executionId execution identifier
+     * @return json of DataModel or error message
+     */
     @GetMapping("/query/{id}/result")
     public String getResult(@PathVariable("id") String executionId) {
         try {
@@ -109,6 +127,10 @@ public class QueryController {
         }
     }
 
+    /**
+     * Endpoint listing all wrappers that can be used for execution
+     * @return json list of objects, which contain field 'type' and 'instanceName'
+     */
     @GetMapping("/instances/list")
     public String getWrappers() {
         try {

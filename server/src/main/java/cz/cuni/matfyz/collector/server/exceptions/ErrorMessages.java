@@ -1,5 +1,8 @@
 package cz.cuni.matfyz.collector.server.exceptions;
 
+/**
+ * Class with all error messages that are used on server to report errors to user
+ */
 public abstract class ErrorMessages {
 
     public static String setExecutionRunningErrorMsg(String uuid) {

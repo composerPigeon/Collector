@@ -13,6 +13,9 @@ import org.springframework.stereotype.Component;
 
 import org.slf4j.Logger;
 
+/**
+ * Class representing Scheduler that will execute all waiting executions from queue
+ */
 @Component
 public class QueryScheduler {
     @Autowired
@@ -21,6 +24,9 @@ public class QueryScheduler {
     private ExecutionsManager _manager;
     private final Logger _logger = LoggerFactory.getLogger(QueryScheduler.class);
 
+    /**
+     * Scheduled method for executing all waiting executions from queue
+     */
     @Scheduled(fixedRate = 5000)
     public void execute() {
         try {

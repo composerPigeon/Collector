@@ -4,11 +4,17 @@ import org.springframework.boot.context.properties.ConfigurationProperties;
 import org.springframework.boot.context.properties.ConfigurationPropertiesScan;
 import org.springframework.boot.context.properties.bind.ConstructorBinding;
 
+/**
+ * Class representing all information about connecting to instances defined in application.properties
+ */
 @ConfigurationProperties(prefix = "persistor")
 @ConfigurationPropertiesScan
 public class PersistorProperties {
+    /** Field containing hostName to connect to persistor */
     private String _hostName;
+    /** Field containing hostName to connect to persistor */
     private int _port;
+    /** Field containing datasetName to specify which to use in persistor */
     private String _datasetName;
     private Credentials _credentials;
 

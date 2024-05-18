@@ -11,6 +11,9 @@ import jakarta.annotation.PostConstruct;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
+/**
+ * Class which is responsible for loading properties and initialize peristor and then provide API for accessing it.
+ */
 @Component
 public class PersistorContainer {
 
@@ -30,18 +33,42 @@ public class PersistorContainer {
         );
     }
 
+    /**
+     * Method for saving execution result into peristor
+     * @param uuid execution identifier
+     * @param model instance of DataModel with collected stats
+     * @throws PersistorException when PersistorException occur in process
+     */
     public void saveExecutionResult(String uuid, DataModel model) throws PersistorException {
         _persistor.saveExecution(uuid, model);
     }
 
+    /**
+     * Method for saving execution error into persistor
+     * @param uuid execution identifier
+     * @param errorMsg error message to be saved
+     * @throws PersistorException when PersistorException occur in process
+     */
     public void saveExecutionError(String uuid, String errorMsg) throws PersistorException {
         _persistor.saveExecutionError(uuid, errorMsg);
     }
 
+    /**
+     * Method for getting result of execution
+     * @param uuid execution identifier
+     * @return json of DataModel or error message if some error during evaluation occurred
+     * @throws PersistorException when PeristorException occur in process
+     */
     public String getExecutionResult(String uuid)  throws PersistorException {
         return _persistor.getExecutionResult(uuid);
     }
 
+    /**
+     * Method for getting execution state
+     * @param uuid execution identifier
+     * @return execution state
+     * @throws PersistorException when PeristorException occur in process
+     */
     public ExecutionState getExecutionState(String uuid) throws PersistorException {
         if (_persistor.getExecutionStatus(uuid))
             return ExecutionState.Processed;
