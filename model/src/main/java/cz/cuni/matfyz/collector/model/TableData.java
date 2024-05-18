@@ -7,13 +7,21 @@ import java.util.LinkedHashMap;
 import java.util.Map;
 import java.util.Set;
 
+/**
+ * Class holding statistical data about table
+ */
 public class TableData {
 
+    /** Field containing table name */
     @JsonIgnore
     final private String _name;
-    public Long _size; //size of table in bytes
-    public Long _sizeInPages; //size of tables in pages on disk
-    public Long _rowCount; //number of rows
+    /** Field containing size of table in bytes */
+    public Long _size;
+    /** Field containing size of table in pages */
+    public Long _sizeInPages;
+    /** Field containing row count of table */
+    public Long _rowCount;
+    /** Field containing number of constraints defined over table */
     public Long _constraintCount;
 
     private final HashMap<String, ColumnData> _columns;
@@ -97,6 +105,10 @@ public class TableData {
         }
     }
 
+    /**
+     * Private method for converting columns to valid map to save in org.bson.Document
+     * @return converted map
+     */
     public Map<String, Object> _parseColumnsToMap() {
         Map<String, Object> map = new LinkedHashMap<>();
         for (var entry : _columns.entrySet()) {
@@ -105,6 +117,10 @@ public class TableData {
         return map;
     }
 
+    /**
+     * Method for converting TableData to map for saving in org.Bson.Document
+     * @return converted map
+     */
     public Map<String, Object> toMap() {
         Map<String, Object> map = new LinkedHashMap<>();
         if (_size != null)

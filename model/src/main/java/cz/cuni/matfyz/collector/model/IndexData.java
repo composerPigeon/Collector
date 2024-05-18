@@ -3,10 +3,16 @@ package cz.cuni.matfyz.collector.model;
 import java.util.LinkedHashMap;
 import java.util.Map;
 
+/**
+ * Class for saving statistical data about index
+ */
 public class IndexData {
-    public Long _size; //size of table in bytes
-    public Long _sizeInPages; //size of tables in pages on disk
-    public Long _rowCount; //number of rows
+    /** Field holding index size in bytes */
+    public Long _size;
+    /** Field holding index size in pages */
+    public Long _sizeInPages;
+    /** Field holding index row count */
+    public Long _rowCount;
 
     public IndexData() {
         _size = null;
@@ -14,7 +20,6 @@ public class IndexData {
         _rowCount = null;
     }
 
-    //Tables setting methods
     public void setByteSize(long size) {
         if (_size == null) {_size = size;}
     }
@@ -27,6 +32,10 @@ public class IndexData {
         if (_rowCount == null) {_rowCount = count;}
     }
 
+    /**
+     * Method for converting IndexData to Map to use in org.bson.Document
+     * @return converted map
+     */
     public Map<String, Object> toMap() {
         Map<String, Object> result = new LinkedHashMap<>();
         if (_size != null)

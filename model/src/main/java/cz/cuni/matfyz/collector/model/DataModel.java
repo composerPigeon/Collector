@@ -9,11 +9,18 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 
 import java.util.*;
 
+/**
+ * Main class holding gathered statistical data which can be eventually transformed to json for persistent storage
+ */
 public class DataModel {
 
-    //Gathered data (objects that will be translated to JSON using GSON)
+    /** Field containing dbType for which is this record relevant */
     private final String _databaseName;
+
+    /** Field containing name of dataset */
     private final String _datasetName;
+
+    /** Field containing query for which were these statistical data gathered. */
     private final String _query;
 
     private final DatasetData _datasetData;
@@ -51,6 +58,10 @@ public class DataModel {
         return _datasetData.getDataSetPageSize();
     }
 
+    /**
+     * Method for converting DataModel to json format
+     * @return converted json string
+     */
     public String toJson() {
         try {
             ObjectMapper objectMapper = new ObjectMapper();
@@ -64,6 +75,10 @@ public class DataModel {
         }
     }
 
+    /**
+     * Method for converting DataModel to Map
+     * @return converted Map
+     */
     public Map<String, Object> toMap() {
         Map<String, Object> result = new LinkedHashMap<>();
 

@@ -4,12 +4,18 @@ import com.fasterxml.jackson.annotation.JsonIgnore;
 
 import java.util.*;
 
+/** Class holding statistical data about dataset */
 public class DatasetData {
-    private Long _dataSetSize; //size of dataset in bytes
-    private Long _dataSetSizeInPages; //size of dataset in pages
+
+    /** Field containing size of dataset in bytes */
+    private Long _dataSetSize;
+    /** Field containing size of dataset in pages (virtual disk block size) */
+    private Long _dataSetSizeInPages;
+    /** Field containing size of page in bytes */
     private Integer _pageSize;
+    /** Field containing size of caches in bytes which could be used for query caching */
     private Long _cacheSize;
-    
+
     private final HashMap<String, TableData> _tables;
     private final HashMap<String, IndexData> _indexes;
 
@@ -23,7 +29,7 @@ public class DatasetData {
         _cacheSize = null;
     }
 
-    //Database setting methods
+    // Database setting methods
     public void setDataSetSize(long size) {
         if(_dataSetSize == null)
             _dataSetSize = size;
@@ -86,6 +92,7 @@ public class DatasetData {
         }
     }
 
+    // Indexes setting methods
     public void setIndexByteSize(String inxName, long size) {
         if (_indexes.containsKey(inxName)) {
             _indexes.get(inxName).setByteSize(size);
@@ -185,6 +192,10 @@ public class DatasetData {
         }
     }
 
+    /**
+     * private method for converting _tables map to valid map that can be in future converted to json
+     * @return converted map
+     */
     private Map<String, Object> _parseTablesToMap() {
         Map<String, Object> map = new LinkedHashMap<>();
         for (var entry : _tables.entrySet()) {
@@ -193,6 +204,10 @@ public class DatasetData {
         return map;
     }
 
+    /**
+     * private method for converting _indexes map to valid map that can be in future converted to json
+     * @return converted map
+     */
     private Map<String, Object> _parseIndexesToMap() {
         Map<String, Object> map = new LinkedHashMap<>();
         for (var entry : _indexes.entrySet()) {
@@ -201,6 +216,10 @@ public class DatasetData {
         return map;
     }
 
+    /**
+     * Method converting DatasetData to map, that can be stored in org.bson.Document
+     * @return converted map
+     */
     public Map<String, Object> toMap() {
         Map<String, Object> result = new LinkedHashMap<>();
         if (_dataSetSize != null)
