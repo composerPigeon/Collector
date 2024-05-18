@@ -4,6 +4,9 @@ import java.time.LocalDate;
 import java.time.ZonedDateTime;
 import java.util.List;
 
+/**
+ * Class which contains all help queries used for collecting data and constants for calculating sizes etc.
+ */
 public class Neo4jResources {
     public static final String DATABASE_NAME = "Neo4j";
     public static String getExplainPlanQuery(String query) {

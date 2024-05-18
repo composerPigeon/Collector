@@ -10,7 +10,18 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
 
+
+/**
+ * Main class handling all process of parsing mongo query to correct mongo command
+ */
 public abstract class MongoQueryParser {
+
+    /**
+     * Method which will split query into tokens for easier parsing
+     * @param query inputted query
+     * @return instance of parsed tokens
+     * @throws ParseException when some problem occur during parsing process
+     */
     private static QueryTokens _splitToTokens(String query) throws ParseException {
         StringBuilder buffer = new StringBuilder();
         QueryTokens.Builder tokensBuilder = new QueryTokens.Builder();
@@ -40,6 +51,10 @@ public abstract class MongoQueryParser {
         return tokensBuilder.toTokens();
     }
 
+    /**
+     * Rrivate void for printing tokens to console. Used for debugging purposes.
+     * @param tokens tokens to be print
+     */
     private static void _printTokens(QueryTokens tokens) {
         try {
             ObjectMapper mapper = new ObjectMapper();
@@ -52,9 +67,14 @@ public abstract class MongoQueryParser {
 
     }
 
+    /**
+     * Main function which parse query to command
+     * @param query query to be parsed
+     * @return parsed command
+     * @throws ParseException when some ParseException occur during parsing process
+     */
     public static Document parseQueryToCommmand(String query) throws ParseException {
         QueryTokens tokens = _splitToTokens(query);
-        System.out.println(tokens.toString());
         CommandBuilder commandBuilder = new CommandBuilder(tokens.collectionName);
 
         while(tokens.moveNext()) {

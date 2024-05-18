@@ -12,6 +12,9 @@ import org.neo4j.driver.exceptions.Neo4jException;
 import org.neo4j.driver.summary.Plan;
 import org.neo4j.driver.summary.ResultSummary;
 
+/**
+ * Class which is responsible to connect to neo4j and enable query execution
+ */
 public class Neo4jConnection extends AbstractConnection<ResultSummary, Result, String> {
     private final Session _session;
     public Neo4jConnection(Driver neo4jDriver, String datasetName, Neo4jParser parser) {
@@ -21,6 +24,13 @@ public class Neo4jConnection extends AbstractConnection<ResultSummary, Result, S
         );
     }
 
+    /**
+     * Mathod which executes main query, parse its result and also its explain plan
+     * @param query inputed query
+     * @param toModel DataModel which is used for storing data parsed from explain tree
+     * @return instance of ConsumedResult
+     * @throws QueryExecutionException when some Neo4jException or ParseException occur during process
+     */
     @Override
     public ConsumedResult executeMainQuery(String query, DataModel toModel) throws QueryExecutionException {
         try {
@@ -33,6 +43,12 @@ public class Neo4jConnection extends AbstractConnection<ResultSummary, Result, S
         }
     }
 
+    /**
+     * Method which will consume result of inputted query and return it as an instance of ConsumedResult
+     * @param query inputted query
+     * @return instance of ConsumedResult
+     * @throws QueryExecutionException when some Neo4jException or ParseException occur during process
+     */
     @Override
     public ConsumedResult executeQueryAndConsume(String query) throws QueryExecutionException {
         try {
@@ -43,6 +59,12 @@ public class Neo4jConnection extends AbstractConnection<ResultSummary, Result, S
         }
     }
 
+    /**
+     * Method which is responsoble for executing query and caching and parsing result to CachedResult
+     * @param query inputted query
+     * @return instance of CachedResult
+     * @throws QueryExecutionException when some Neo4jException or ParseException occur during process
+     */
     @Override
     public CachedResult executeQuery(String query) throws QueryExecutionException {
         try {
@@ -53,6 +75,9 @@ public class Neo4jConnection extends AbstractConnection<ResultSummary, Result, S
         }
     }
 
+    /**
+     * Method which implements interface AutoClosable and closes all resources after query evaluation is ended
+     */
     @Override
     public void close() {
         _session.close();

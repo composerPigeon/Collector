@@ -9,6 +9,9 @@ import java.nio.charset.StandardCharsets;
 import java.util.LinkedList;
 import java.util.List;
 
+/**
+ * Class containing all help queries used for gather data and some constants for computing sizes etc.
+ */
 public class MongoResources {
     public static final String DATABASE_NAME = "MongoDB";
 

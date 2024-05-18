@@ -10,6 +10,9 @@ import org.neo4j.driver.GraphDatabase;
 import org.neo4j.driver.Result;
 import org.neo4j.driver.summary.Plan;
 
+/**
+ * Class which represents wrapper that is connected to Neo4j database and evaluate queries over it
+ */
 public class Neo4jWrapper extends AbstractWrapper {
     private final Driver _driver;
     private final Neo4jParser _parser;
@@ -19,6 +22,12 @@ public class Neo4jWrapper extends AbstractWrapper {
         _parser = new Neo4jParser();
     }
 
+    /**
+     * Method which executes the query and collects all statistics which are return as DataModel instance
+     * @param query inputted query
+     * @return instance of DataModel
+     * @throws WrapperException when some of implementing exceptions occur during the evaluation process
+     */
     @Override
     public DataModel executeQuery(String query) throws WrapperException {
         try (

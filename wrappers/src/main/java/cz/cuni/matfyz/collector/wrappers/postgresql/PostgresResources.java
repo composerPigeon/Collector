@@ -1,5 +1,9 @@
 package cz.cuni.matfyz.collector.wrappers.postgresql;
 
+
+/**
+ * Class which hold all queries used for gathering statistics data
+ */
 public abstract class PostgresResources {
     public static final String DATABASE_NAME = "PostgreSQL";
     public static String getExplainPlanQuery(String query) {

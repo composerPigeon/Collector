@@ -8,6 +8,9 @@ import cz.cuni.matfyz.collector.wrappers.exceptions.WrapperException;
 
 import java.sql.*;
 
+/**
+ * Class which represents the wrapper operating over PostgreSQL database
+ */
 public class PostgresWrapper extends AbstractWrapper {
     private final PostgresParser _parser;
     public PostgresWrapper(String host, int port, String datasetName, String user, String password) {
@@ -15,6 +18,12 @@ public class PostgresWrapper extends AbstractWrapper {
         _parser =  new PostgresParser();
     }
 
+    /**
+     * Method which gets the main query executes it, parse explai tree and collect all statistical data about the result and then return as instance of DataModel
+     * @param query inputted query
+     * @return instance of DataModel
+     * @throws WrapperException when some of the implementing exceptions occur during the process
+     */
     @Override
     public DataModel executeQuery(String query) throws WrapperException {
         try (
@@ -28,10 +37,5 @@ public class PostgresWrapper extends AbstractWrapper {
         } catch (SQLException e) {
             throw new WrapperException(e);
         }
-    }
-
-    @Override
-    public String toString() {
-        return "Connection link: " + _hostName + '/' + _datasetName + "\n";
     }
 }

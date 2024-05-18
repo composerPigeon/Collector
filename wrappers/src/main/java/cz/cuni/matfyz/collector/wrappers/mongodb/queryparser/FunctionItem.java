@@ -1,5 +1,8 @@
 package cz.cuni.matfyz.collector.wrappers.mongodb.queryparser;
 
+/**
+ * Class which represents called mongosh function used in query
+ */
 public class FunctionItem {
     public final String name;
     public final ArgumentsArray args;

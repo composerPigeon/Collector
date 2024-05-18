@@ -21,18 +21,37 @@ import org.neo4j.driver.types.Node;
 import org.neo4j.driver.types.Relationship;
 import org.neo4j.driver.util.Pair;
 
+/**
+ * Class responsible for parsing neo4j results and explain plan
+ */
 public class Neo4jParser extends AbstractParser<ResultSummary, Result> {
 
+    /**
+     * Method which saves execution time from explain to data model
+     * @param model DataModel to save parsed data
+     * @param summary part of explain result
+     */
     private void _parseExecutionTime(DataModel model, ResultSummary summary ) {
         long nanoseconds = summary.resultAvailableAfter(TimeUnit.NANOSECONDS);
         model.resultData().setExecutionTime((double) nanoseconds / (1_000_000));
     }
+
+    /**
+     * Method for getting all used labels by main query
+     * @param model DataModel to save parsed data
+     * @param operator represents one node of explain tree
+     */
     private void _parseNodeTableName(DataModel model, Plan operator) {
         String details = operator.arguments().get("Details").asString();
         String tableName = details.split(":")[1];
         model.datasetData().addTable(tableName);
     }
 
+    /**
+     * Method for parsing details to get edges label
+     * @param details to be parsed
+     * @return name of label as string
+     */
     private String _parseRelationDetailsForLabel(String details) {
         StringBuilder buffer = new StringBuilder();
         Boolean isInEdge = null;
@@ -52,12 +71,23 @@ public class Neo4jParser extends AbstractParser<ResultSummary, Result> {
         }
         return buffer.toString();
     }
+
+    /**
+     * Method for parsing edge labels used by query
+     * @param model to save lables
+     * @param operator node of explain tree
+     */
     private void _parseRelationTableName(DataModel model, Plan operator) {
         String details = operator.arguments().get("Details").asString();
         String tableName = _parseRelationDetailsForLabel(details);
         model.datasetData().addTable(tableName);
     }
 
+    /**
+     * Method parsing index identifier to tokens
+     * @param identifier index identifier created from information such as label, property name and type
+     * @return string array of tokens from index
+     */
     private String[] _parseIndexIdentifier(String identifier) {
         StringBuilder label = new StringBuilder();
         StringBuilder prop = new StringBuilder();
@@ -79,6 +109,11 @@ public class Neo4jParser extends AbstractParser<ResultSummary, Result> {
         return new String[] { label.toString(), prop.toString() };
     }
 
+    /**
+     * Mathod for getting index identifier from explain relevant to query
+     * @param model DataModel to save data
+     * @param operator explain tree node
+     */
     private void _parseIndexName(DataModel model, Plan operator) {
         String[] details = operator.arguments().get("Details").asString().split(" ");
         String indexType = details[0];
@@ -87,6 +122,11 @@ public class Neo4jParser extends AbstractParser<ResultSummary, Result> {
         model.datasetData().addIndex(indexType + ':' + indexIdentifiers[0] + ':' + indexIdentifiers[1]);
     }
 
+    /**
+     * Method for parsing types of different Neo4j operators
+     * @param model dataModel to save results
+     * @param operator actual explain tree node to be parsed
+     */
     public void _parseOperator(DataModel model, Plan operator) {
         if (operator.operatorType().contains("NodeByLabel")) {
             _parseNodeTableName(model, operator);
@@ -101,6 +141,12 @@ public class Neo4jParser extends AbstractParser<ResultSummary, Result> {
         }
     }
 
+    /**
+     * Method for parsing explain for important information
+     * @param model instance of DataModel where collected information are stored
+     * @param summary explain tree to be parsed
+     * @throws ParseException is there to implement abstract method
+     */
     @Override
     public void parseExplainTree(DataModel model, ResultSummary summary) throws ParseException {
         _parseExecutionTime(model, summary);
@@ -108,7 +154,13 @@ public class Neo4jParser extends AbstractParser<ResultSummary, Result> {
     }
 
     // Parse Result
-    private Set<Map.Entry<String, PropertyData>> _parseNodeToMap(Node node) throws ParseException {
+
+    /**
+     * Method which parse node to map
+     * @param node node to be parsed
+     * @return parsed map
+     */
+    private Set<Map.Entry<String, PropertyData>> _parseNodeToMap(Node node) {
         var map = new HashMap<String, PropertyData>();
         for (String colName : node.keys()) {
             PropertyData data = PropertyData.fromValue(node.get(colName));
@@ -118,7 +170,12 @@ public class Neo4jParser extends AbstractParser<ResultSummary, Result> {
         return map.entrySet();
     }
 
-    private Set<Map.Entry<String, PropertyData>> _parseRelationToMap(Relationship relation) throws ParseException {
+    /**
+     * Method which parse egde to map
+     * @param relation edge to be parsed
+     * @return parsed map
+     */
+    private Set<Map.Entry<String, PropertyData>> _parseRelationToMap(Relationship relation) {
         var map = new HashMap<String, PropertyData>();
         for (String colName : relation.keys()) {
             PropertyData data = PropertyData.fromValue(relation.get(colName));
@@ -129,7 +186,12 @@ public class Neo4jParser extends AbstractParser<ResultSummary, Result> {
     }
 
 
-    private void _addDataToBuilder(CachedResult.Builder builder, Record record) throws ParseException {
+    /**
+     * Method responsible for adding record from native result to CachedResult
+     * @param builder builder to add records and then build CachedResult
+     * @param record is native record from result
+     */
+    private void _addDataToBuilder(CachedResult.Builder builder, Record record) {
         for (Pair<String, Value> pair : record.fields()) {
             if (pair.value() instanceof NodeValue nodeValue) {
                 for (Map.Entry<String, PropertyData> entry : _parseNodeToMap(nodeValue.asNode())) {
@@ -152,8 +214,13 @@ public class Neo4jParser extends AbstractParser<ResultSummary, Result> {
         }
     }
 
+    /**
+     * Method for parsing ordinal result to Cached result
+     * @param result result of some query
+     * @return insance of CachedResult
+     */
     @Override
-    public CachedResult parseResult(Result result) throws ParseException {
+    public CachedResult parseResult(Result result) {
         var builder = new CachedResult.Builder();
         while (result.hasNext()) {
             var record = result.next();
@@ -164,7 +231,13 @@ public class Neo4jParser extends AbstractParser<ResultSummary, Result> {
     }
 
     // Parse Main Result
-    private void _consumeDataToBuilder(ConsumedResult.Builder builder, Record record) throws ParseException {
+
+    /**
+     * Method which will incrementally compute statistics for result record by record
+     * @param builder builder which consumes the data from result
+     * @param record native record from result
+     */
+    private void _consumeDataToBuilder(ConsumedResult.Builder builder, Record record) {
         for (Pair<String, Value> pair : record.fields()) {
             if (pair.value() instanceof NodeValue nodeValue) {
                 for (Map.Entry<String, PropertyData> entry : _parseNodeToMap(nodeValue.asNode())) {
@@ -190,8 +263,14 @@ public class Neo4jParser extends AbstractParser<ResultSummary, Result> {
         }
     }
 
+    /**
+     * Method which parses native result of main query ti consumed one
+     * @param result is native result of some query
+     * @param withModel instance of DataModel for getting important data such as tableNames, so information about result columns can be gathered
+     * @return instance of ConsumedResult
+     */
     @Override
-    public ConsumedResult parseMainResult(Result result, DataModel withModel) throws ParseException {
+    public ConsumedResult parseMainResult(Result result, DataModel withModel) {
         var builder = new ConsumedResult.Builder();
         while (result.hasNext()) {
             var record = result.next();
@@ -201,8 +280,13 @@ public class Neo4jParser extends AbstractParser<ResultSummary, Result> {
         return builder.toResult();
     }
 
+    /**
+     * Mathod which will take result of some ordinal query and consume it
+     * @param result is native result of some query
+     * @return instance of ConsumedResult
+     */
     @Override
-    public ConsumedResult parseResultAndConsume(Result result) throws ParseException {
+    public ConsumedResult parseResultAndConsume(Result result) {
         var builder = new ConsumedResult.Builder();
         while(result.hasNext()) {
             var record = result.next();
@@ -212,6 +296,9 @@ public class Neo4jParser extends AbstractParser<ResultSummary, Result> {
         return builder.toResult();
     }
 
+    /**
+     * Class which represents properties of entities from neo4j graph
+     */
     private static class PropertyData {
         private Object _value;
         private String _type;
@@ -228,6 +315,11 @@ public class Neo4jParser extends AbstractParser<ResultSummary, Result> {
             return _type;
         }
 
+        /**
+         * Static method which will parse value of Value type to instance of this class
+         * @param value value gathered from native result
+         * @return instance of newly created PropertyData
+         */
         public static PropertyData fromValue(Value value) {
             if (value.isNull())
                 return null;

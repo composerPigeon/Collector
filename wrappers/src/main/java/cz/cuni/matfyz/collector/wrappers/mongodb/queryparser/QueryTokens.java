@@ -5,11 +5,20 @@ import cz.cuni.matfyz.collector.wrappers.exceptions.ParseException;
 import java.util.ArrayList;
 import java.util.List;
 
+/**
+ * Class which represents query as parsed tokens
+ */
 public class QueryTokens {
+    /** Field holding info about database name from query */
     public final String db;
+
+    /** Field holding info about parsed collectionName on which is query pointed */
     public final String collectionName;
+
+    /** list of all functions called in the query */
     public final FunctionItem[] functionTokens;
 
+    /** pointer to actual function to be processed */
     private int _index;
 
     private QueryTokens(String db, String collectionName, FunctionItem[] functionTokens) {
@@ -19,15 +28,28 @@ public class QueryTokens {
         _index = -1;
     }
 
+    /**
+     * Method for iterating over functions
+     * @return true if there is more functions
+     */
     public boolean moveNext() {
         _index += 1;
         return _index < functionTokens.length;
     }
 
+    /**
+     * Method for getting actual function
+     * @return instance of function
+     */
     public FunctionItem getActualFunction() {
         return functionTokens[_index];
     }
 
+    /**
+     * Method for parsing QueryTokens to string, which can be printed to console.
+     * Used mainly for debugging purposes
+     * @return string representation of tokens
+     */
     @Override
     public String toString() {
         StringBuilder buffer = new StringBuilder();
@@ -45,13 +67,20 @@ public class QueryTokens {
         return buffer.toString();
     }
 
+    /**
+     * Class representing builder for QueryTokens
+     */
     public static class Builder {
         private String _db;
         private String _collectionName;
         private final List<FunctionItem> _functionTokens;
 
 
-
+        /**
+         * Method for parsing string token to function token
+         * @param token string representation of function as user wrote it to query
+         * @return parsed function as FunctionItem
+         */
         private static FunctionItem _parseToFunctionItem(String token) {
             StringBuilder buffer = new StringBuilder();
             boolean inArgs = false;
@@ -86,6 +115,10 @@ public class QueryTokens {
             _functionTokens = new ArrayList<>();
         }
 
+        /**
+         * Public Method for adding new token to QueryTokens
+         * @param token string token from user
+         */
         public void addToken(String token) {
             if (_db == null)
                 _db = token;
@@ -101,7 +134,11 @@ public class QueryTokens {
             }
         }
 
-        public QueryTokens toTokens() throws ParseException {
+        /**
+         * Builder method which creates instance of QueryTokens from this builder
+         * @return insance of QueryTokens
+         */
+        public QueryTokens toTokens() {
             return new QueryTokens(
                     _db,
                     _collectionName,

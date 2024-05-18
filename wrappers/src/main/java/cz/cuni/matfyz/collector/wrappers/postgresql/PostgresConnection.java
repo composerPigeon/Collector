@@ -8,6 +8,10 @@ import cz.cuni.matfyz.collector.wrappers.exceptions.QueryExecutionException;
 import cz.cuni.matfyz.collector.wrappers.cachedresult.CachedResult;
 
 import java.sql.*;
+
+/**
+ * Class representing connection to PostgreSQL database and enables to evaluate queries
+ */
 public class PostgresConnection extends AbstractConnection<String, ResultSet, String> {
     private final Connection _connection;
     private final Statement _statement;
@@ -17,6 +21,14 @@ public class PostgresConnection extends AbstractConnection<String, ResultSet, St
         _connection.setReadOnly(true);
         _statement = _connection.createStatement();
     }
+
+    /**
+     * Method executing main query and parsing its result and explain tree
+     * @param query inputted query
+     * @param toModel DataModel which is used for storing data parsed from explain tree
+     * @return instance of ConsumedResult
+     * @throws QueryExecutionException when ParseException or SQLException occurs during the process
+     */
     @Override
     public ConsumedResult executeMainQuery(String query, DataModel toModel) throws QueryExecutionException {
         try (ResultSet planResult = _statement.executeQuery(PostgresResources.getExplainPlanQuery(query))) {
@@ -31,6 +43,12 @@ public class PostgresConnection extends AbstractConnection<String, ResultSet, St
         }
     }
 
+    /**
+     * Method executing ordinal query and caching all of its result to CachedResult instance
+     * @param query inputted query
+     * @return instance of CachedResult
+     * @throws QueryExecutionException when SQLException or ParseException occur during the process
+     */
     @Override
     public CachedResult executeQuery(String query) throws QueryExecutionException {
         try (ResultSet rs = _statement.executeQuery(query)){
@@ -40,6 +58,12 @@ public class PostgresConnection extends AbstractConnection<String, ResultSet, St
         }
     }
 
+    /**
+     * Method which executes inputted query and consume it
+     * @param query inputted query
+     * @return instance of ConsumedResult
+     * @throws QueryExecutionException when SQLException of ParseException occur during the process
+     */
     @Override
     public ConsumedResult executeQueryAndConsume(String query) throws QueryExecutionException {
         try (ResultSet rs = _statement.executeQuery(query)){
@@ -49,6 +73,10 @@ public class PostgresConnection extends AbstractConnection<String, ResultSet, St
         }
     }
 
+    /**
+     * Method which implements the Interface AutoClosable and closes all database resources after query execution is finished
+     * @throws SQLException from _statement.close() and _connection.close() if some problem occurs
+     */
     @Override
     public void close() throws SQLException {
         _statement.close();

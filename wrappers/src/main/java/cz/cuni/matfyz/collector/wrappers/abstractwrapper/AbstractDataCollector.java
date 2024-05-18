@@ -5,6 +5,12 @@ import cz.cuni.matfyz.collector.wrappers.cachedresult.CachedResult;
 import cz.cuni.matfyz.collector.wrappers.cachedresult.ConsumedResult;
 import cz.cuni.matfyz.collector.wrappers.exceptions.DataCollectException;
 
+/**
+ * Class representing entity that is responsible for collecting all statistical data for query
+ * @param <TPlan>
+ * @param <TResult>
+ * @param <TQuery>
+ */
 public abstract class AbstractDataCollector<TPlan, TResult, TQuery> {
     protected String _datasetName;
     protected DataModel _model;

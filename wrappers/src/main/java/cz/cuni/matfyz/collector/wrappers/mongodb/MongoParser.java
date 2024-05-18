@@ -16,6 +16,9 @@ import java.util.List;
 import java.util.Optional;
 import java.util.RandomAccess;
 
+/**
+ * Class responsible for parsing results and explain plans of Mongodb database
+ */
 public class MongoParser extends AbstractParser<Document, Document> {
 
     private final MongoDatabase _database;
@@ -24,12 +27,22 @@ public class MongoParser extends AbstractParser<Document, Document> {
         _database = database;
     }
 
+    /**
+     * Method which parses collection name of query
+     * @param model instance of DataModel where the name will be saved
+     * @param command node of explain result
+     */
     private void _parseTableNames(DataModel model, Document command) {
         String collectionName = command.getString("find");
         if (collectionName != null)
             model.datasetData().addTable(collectionName);
     }
 
+    /**
+     * Method which parses a stage of explain plan
+     * @param model instance of DataModel where results are saved
+     * @param stage actual stage to be parsed
+     */
     private void _parseStage(DataModel model, Document stage) {
         if ("IXSCAN".equals(stage.getString("stage"))) {
             String indexName = stage.getString("indexName");
@@ -42,12 +55,24 @@ public class MongoParser extends AbstractParser<Document, Document> {
         }
     }
 
+    /**
+     * Method for parsing statistics about execution
+     * @param model instance of DataModel where will all results be saved
+     * @param node document from which the statistics will be parsed (especially the execution time)
+     */
     private void _parseExecutionStats(DataModel model, Document node) {
         if (node.getBoolean("executionSuccess")) {
 
             model.resultData().setExecutionTime(Double.valueOf(node.getInteger("executionTimeMillis")));
         }
     }
+
+    /**
+     * Method for parsing epxlain plan and consume it into model
+     * @param model instance of DataModel where collected information are stored
+     * @param explainTree explain tree to be parsed
+     * @throws ParseException is there to implements the abstract method
+     */
     @Override
     public void parseExplainTree(DataModel model, Document explainTree) throws ParseException {
         _parseTableNames(model, explainTree.get("command", Document.class));
@@ -61,6 +86,12 @@ public class MongoParser extends AbstractParser<Document, Document> {
     }
 
     // Parse Result
+
+    /**
+     * Mathod which parses BsonValue to type it is using
+     * @param value the BsonValue to be parsed
+     * @return string representation of parsed type
+     */
     private String _parseType(BsonValue value) {
         if (value.isArray())
             return "array";
@@ -88,7 +119,11 @@ public class MongoParser extends AbstractParser<Document, Document> {
             return null;
     }
 
-    // parse Result
+    /**
+     * Mathod which will fetch all documents from cursor to result
+     * @param batch fetched documents
+     * @param builder builder responsible for building the result
+     */
     private void _addDocumentsToResult(List<Document> batch, CachedResult.Builder builder) {
         for (Document document : batch) {
             builder.addEmptyRecord();
@@ -98,6 +133,11 @@ public class MongoParser extends AbstractParser<Document, Document> {
         }
     }
 
+    /**
+     * Method which will parse curor result to CachedResult
+     * @param cursor cursor document from native result
+     * @param builder for CachedResult used to build it
+     */
     private void _parseCursorResult(Document cursor, CachedResult.Builder builder ) {
         if (cursor.containsKey("firstBatch")) {
             _addDocumentsToResult(cursor.getList("firstBatch", Document.class), builder);
@@ -106,6 +146,12 @@ public class MongoParser extends AbstractParser<Document, Document> {
         }
     }
 
+    /**
+     * Method for parsing native result of ordinal query to instance of CachedResult
+     * @param result result of some query
+     * @return parsed CachedResult instance
+     * @throws ParseException is there to implements the abstract method
+     */
     @Override
     public CachedResult parseResult(Document result) throws ParseException {
         CachedResult.Builder builder = new CachedResult.Builder();
@@ -123,6 +169,12 @@ public class MongoParser extends AbstractParser<Document, Document> {
 
 
     // Parse Main Result
+
+    /**
+     * Method which will measure stats about document from result and add them to consumed result
+     * @param document from native result
+     * @param builder builder responsible for building the result
+     */
     private void _parseColumnTypes(RawBsonDocument document, ConsumedResult.Builder builder) {
         for (var entry : document.entrySet()) {
             String fieldName = entry.getKey();
@@ -134,6 +186,11 @@ public class MongoParser extends AbstractParser<Document, Document> {
         }
     }
 
+    /**
+     * Method consuming all documents from cursor to result
+     * @param batch fetched documents
+     * @param builder builder responsible for building the result
+     */
     private void _consumeDocumentsToResult(List<Document> batch, ConsumedResult.Builder builder) {
         for (Document document : batch) {
             builder.addRecord();
@@ -143,6 +200,12 @@ public class MongoParser extends AbstractParser<Document, Document> {
         }
     }
 
+    /**
+     * Method which is responsible to iterate through whole cursor
+     * @param cursor cursor to iterate
+     * @param builder builder to save results and build ConsumedResult
+     * @param collectionName collection name used by main query
+     */
     private void _parseMainCursorResult(Document cursor, ConsumedResult.Builder builder, String collectionName) {
         if (cursor.containsKey("firstBatch")) {
             _consumeDocumentsToResult(cursor.getList("firstBatch", Document.class), builder);
@@ -161,6 +224,13 @@ public class MongoParser extends AbstractParser<Document, Document> {
         }
     }
 
+    /**
+     * Method responsible for parsing native result of main query
+     * @param result is native result of some query
+     * @param withModel instance of DataModel for getting important data such as tableNames, so information about result columns can be gathered
+     * @return instance of ConsumedResult
+     * @throws ParseException is there to implements the abstract method
+     */
     @Override
     public ConsumedResult parseMainResult(Document result, DataModel withModel) throws ParseException {
         ConsumedResult.Builder builder = new ConsumedResult.Builder();
@@ -179,6 +249,12 @@ public class MongoParser extends AbstractParser<Document, Document> {
         return builder.toResult();
     }
 
+    /**
+     * Method responsible for consuming result into ConsumedResult
+     * @param result is native result of some query
+     * @return instance of ConsumedResult
+     * @throws ParseException is there to implement abstract method
+     */
     @Override
     public ConsumedResult parseResultAndConsume(Document result) throws ParseException {
         ConsumedResult.Builder builder = new ConsumedResult.Builder();
