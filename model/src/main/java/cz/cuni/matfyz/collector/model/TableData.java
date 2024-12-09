@@ -10,7 +10,7 @@ import java.util.Set;
 /**
  * Class holding statistical data about table
  */
-public class TableData {
+public class TableData implements Mappable<String, Object> {
 
     /** Field containing table name */
     @JsonIgnore
@@ -58,19 +58,19 @@ public class TableData {
     }
 
     //Columns setting methods
-    public void setColumnByteSize(String colName, int size) {
+    public void setColumnTypeByteSize(String colName, String colType, int size) {
         if (_columns.containsKey(colName)) {
-            _columns.get(colName).setByteSize(size);
+            _columns.get(colName).setColumnTypeSize(colType, size);
         }
         else {
             _columns.put(colName, new ColumnData());
-            _columns.get(colName).setByteSize(size);
+            _columns.get(colName).setColumnTypeSize(colType, size);
         }
     }
 
-    public int getColumnByteSize(String colName) {
+    public int getColumnMaxByteSize(String colName) {
         if (_columns.containsKey(colName)) {
-            return _columns.get(colName).getByteSize();
+            return _columns.get(colName).getMaxByteSize();
         }
         throw new IllegalArgumentException("Column " + colName + " in table " + _name + " does not exists");
     }
@@ -85,13 +85,13 @@ public class TableData {
         }
     }
 
-    public void setColumnType(String colName, String type) {
+    public void addColumnType(String colName, String type) {
         if(_columns.containsKey(colName)) {
-            _columns.get(colName).setType(type);
+            _columns.get(colName).addType(type);
         }
         else {
             _columns.put(colName, new ColumnData());
-            _columns.get(colName).setType(type);
+            _columns.get(colName).addType(type);
         }
     }
 

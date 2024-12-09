@@ -25,7 +25,7 @@ public class Neo4jDataCollector extends AbstractDataCollector<ResultSummary, Res
     /**
      * Method which saves page size used by databases storage engine
      */
-    private void _savePageSize() {
+    private void _collectPageSize() {
         _model.datasetData().setDataSetPageSize(Neo4jResources.DefaultSizes.PAGE_SIZE);
     }
 
@@ -53,7 +53,7 @@ public class Neo4jDataCollector extends AbstractDataCollector<ResultSummary, Res
     }
 
     /**
-     * Method reponsible for parsing caching size
+     * Method responsible for parsing caching size
      * @param size string which contains number and unit
      * @return parsed number which is size in bytes
      * @throws ParseException when input cannot be parsed
@@ -78,11 +78,11 @@ public class Neo4jDataCollector extends AbstractDataCollector<ResultSummary, Res
     }
 
     /**
-     * Method which saves the gahered cache size to data model
+     * Method which saves the gathered cache size to data model
      * @throws QueryExecutionException when QueryExecutionException occur in help query evaluation
      * @throws ParseException when ParseException occur during unit parsing process
      */
-    private void _saveCacheSize() throws QueryExecutionException, ParseException {
+    private void _collectCacheSize() throws QueryExecutionException, ParseException {
         CachedResult result = _connection.executeQuery(Neo4jResources.getPageCacheSizeQuery());
         if (result.next()) {
             String stringSize = result.getString("value");
@@ -96,7 +96,7 @@ public class Neo4jDataCollector extends AbstractDataCollector<ResultSummary, Res
      * Method responsible for saving all dataset sizes parameters to data model
      * @throws QueryExecutionException when it is thrown from some of the help queries
      */
-    private void _saveDatasetSize() throws QueryExecutionException {
+    private void _collectDatasetSize() throws QueryExecutionException {
         long[] nodeTuple = _fetchNodePropertiesSize(Neo4jResources.getAllNodesQuery());
         long[] edgeTuple = _fetchEdgePropertiesSize(Neo4jResources.getAllRelationsQuery());
         long size = nodeTuple[0] + edgeTuple[0];
@@ -111,10 +111,10 @@ public class Neo4jDataCollector extends AbstractDataCollector<ResultSummary, Res
      * @throws QueryExecutionException whe some of the help queries produced a problem
      * @throws ParseException when there was some parsing issue with parsing cacheSize
      */
-    private void _saveDatasetData() throws QueryExecutionException, ParseException {
-        _savePageSize();
-        _saveDatasetSize();
-        _saveCacheSize();
+    private void _collectDatasetData() throws QueryExecutionException, ParseException {
+        _collectPageSize();
+        _collectDatasetSize();
+        _collectCacheSize();
     }
 
     // Save ColumnData
@@ -126,16 +126,17 @@ public class Neo4jDataCollector extends AbstractDataCollector<ResultSummary, Res
      * @param isNode boolean which indicates if we are parsing node property or edge property
      * @throws QueryExecutionException when some of the help queries fail
      */
-    private void _saveSpecificColumnData(String label, String property, boolean isNode) throws QueryExecutionException {
+    private void _collectSpecificColumnData(String label, String property, boolean isNode) throws QueryExecutionException {
         CachedResult result = isNode ? _connection.executeQuery(Neo4jResources.getNodePropertyTypeAndMandatoryQuery(label, property)) :
                 _connection.executeQuery(Neo4jResources.getEdgePropertyTypeAndMandatoryQuery(label, property));
         if (result.next()) {
             boolean mandatory = result.getBoolean("mandatory");
-            String type = result.getList("propertyTypes", String.class).get(0);
-            int columnSize = Neo4jResources.DefaultSizes.getAvgColumnSizeByType(type);
-            _model.datasetData().setColumnByteSize(label, property, columnSize);
-            _model.datasetData().setColumnType(label, property, type);
             _model.datasetData().setColumnMandatory(label, property, mandatory);
+
+            for (String type : result.getList("propertyTypes", String.class)) {
+                int columnSize = Neo4jResources.DefaultSizes.getAvgColumnSizeByType(type);
+                _model.datasetData().setColumnTypeByteSize(label, property, type, columnSize);
+            }
         }
     }
 
@@ -163,12 +164,12 @@ public class Neo4jDataCollector extends AbstractDataCollector<ResultSummary, Res
      * @param isNode indicates if entity is node or edge
      * @throws QueryExecutionException when some of the help queries fails
      */
-    private void _saveColumnData(String tableName, boolean isNode) throws QueryExecutionException {
+    private void _collectColumnData(String tableName, boolean isNode) throws QueryExecutionException {
         List<String> properties = isNode ? _getPropertyNames(Neo4jResources.getNodePropertiesForLabelQuery(tableName)) :
                 _getPropertyNames(Neo4jResources.getEdgePropertiesForLabelQuery(tableName));
 
         for (String columnName : properties) {
-            _saveSpecificColumnData(tableName, columnName, isNode);
+            _collectSpecificColumnData(tableName, columnName, isNode);
         }
     }
 
@@ -203,7 +204,7 @@ public class Neo4jDataCollector extends AbstractDataCollector<ResultSummary, Res
      * @param label speciufies entities we are interested in
      * @throws QueryExecutionException when help query fails
      */
-    private void _saveTableConstraintCount(String label) throws QueryExecutionException {
+    private void _collectTableConstraintCount(String label) throws QueryExecutionException {
         CachedResult result = _connection.executeQuery(Neo4jResources.getConstraintCountForLabelQuery(label));
         if (result.next()) {
             long count = result.getLong("count");
@@ -217,7 +218,7 @@ public class Neo4jDataCollector extends AbstractDataCollector<ResultSummary, Res
      * @param isNode indicates if we are interested in nodes or edges
      * @throws QueryExecutionException when some of the help queries fails
      */
-    private void _saveTableSizes(String tableName, boolean isNode) throws QueryExecutionException {
+    private void _collectTableSizes(String tableName, boolean isNode) throws QueryExecutionException {
         long[] tuple = isNode ? _fetchNodePropertiesSize(Neo4jResources.getNodesOfSpecificLabelQuery(tableName)) : _fetchEdgePropertiesSize(Neo4jResources.getEdgesOfSpecificLabelQuery(tableName));
         long size = tuple[0];
         long rowCount = tuple[1];
@@ -249,12 +250,12 @@ public class Neo4jDataCollector extends AbstractDataCollector<ResultSummary, Res
      * @throws QueryExecutionException when some of the help queries fails
      * @throws DataCollectException when invalid label is used
      */
-    private void _saveTableData() throws QueryExecutionException, DataCollectException {
+    private void _collectTableData() throws QueryExecutionException, DataCollectException {
         for (String label : _model.getTableNames()) {
             boolean isNode = _isNodeLabel(label);
-            _saveTableConstraintCount(label);
-            _saveTableSizes(label, isNode);
-            _saveColumnData(label, isNode);
+            _collectTableConstraintCount(label);
+            _collectTableSizes(label, isNode);
+            _collectColumnData(label, isNode);
         }
     }
 
@@ -262,7 +263,7 @@ public class Neo4jDataCollector extends AbstractDataCollector<ResultSummary, Res
      * Method which gets labels over which is this index build
      * @param indexNames specify index by its name
      */
-    private void _saveTableNameFor(String[] indexNames) {
+    private void _collectTableNameFor(String[] indexNames) {
         _model.datasetData().addTable(indexNames[1]);
     }
 
@@ -273,7 +274,7 @@ public class Neo4jDataCollector extends AbstractDataCollector<ResultSummary, Res
      * @param isNode indicates whether the entity is node or edge
      * @throws QueryExecutionException when some of the help queries will fail
      */
-    private void _saveIndexSizes(String indexName, String[] indexNames, boolean isNode) throws QueryExecutionException{
+    private void _collectIndexSizes(String indexName, String[] indexNames, boolean isNode) throws QueryExecutionException{
         long[] index = isNode ? _fetchNodePropertiesSize(Neo4jResources.getNodeAndPropertyQuery(indexNames[1], indexNames[2])) :
                 _fetchEdgePropertiesSize(Neo4jResources.getEdgeAndPropertyQuery(indexNames[1], indexNames[2]));
         long size = (long) Math.ceil((double) (index[0]) / 3);
@@ -291,13 +292,13 @@ public class Neo4jDataCollector extends AbstractDataCollector<ResultSummary, Res
      * @throws QueryExecutionException when some of the help queries fail
      * @throws DataCollectException when some of the labels are invalid
      */
-    private void _saveIndexData() throws QueryExecutionException, DataCollectException {
+    private void _collectIndexData() throws QueryExecutionException, DataCollectException {
         for (String inxName : _model.getIndexNames()) {
             String[] names = inxName.split(":");
 
             boolean isNode = _isNodeLabel(names[1]);
-            _saveTableNameFor(names);
-            _saveIndexSizes(inxName, names, isNode);
+            _collectTableNameFor(names);
+            _collectIndexSizes(inxName, names, isNode);
         }
     }
 
@@ -305,7 +306,7 @@ public class Neo4jDataCollector extends AbstractDataCollector<ResultSummary, Res
      * Method which is saving all statistics about result data to dataModel
      * @param result result of main query
      */
-    private void _saveResultData(ConsumedResult result) {
+    private void _collectResultData(ConsumedResult result) {
         long size = result.getByteSize();
         _model.resultData().setByteSize(size);
 
@@ -316,9 +317,9 @@ public class Neo4jDataCollector extends AbstractDataCollector<ResultSummary, Res
         _model.resultData().setSizeInPages(sizeInPages);
 
         for (String colName : result.getColumnNames()) {
-            String type = result.getColumnType(colName);
-            _model.resultData().setColumnType(colName, type);
-            _model.resultData().setColumnByteSize(colName, Neo4jResources.DefaultSizes.getAvgColumnSizeByType(type));
+            for (String type : result.getColumnTypes(colName)) {
+                _model.resultData().setColumnTypeByteSize(colName, type, Neo4jResources.DefaultSizes.getAvgColumnSizeByType(type));
+            }
         }
     }
 
@@ -331,10 +332,10 @@ public class Neo4jDataCollector extends AbstractDataCollector<ResultSummary, Res
     @Override
     public DataModel collectData(ConsumedResult result) throws DataCollectException {
         try {
-            _saveDatasetData();
-            _saveIndexData();
-            _saveTableData();
-            _saveResultData(result);
+            _collectDatasetData();
+            _collectIndexData();
+            _collectTableData();
+            _collectResultData(result);
             return _model;
         } catch (QueryExecutionException | ParseException e) {
             throw new DataCollectException(e);

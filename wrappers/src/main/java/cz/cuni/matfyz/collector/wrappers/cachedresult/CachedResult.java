@@ -16,7 +16,7 @@ public class CachedResult {
     /** Private pointer, which points to actual record when iterating over result */
     private int _cursor;
 
-    protected CachedResult(List<Map<String, Object>> records) {
+    private CachedResult(List<Map<String, Object>> records) {
         _records = records;
         _cursor = -1;
     }
@@ -52,7 +52,7 @@ public class CachedResult {
 
     /**
      * Private method used for getting value of column from actual record which is pointed by _cursor
-     * @param colName
+     * @param colName inputted columnName
      * @return instance of Object which is selected value or null this value do not exist
      */
     private Object _get(String colName) {
@@ -196,7 +196,7 @@ public class CachedResult {
     private <T> List<T> _convertList(List<?> listValue, Class<T> clazz) {
         List<T> convertedList = new ArrayList<>();
         for (Object item : listValue) {
-            convertedList.add((T)item);
+            convertedList.add(clazz.cast(item));
         }
         return convertedList;
     }

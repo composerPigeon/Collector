@@ -6,7 +6,7 @@ import java.util.Map;
 /**
  * Class for saving statistical data about index
  */
-public class IndexData {
+public class IndexData implements Mappable<String, Object> {
     /** Field holding index size in bytes */
     public Long _size;
     /** Field holding index size in pages */

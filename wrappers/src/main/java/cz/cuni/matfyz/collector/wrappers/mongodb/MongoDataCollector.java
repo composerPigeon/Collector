@@ -10,9 +10,7 @@ import cz.cuni.matfyz.collector.wrappers.exceptions.QueryExecutionException;
 import org.bson.Document;
 
 import javax.xml.crypto.Data;
-import java.util.HashMap;
-import java.util.HashSet;
-import java.util.List;
+import java.util.*;
 import java.util.concurrent.ExecutionException;
 
 /**
@@ -31,7 +29,7 @@ public class MongoDataCollector extends AbstractDataCollector<Document, Document
      * @param collectionName inputted collectionName
      * @throws QueryExecutionException when some QueryExecutionException occur during running help query
      */
-    private void _savePageSize(String collectionName) throws QueryExecutionException {
+    private void _collectPageSize(String collectionName) throws QueryExecutionException {
         CachedResult result = _connection.executeQuery(MongoResources.getCollectionStatsCommand(collectionName));
 
         if (result.next()) {
@@ -44,7 +42,7 @@ public class MongoDataCollector extends AbstractDataCollector<Document, Document
      * Method which will save cache size of dataset
      * @throws QueryExecutionException when some QueryExecutionException occur during running help query
      */
-    private void _saveCacheDatasetSize() throws QueryExecutionException {
+    private void _collectCacheDatasetSize() throws QueryExecutionException {
         CachedResult stats = _connection.executeQuery(MongoResources.getServerStatsCommand());
 
         if (stats.next()) {
@@ -57,7 +55,7 @@ public class MongoDataCollector extends AbstractDataCollector<Document, Document
      * Method which will save all dataset data wrapper gathers
      * @throws QueryExecutionException when some QueryExecutionException occur during running help queries
      */
-    private void _saveDatasetData() throws QueryExecutionException {
+    private void _collectDatasetData() throws QueryExecutionException {
         CachedResult stats = _connection.executeQuery(MongoResources.getDatasetStatsCommand());
 
         if (stats.next()) {
@@ -66,7 +64,7 @@ public class MongoDataCollector extends AbstractDataCollector<Document, Document
             long sizeInPages = (long) Math.ceil((double)size / _model.getPageSize());
             _model.datasetData().setDataSetSizeInPages(sizeInPages);
         }
-        _saveCacheDatasetSize();
+        _collectCacheDatasetSize();
     }
 
 
@@ -80,11 +78,11 @@ public class MongoDataCollector extends AbstractDataCollector<Document, Document
      * @param columnType data type of column
      * @throws QueryExecutionException when some QueryExecutionException occur during running help query
      */
-    private void _saveStringObjectColumnByteSize(String collectionName, String columnName, String columnType) throws QueryExecutionException {
+    private void _collectStringObjectColumnByteSize(String collectionName, String columnName, String columnType) throws QueryExecutionException {
         CachedResult result = _connection.executeQuery(MongoResources.getAvgObjectStringSizeCommand(collectionName, columnName, columnType));
         if (result.next()) {
             int avgByteSize = (int)Math.round(result.getDouble("avg"));
-            _model.datasetData().setColumnByteSize(collectionName, columnName, avgByteSize);
+            _model.datasetData().setColumnTypeByteSize(collectionName, columnName, columnType, avgByteSize);
         }
     }
 
@@ -95,10 +93,10 @@ public class MongoDataCollector extends AbstractDataCollector<Document, Document
      * @param columnType data type of column
      * @throws QueryExecutionException when some QueryExecutionException occur during running help query
      */
-    private void _saveNumberColumnByteSize(String collectionName, String columnName, String columnType) throws QueryExecutionException {
+    private void _collectNumberColumnByteSize(String collectionName, String columnName, String columnType) throws QueryExecutionException {
         Integer size = MongoResources.DefaultSizes.getAvgColumnSizeByType(columnType);
         if (size != null) {
-            _model.datasetData().setColumnByteSize(collectionName, columnName, size);
+            _model.datasetData().setColumnTypeByteSize(collectionName, columnName, columnType, size);
         }
     }
 
@@ -109,11 +107,11 @@ public class MongoDataCollector extends AbstractDataCollector<Document, Document
      * @param columnType data type of column
      * @throws QueryExecutionException when some QueryExecutionException occur during running help query
      */
-    private void _saveColumnByteSize(String collectionName, String columnName, String columnType) throws QueryExecutionException {
+    private void _collectColumnByteSize(String collectionName, String columnName, String columnType) throws QueryExecutionException {
         if ("string".equals(columnType) || "object".equals(columnType) || "binData".equals(columnType)) {
-            _saveStringObjectColumnByteSize(collectionName, columnName, columnType);
+            _collectStringObjectColumnByteSize(collectionName, columnName, columnType);
         } else
-            _saveNumberColumnByteSize(collectionName, columnName, columnType);
+            _collectNumberColumnByteSize(collectionName, columnName, columnType);
     }
 
     /**
@@ -146,7 +144,7 @@ public class MongoDataCollector extends AbstractDataCollector<Document, Document
      * @param columnName used column name
      * @throws QueryExecutionException when some QueryExecutionException occur during running help query
      */
-    private void _saveColumnMandatory(String collectionName, String columnName) throws QueryExecutionException {
+    private void _collectColumnMandatory(String collectionName, String columnName) throws QueryExecutionException {
         CachedResult result = _connection.executeQuery(MongoResources.getCollectionInfoCommand(collectionName));
         if (result.next()) {
             if (result.containsCol("options")) {
@@ -165,24 +163,20 @@ public class MongoDataCollector extends AbstractDataCollector<Document, Document
      * @param columnName used column name
      * @throws QueryExecutionException when some QueryExecutionException occur during running help query
      */
-    private void _saveColumnType(String collectionName, String columnName) throws QueryExecutionException {
+    private void _collectColumnType(String collectionName, String columnName) throws QueryExecutionException {
         CachedResult result = _connection.executeQuery(MongoResources.getFieldTypeCommand(collectionName, columnName));
-
-        int bestCount = 0;
-        String type = "";
+        List<Map.Entry<String, Integer>> types = new ArrayList<>();
+        int maxCount = 0;
 
         while (result.next()) {
             int count = result.getInt("count");
-
-            if (count > bestCount) {
-                bestCount = count;
-                type = result.getDocument("_id").getString("fieldType");
-            }
+            String type = result.getDocument("_id").getString("fieldType");
+            types.add(Map.entry(type, count));
+            maxCount += count;
         }
 
-        if (bestCount > 0) {
-            _model.datasetData().setColumnType(collectionName, columnName, type);
-            _saveColumnByteSize(collectionName, columnName, type);
+        for (var entry : types) {
+            _collectColumnByteSize(collectionName, columnName, entry.getKey());
         }
     }
 
@@ -191,15 +185,15 @@ public class MongoDataCollector extends AbstractDataCollector<Document, Document
      * @param collectionName collection used for query
      * @throws QueryExecutionException when some QueryExecutionException occur during running help query
      */
-    private void _saveColumnData(String collectionName) throws QueryExecutionException {
+    private void _collectColumnData(String collectionName) throws QueryExecutionException {
         CachedResult result = _connection.executeQuery(MongoResources.getFieldsInCollectionCommand(collectionName));
 
         if (result.next()) {
             List<String> fieldNames = result.getList("allKeys", String.class);
 
             for (String fieldName : fieldNames) {
-                _saveColumnType(collectionName, fieldName);
-                _saveColumnMandatory(collectionName, fieldName);
+                _collectColumnType(collectionName, fieldName);
+                _collectColumnMandatory(collectionName, fieldName);
             }
         }
     }
@@ -211,7 +205,7 @@ public class MongoDataCollector extends AbstractDataCollector<Document, Document
      * @param collectionName collection used in query
      * @throws QueryExecutionException when some QueryExecutionException occur during running help query
      */
-    private void _saveTableData(String collectionName) throws QueryExecutionException {
+    private void _collectTableData(String collectionName) throws QueryExecutionException {
         CachedResult stats = _connection.executeQuery(MongoResources.getCollectionStatsCommand(collectionName));
 
         if (stats.next()) {
@@ -224,7 +218,7 @@ public class MongoDataCollector extends AbstractDataCollector<Document, Document
             _model.datasetData().setTableRowCount(collectionName, rowCount);
         }
 
-        _saveColumnData(collectionName);
+        _collectColumnData(collectionName);
     }
 
     // Save Index Data
@@ -235,7 +229,7 @@ public class MongoDataCollector extends AbstractDataCollector<Document, Document
      * @param indexName used index
      * @throws QueryExecutionException when some QueryExecutionException occur during running help query
      */
-    private void _saveIndexRowCount(String collectionName, String indexName) throws QueryExecutionException {
+    private void _collectIndexRowCount(String collectionName, String indexName) throws QueryExecutionException {
         CachedResult result = _connection.executeQuery(MongoResources.getIndexRowCountCommand(collectionName, indexName));
 
         if (result.next()) {
@@ -250,7 +244,7 @@ public class MongoDataCollector extends AbstractDataCollector<Document, Document
      * @param indexName used index
      * @throws QueryExecutionException when some QueryExecutionException occur during running help query
      */
-    private void _saveIndexSizesData(String collectionName, String indexName) throws QueryExecutionException {
+    private void _collectIndexSizesData(String collectionName, String indexName) throws QueryExecutionException {
         CachedResult stats = _connection.executeQuery(MongoResources.getCollectionStatsCommand(collectionName));
         if (stats.next()) {
             int size = stats.getDocument("indexSizes").getInteger(indexName);
@@ -264,10 +258,10 @@ public class MongoDataCollector extends AbstractDataCollector<Document, Document
      * @param collectionName used collection
      * @throws QueryExecutionException when some QueryExecutionException occur during running help queries
      */
-    private void _saveIndexesData(String collectionName) throws QueryExecutionException {
+    private void _collectIndexesData(String collectionName) throws QueryExecutionException {
         for (String indexName : _model.getIndexNames()) {
-            _saveIndexSizesData(collectionName, indexName);
-            _saveIndexRowCount(collectionName, indexName);
+            _collectIndexSizesData(collectionName, indexName);
+            _collectIndexRowCount(collectionName, indexName);
         }
     }
 
@@ -289,14 +283,14 @@ public class MongoDataCollector extends AbstractDataCollector<Document, Document
      * Method which will save field data for field present in result
      * @param result result of executed main query
      */
-    private void _saveResultColumnData(ConsumedResult result) {
+    private void _collectResultColumnData(ConsumedResult result) {
         for (String colName : result.getColumnNames()) {
-            String type = result.getColumnType(colName);
-            if (type != null) {
-                _model.resultData().setColumnType(colName, type);
-                Integer size = MongoResources.DefaultSizes.getAvgColumnSizeByType(type);
-                if (size != null)
-                    _model.resultData().setColumnByteSize(colName, size);
+            for (String colType : result.getColumnTypes(colName)) {
+                if (colType != null) {
+                    Integer size = MongoResources.DefaultSizes.getAvgColumnSizeByType(colType);
+                    if (size != null)
+                        _model.resultData().setColumnTypeByteSize(colName, colType, size);
+                }
             }
         }
     }
@@ -305,7 +299,7 @@ public class MongoDataCollector extends AbstractDataCollector<Document, Document
      * Method which saves all result data from result
      * @param result result of main query
      */
-    private void _saveResultData(ConsumedResult result) {
+    private void _collectResultData(ConsumedResult result) {
         long size = result.getByteSize();
         _model.resultData().setByteSize(size);
         long count = result.getRowCount();
@@ -314,7 +308,7 @@ public class MongoDataCollector extends AbstractDataCollector<Document, Document
         long sizeInPages = (long)Math.ceil((double) size / _model.getPageSize());
         _model.resultData().setSizeInPages(sizeInPages);
 
-        _saveResultColumnData(result);
+        _collectResultColumnData(result);
     }
 
     /**
@@ -326,11 +320,11 @@ public class MongoDataCollector extends AbstractDataCollector<Document, Document
     public DataModel collectData(ConsumedResult result) throws DataCollectException {
         try {
             String collName = _getCollectionName();
-            _savePageSize(collName);
-            _saveDatasetData();
-            _saveIndexesData(collName);
-            _saveTableData(collName);
-            _saveResultData(result);
+            _collectPageSize(collName);
+            _collectDatasetData();
+            _collectIndexesData(collName);
+            _collectTableData(collName);
+            _collectResultData(result);
             return _model;
         } catch (QueryExecutionException e) {
             throw new DataCollectException(e);

@@ -5,7 +5,7 @@ import com.fasterxml.jackson.annotation.JsonIgnore;
 import java.util.*;
 
 /** Class holding statistical data about dataset */
-public class DatasetData {
+public class DatasetData implements Mappable<String, Object> {
 
     /** Field containing size of dataset in bytes */
     private Long _dataSetSize;
@@ -145,19 +145,19 @@ public class DatasetData {
     }
 
     //Columns setting methods
-    public void setColumnByteSize(String tableName, String colName, int size) {
+    public void setColumnTypeByteSize(String tableName, String colName, String colType, int size) {
         if(_tables.containsKey(tableName)) {
-            _tables.get(tableName).setColumnByteSize(colName, size);
+            _tables.get(tableName).setColumnTypeByteSize(colName, colType, size);
         }
         else {
             _tables.put(tableName, new TableData(tableName));
-            _tables.get(tableName).setColumnByteSize(colName, size);
+            _tables.get(tableName).setColumnTypeByteSize(colName, colType, size);
         }
     }
 
-    public int getColumnByteSize(String tableName, String colName) {
+    public int getColumnMaxByteSize(String tableName, String colName) {
         if (_tables.containsKey(tableName)) {
-            return _tables.get(tableName).getColumnByteSize(colName);
+            return _tables.get(tableName).getColumnMaxByteSize(colName);
         }
         throw new IllegalArgumentException("TableName " + tableName + " does not exists in DataModel");
     }
@@ -172,13 +172,13 @@ public class DatasetData {
         }
     }
 
-    public void setColumnType(String tableName, String colName, String type) {
+    public void addColumnType(String tableName, String colName, String type) {
         if(_tables.containsKey(tableName)) {
-            _tables.get(tableName).setColumnType(colName, type);
+            _tables.get(tableName).addColumnType(colName, type);
         }
         else {
             _tables.put(tableName, new TableData(tableName));
-            _tables.get(tableName).setColumnType(colName, type);
+            _tables.get(tableName).addColumnType(colName, type);
         }
     }
 

@@ -2,18 +2,12 @@ package cz.cuni.matfyz.collector.model;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
 
-import java.util.LinkedHashMap;
-import java.util.Map;
+import java.util.*;
 
 /**
  * Class responsible for representing collected statistical data about individual columns
  */
-public class ColumnData {
-
-    /**
-     * Field holding avarage byte size of column.
-     */
-    private Integer _size;
+public class ColumnData implements Mappable<String, Object> {
 
     /**
      * Field holding information about statistical distribution of values. In PostgreSQL it holds ratio of distinct values.
@@ -23,7 +17,10 @@ public class ColumnData {
     /**
      * Field holding dominant data type of column.
      */
-    private String _type;
+    private final HashMap<String, ColumnType> _types;
+
+    @JsonIgnore
+    private Integer _maxByteSize;
 
     /**
      * Field holding information if column is mandatory to be set for entity in database.
@@ -31,20 +28,10 @@ public class ColumnData {
     private Boolean _mandatory;
 
     public ColumnData() {
-        _size = null;
         _ratio = null;
-        _type = null;
         _mandatory = null;
-    }
-
-    /**
-     * Setter for Field _size
-     *
-     * @param size value to be set
-     */
-    public void setByteSize(int size) {
-        if (_size == null)
-            _size = size;
+        _maxByteSize = null;
+        _types = new HashMap<>();
     }
 
     /**
@@ -53,17 +40,35 @@ public class ColumnData {
      * @return value stored in _size field
      */
     @JsonIgnore
-    public int getByteSize() {
-        return _size;
+    public int getMaxByteSize() {
+        return _maxByteSize;
     }
 
     /**
-     * Setter for field _type
-     * @param type value to be set
+     * Set byteSize for type in _types for this column
+     * @param columnType for which type
+     * @param size byte size to be set
      */
-    public void setType(String type) {
-        if (_type == null)
-            _type = type;
+    public void setColumnTypeSize(String columnType, int size) {
+        if (_maxByteSize == null || size > _maxByteSize)
+            _maxByteSize = size;
+
+        if (_types.containsKey(columnType))
+            _types.get(columnType).setByteSize(size);
+        else {
+            _types.put(columnType, new ColumnType(columnType));
+            _types.get(columnType).setByteSize(size);
+        }
+
+    }
+
+    /**
+     * Add new column type
+     * @param columnType to be added
+     */
+    public void addType(String columnType) {
+        if (!_types.containsKey(columnType))
+            _types.put(columnType, new ColumnType(columnType));
     }
 
 
@@ -76,20 +81,25 @@ public class ColumnData {
         if (_ratio == null) {_ratio = ratio;}
     }
 
+    private Map<String, Object> _parseColumnTypesToMap() {
+        Map<String, Object> map = new HashMap<>();
+        for (var entry : _types.entrySet()) {
+            map.put(entry.getKey(), entry.getValue().toMap());
+        }
+        return map;
+    }
+
     /**
      * Method converting ColumnData object to map for saving it as part of org.bson.Document
      * @return converted map
      */
     public Map<String, Object> toMap() {
         Map<String, Object> map = new LinkedHashMap<>();
-        if (_size != null)
-            map.put("size", _size);
         if (_ratio != null)
             map.put("ratio", _ratio);
-        if (_type != null)
-            map.put("type", _type);
         if (_mandatory != null)
             map.put("mandatory", _mandatory);
+        map.put("types", _parseColumnTypesToMap());
         return map;
     }
 

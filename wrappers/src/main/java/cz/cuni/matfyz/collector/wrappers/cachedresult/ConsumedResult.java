@@ -1,8 +1,6 @@
 package cz.cuni.matfyz.collector.wrappers.cachedresult;
 
-import java.util.HashMap;
-import java.util.Map;
-import java.util.Set;
+import java.util.*;
 
 /**
  * Class which represents ConsumedResult and provides it unified API to get measured statistical data
@@ -10,7 +8,7 @@ import java.util.Set;
 public class ConsumedResult {
 
     /** Field conatining all columnTypes for all columns of result */
-    private final Map<String, String> _columnTypes;
+    private final Map<String, List<String>> _columnTypes;
 
     /** Field holding byte size of result measured in bytes */
     private final long _byteSize;
@@ -18,10 +16,10 @@ public class ConsumedResult {
     /** Field containing record count from result */
     private final long _count;
 
-    public ConsumedResult(Map<String, String> columnmTypes, long byteSize, long count) {
+    private ConsumedResult(Map<String, List<String>> columnTypes, long byteSize, long count) {
         _byteSize = byteSize;
         _count = count;
-        _columnTypes = columnmTypes;
+        _columnTypes = columnTypes;
     }
 
     /**
@@ -37,7 +35,7 @@ public class ConsumedResult {
      * @param colName to select column by columnName
      * @return type of this column as string
      */
-    public String getColumnType(String colName) {
+    public Iterable<String> getColumnTypes(String colName) {
         return _columnTypes.get(colName);
     }
 
@@ -62,7 +60,7 @@ public class ConsumedResult {
      */
     public static class Builder {
 
-        private Map<String, String> _columnTypes;
+        private Map<String, List<String>> _columnTypes;
         private long _byteSize;
         private long _count;
 
@@ -78,8 +76,13 @@ public class ConsumedResult {
          * @param type inputted type
          */
         public void addColumnType(String colName, String type) {
-            if (!_columnTypes.containsKey(colName))
-                _columnTypes.put(colName, type);
+            if (_columnTypes.containsKey(colName)) {
+                _columnTypes.get(colName).add(type);
+            } else {
+                var list = new ArrayList<String>();
+                list.add(type);
+                _columnTypes.put(colName, list);
+            }
         }
 
         /**

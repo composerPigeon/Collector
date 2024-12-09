@@ -6,7 +6,7 @@ import java.util.Map;
 /**
  * Class for saving statistical data about result
  */
-public class ResultData {
+public class ResultData implements Mappable<String, Object> {
 
     /** Field containing execution time in millis */
     private Double _executionTime;
@@ -35,11 +35,11 @@ public class ResultData {
     }
 
     // Column data setters
-    public void setColumnByteSize(String columnName, int size) {
-        _resultTable.setColumnByteSize(columnName, size);
+    public void setColumnTypeByteSize(String columnName, String columnType, int size) {
+        _resultTable.setColumnTypeByteSize(columnName, columnType, size);
     }
-    public void setColumnType(String columnName, String columnType) {
-        _resultTable.setColumnType(columnName, columnType);
+    public void addColumnType(String columnName, String columnType) {
+        _resultTable.addColumnType(columnName, columnType);
     }
 
     /**

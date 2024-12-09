@@ -12,7 +12,7 @@ import java.util.*;
 /**
  * Main class holding gathered statistical data which can be eventually transformed to json for persistent storage
  */
-public class DataModel {
+public class DataModel implements Mappable<String, Object> {
 
     /** Field containing dbType for which is this record relevant */
     private final String _databaseName;
@@ -50,8 +50,8 @@ public class DataModel {
     public Set<String> getIndexNames() {
         return new HashSet<>(_datasetData.getIndexNames());
     }
-    public int getColumnByteSize(String tableName, String colName) {
-        return _datasetData.getColumnByteSize(tableName, colName);
+    public int getColumnMaxByteSize(String tableName, String colName) {
+        return _datasetData.getColumnMaxByteSize(tableName, colName);
     }
     @JsonIgnore
     public int getPageSize() {
