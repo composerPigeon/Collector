@@ -97,9 +97,9 @@ public class Neo4jDataCollector extends AbstractDataCollector<ResultSummary, Res
      * @throws QueryExecutionException when it is thrown from some of the help queries
      */
     private void _collectDatasetSize() throws QueryExecutionException {
-        long[] nodeTuple = _fetchNodePropertiesSize(Neo4jResources.getAllNodesQuery());
-        long[] edgeTuple = _fetchEdgePropertiesSize(Neo4jResources.getAllRelationsQuery());
-        long size = nodeTuple[0] + edgeTuple[0];
+        PropertiesSizeData nodeSizes = _fetchNodePropertiesSize(Neo4jResources.getAllNodesQuery());
+        PropertiesSizeData edgeSizes = _fetchEdgePropertiesSize(Neo4jResources.getAllRelationsQuery());
+        long size = nodeSizes.getByteSize() + edgeSizes.getByteSize();
         _model.datasetData().setDataSetSize(size);
         _model.datasetData().setDataSetSizeInPages((int) Math.ceil(
                 (double) size / Neo4jResources.DefaultSizes.PAGE_SIZE
@@ -179,11 +179,12 @@ public class Neo4jDataCollector extends AbstractDataCollector<ResultSummary, Res
      * @return array of size 2, where first number is byteSize of nodes in the collection and second one is their count
      * @throws QueryExecutionException when help query fails
      */
-    private long[] _fetchNodePropertiesSize(String fetchQuery) throws QueryExecutionException {
+    private PropertiesSizeData _fetchNodePropertiesSize(String fetchQuery) throws QueryExecutionException {
         ConsumedResult result = _connection.executeQueryAndConsume(fetchQuery);
-        return new long[]{
-                result.getRowCount() * Neo4jResources.DefaultSizes.NODE_SIZE + result.getByteSize(), result.getRowCount()
-        };
+        return new PropertiesSizeData(
+                result.getRowCount() * Neo4jResources.DefaultSizes.NODE_SIZE + result.getByteSize(),
+                result.getRowCount()
+        );
     }
 
     /**
@@ -192,11 +193,12 @@ public class Neo4jDataCollector extends AbstractDataCollector<ResultSummary, Res
      * @return array of size 2, where first number is byteSize of edges in the collection and second one is their count
      * @throws QueryExecutionException when help query fails
      */
-    private long[] _fetchEdgePropertiesSize(String fetchQuery) throws QueryExecutionException {
+    private PropertiesSizeData _fetchEdgePropertiesSize(String fetchQuery) throws QueryExecutionException {
         ConsumedResult result = _connection.executeQueryAndConsume(fetchQuery);
-        return new long[]{
-                result.getRowCount() * Neo4jResources.DefaultSizes.EDGE_SIZE + result.getByteSize(), result.getRowCount()
-        };
+        return new PropertiesSizeData(
+                result.getRowCount() * Neo4jResources.DefaultSizes.EDGE_SIZE + result.getByteSize(),
+                result.getRowCount()
+        );
     }
 
     /**
@@ -219,9 +221,9 @@ public class Neo4jDataCollector extends AbstractDataCollector<ResultSummary, Res
      * @throws QueryExecutionException when some of the help queries fails
      */
     private void _collectTableSizes(String tableName, boolean isNode) throws QueryExecutionException {
-        long[] tuple = isNode ? _fetchNodePropertiesSize(Neo4jResources.getNodesOfSpecificLabelQuery(tableName)) : _fetchEdgePropertiesSize(Neo4jResources.getEdgesOfSpecificLabelQuery(tableName));
-        long size = tuple[0];
-        long rowCount = tuple[1];
+        PropertiesSizeData sizes = isNode ? _fetchNodePropertiesSize(Neo4jResources.getNodesOfSpecificLabelQuery(tableName)) : _fetchEdgePropertiesSize(Neo4jResources.getEdgesOfSpecificLabelQuery(tableName));
+        long size = sizes.getByteSize();
+        long rowCount = sizes.getCount();
 
         _model.datasetData().setTableByteSize(tableName, size);
         _model.datasetData().setTableSizeInPages(tableName, (int) Math.ceil(
@@ -275,10 +277,10 @@ public class Neo4jDataCollector extends AbstractDataCollector<ResultSummary, Res
      * @throws QueryExecutionException when some of the help queries will fail
      */
     private void _collectIndexSizes(String indexName, String[] indexNames, boolean isNode) throws QueryExecutionException{
-        long[] index = isNode ? _fetchNodePropertiesSize(Neo4jResources.getNodeAndPropertyQuery(indexNames[1], indexNames[2])) :
+        PropertiesSizeData sizes = isNode ? _fetchNodePropertiesSize(Neo4jResources.getNodeAndPropertyQuery(indexNames[1], indexNames[2])) :
                 _fetchEdgePropertiesSize(Neo4jResources.getEdgeAndPropertyQuery(indexNames[1], indexNames[2]));
-        long size = (long) Math.ceil((double) (index[0]) / 3);
-        long rowCount = index[1];
+        long size = (long) Math.ceil((double) (sizes.getByteSize()) / 3);
+        long rowCount = sizes.getCount();
 
         _model.datasetData().setIndexRowCount(indexName, rowCount);
         _model.datasetData().setIndexByteSize(indexName, size);
@@ -339,6 +341,24 @@ public class Neo4jDataCollector extends AbstractDataCollector<ResultSummary, Res
             return _model;
         } catch (QueryExecutionException | ParseException e) {
             throw new DataCollectException(e);
+        }
+    }
+
+    private static class PropertiesSizeData {
+        private final long _byteSize;
+        private final long _count;
+
+        public PropertiesSizeData(long byteSize, long count) {
+            _byteSize = byteSize;
+            _count = count;
+        }
+
+        public long getByteSize() {
+            return _byteSize;
+        }
+
+        public long getCount() {
+            return _count;
         }
     }
 }

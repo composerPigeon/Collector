@@ -60,7 +60,7 @@ public class Neo4jConnection extends AbstractConnection<ResultSummary, Result, S
     }
 
     /**
-     * Method which is responsoble for executing query and caching and parsing result to CachedResult
+     * Method which is responsible for executing query and caching and parsing result to CachedResult
      * @param query inputted query
      * @return instance of CachedResult
      * @throws QueryExecutionException when some Neo4jException or ParseException occur during process

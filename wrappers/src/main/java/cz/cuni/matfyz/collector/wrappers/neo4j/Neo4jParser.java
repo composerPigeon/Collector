@@ -74,7 +74,7 @@ public class Neo4jParser extends AbstractParser<ResultSummary, Result> {
 
     /**
      * Method for parsing edge labels used by query
-     * @param model to save lables
+     * @param model to save labels
      * @param operator node of explain tree
      */
     private void _parseRelationTableName(DataModel model, Plan operator) {
