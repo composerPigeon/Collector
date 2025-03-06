@@ -2,10 +2,10 @@ package cz.cuni.matfyz.collector.wrappers.postgresql;
 
 import cz.cuni.matfyz.collector.model.DataModel;
 import cz.cuni.matfyz.collector.wrappers.abstractwrapper.*;
-import cz.cuni.matfyz.collector.wrappers.cachedresult.ConsumedResult;
+import cz.cuni.matfyz.collector.wrappers.queryresult.ConsumedResult;
 import cz.cuni.matfyz.collector.wrappers.exceptions.DataCollectException;
 import cz.cuni.matfyz.collector.wrappers.exceptions.QueryExecutionException;
-import cz.cuni.matfyz.collector.wrappers.cachedresult.CachedResult;
+import cz.cuni.matfyz.collector.wrappers.queryresult.CachedResult;
 
 import java.sql.ResultSet;
 import java.util.HashSet;
@@ -140,7 +140,6 @@ class PostgresDataCollector extends AbstractDataCollector<String, ResultSet, Str
      */
     private void _collectColumnData(String tableName) throws QueryExecutionException {
         for (String columnName: _getColumnNames(tableName)) {
-            _collectNumericDataForCol(tableName, columnName);
             _collectTypeAndMandatoryForCol(tableName, columnName);
         }
     }
@@ -311,17 +310,22 @@ class PostgresDataCollector extends AbstractDataCollector<String, ResultSet, Str
         _model.resultData().setRowCount(rowCount);
 
         long sizeInBytes = 0;
+        double colSize = 0;
         for (String columnName : mainResult.getColumnNames()) {
-            String colType = mainResult.getColumnType(columnName);
-            String tableName = _getTableNameForColumn(columnName, colType);
-            int colSize = _model.getColumnByteSize(tableName, columnName);
-            sizeInBytes += colSize;
-            _model.resultData().setColumnByteSize(columnName, colSize);
-            _model.resultData().addColumnType(columnName, colType);
+            colSize = 0;
+            for (String colType : mainResult.getColumnTypes(columnName)) {
+                String tableName = _getTableNameForColumn(columnName, colType);
+                int typeSize = _model.datasetData().getColumnTypeByteSize(tableName, columnName, colType);
+                _model.resultData().setColumnTypeByteSize(columnName, colType, typeSize);
+                double ratio = mainResult.getColumnTypeRatio(columnName, colType);
+                _model.resultData().setColumnTypeRatio(columnName, colType, ratio);
+                colSize += typeSize * ratio;
+            }
+            sizeInBytes += Math.round(colSize);
         }
         sizeInBytes *= rowCount;
-
         _model.resultData().setByteSize(sizeInBytes);
+
         int pageSize = _model.getPageSize();
         if (pageSize > 0)
             _model.resultData().setSizeInPages((int)Math.ceil((double) sizeInBytes / pageSize));

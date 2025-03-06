@@ -11,9 +11,9 @@ import java.util.Map;
 
 import cz.cuni.matfyz.collector.model.DataModel;
 import cz.cuni.matfyz.collector.wrappers.abstractwrapper.AbstractParser;
-import cz.cuni.matfyz.collector.wrappers.cachedresult.ConsumedResult;
+import cz.cuni.matfyz.collector.wrappers.queryresult.ConsumedResult;
 import cz.cuni.matfyz.collector.wrappers.exceptions.ParseException;
-import cz.cuni.matfyz.collector.wrappers.cachedresult.CachedResult;
+import cz.cuni.matfyz.collector.wrappers.queryresult.CachedResult;
 
 /**
  * Class which is responsible for parsing native results and explain plan result
@@ -177,7 +177,7 @@ public class PostgresParser extends AbstractParser<String, ResultSet> {
      * @param resultSet the main result
      * @throws SQLException from accessing metadata
      */
-    private void _consumeDataToBuilder(ConsumedResult.Builder builder, ResultSetMetaData metaData, ResultSet resultSet) throws SQLException {
+    private void _consumeColumnDataToBuilder(ConsumedResult.Builder builder, ResultSetMetaData metaData, ResultSet resultSet) throws SQLException {
         for (int i = 1; i <= metaData.getColumnCount(); i++) {
             String columnName = metaData.getColumnName(i);
             String typeName = metaData.getColumnTypeName(i);
@@ -200,7 +200,7 @@ public class PostgresParser extends AbstractParser<String, ResultSet> {
             ResultSetMetaData metaData = resultSet.getMetaData();
             while (resultSet.next()) {
                 builder.addRecord();
-                _consumeDataToBuilder(builder, metaData, resultSet);
+                _consumeColumnDataToBuilder(builder, metaData, resultSet);
             }
             return builder.toResult();
         } catch (SQLException e) {
@@ -221,7 +221,7 @@ public class PostgresParser extends AbstractParser<String, ResultSet> {
             ResultSetMetaData metaData = resultSet.getMetaData();
             while (resultSet.next()) {
                 builder.addRecord();
-                _consumeDataToBuilder(builder, metaData, resultSet);
+                _consumeColumnDataToBuilder(builder, metaData, resultSet);
             }
             return builder.toResult();
         } catch (SQLException e) {
