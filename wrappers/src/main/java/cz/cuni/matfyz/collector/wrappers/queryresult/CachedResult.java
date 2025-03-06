@@ -1,7 +1,8 @@
-package cz.cuni.matfyz.collector.wrappers.cachedresult;
+package cz.cuni.matfyz.collector.wrappers.queryresult;
 
 import org.bson.Document;
 
+import java.math.BigDecimal;
 import java.util.*;
 import java.util.Map.Entry;
 
@@ -148,7 +149,7 @@ public class CachedResult {
         } else if (value instanceof Double doubleValue) {
             return Math.round(doubleValue);
         } else if (value instanceof String strValue) {
-            return Long.parseLong(strValue);
+            return new BigDecimal(strValue).longValue();
         } else {
             throw new ClassCastException();
         }

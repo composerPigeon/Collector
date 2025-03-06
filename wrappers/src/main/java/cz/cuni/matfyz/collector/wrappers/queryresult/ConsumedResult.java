@@ -1,5 +1,6 @@
-package cz.cuni.matfyz.collector.wrappers.cachedresult;
+package cz.cuni.matfyz.collector.wrappers.queryresult;
 
+import javax.xml.crypto.dsig.keyinfo.KeyValue;
 import java.util.*;
 
 /**
@@ -7,8 +8,8 @@ import java.util.*;
  */
 public class ConsumedResult {
 
-    /** Field conatining all columnTypes for all columns of result */
-    private final Map<String, List<String>> _columnTypes;
+    /** Field containing all columnTypes for all columns of result */
+    private final Map<String, Map<String, Integer>> _columnTypes;
 
     /** Field holding byte size of result measured in bytes */
     private final long _byteSize;
@@ -16,7 +17,7 @@ public class ConsumedResult {
     /** Field containing record count from result */
     private final long _count;
 
-    private ConsumedResult(Map<String, List<String>> columnTypes, long byteSize, long count) {
+    private ConsumedResult(Map<String, Map<String, Integer>> columnTypes, long byteSize, long count) {
         _byteSize = byteSize;
         _count = count;
         _columnTypes = columnTypes;
@@ -36,7 +37,23 @@ public class ConsumedResult {
      * @return type of this column as string
      */
     public Iterable<String> getColumnTypes(String colName) {
-        return _columnTypes.get(colName);
+        return _columnTypes.get(colName).keySet();
+    }
+
+    public String getMajorType(String colName) {
+        var counts = _columnTypes.get(colName);
+        return Collections.max(counts.entrySet(), Map.Entry.comparingByValue()).getKey();
+    }
+
+    public String getOnlyType(String colName) {
+        String[] types = _columnTypes.get(colName).keySet().toArray(new String[]{});
+        if (types.length == 1)
+            return types[0];
+        throw new UnsupportedOperationException("There must be only type for column name: " + colName);
+    }
+
+    public double getColumnTypeRatio(String colName, String type) {
+        return (double) _columnTypes.get(colName).get(type) / (double)_count;
     }
 
     /**
@@ -60,7 +77,7 @@ public class ConsumedResult {
      */
     public static class Builder {
 
-        private Map<String, List<String>> _columnTypes;
+        private Map<String, Map<String, Integer>> _columnTypes;
         private long _byteSize;
         private long _count;
 
@@ -70,6 +87,10 @@ public class ConsumedResult {
             _byteSize = 0;
         }
 
+        private void addColumnType(Map<String, Integer> counts, String type) {
+            counts.compute(type, (k, v) -> v == null ? 1 : v + 1);
+        }
+
         /**
          * Method for adding type for specific column
          * @param colName to specify column by columnName
@@ -77,11 +98,12 @@ public class ConsumedResult {
          */
         public void addColumnType(String colName, String type) {
             if (_columnTypes.containsKey(colName)) {
-                _columnTypes.get(colName).add(type);
+                var counts = _columnTypes.get(colName);
+                addColumnType(counts, type);
             } else {
-                var list = new ArrayList<String>();
-                list.add(type);
-                _columnTypes.put(colName, list);
+                var counts = new HashMap<String, Integer>();
+                addColumnType(counts, type);
+                _columnTypes.put(colName, counts);
             }
         }
 
