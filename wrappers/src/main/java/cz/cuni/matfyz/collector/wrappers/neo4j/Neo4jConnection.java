@@ -2,14 +2,13 @@ package cz.cuni.matfyz.collector.wrappers.neo4j;
 
 import cz.cuni.matfyz.collector.model.DataModel;
 import cz.cuni.matfyz.collector.wrappers.abstractwrapper.*;
-import cz.cuni.matfyz.collector.wrappers.cachedresult.ConsumedResult;
+import cz.cuni.matfyz.collector.wrappers.queryresult.ConsumedResult;
 import cz.cuni.matfyz.collector.wrappers.exceptions.ParseException;
 import cz.cuni.matfyz.collector.wrappers.exceptions.QueryExecutionException;
-import cz.cuni.matfyz.collector.wrappers.cachedresult.CachedResult;
+import cz.cuni.matfyz.collector.wrappers.queryresult.CachedResult;
 
 import org.neo4j.driver.*;
 import org.neo4j.driver.exceptions.Neo4jException;
-import org.neo4j.driver.summary.Plan;
 import org.neo4j.driver.summary.ResultSummary;
 
 /**

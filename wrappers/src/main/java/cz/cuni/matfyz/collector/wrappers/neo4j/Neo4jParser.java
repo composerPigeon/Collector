@@ -2,9 +2,9 @@ package cz.cuni.matfyz.collector.wrappers.neo4j;
 
 import cz.cuni.matfyz.collector.model.DataModel;
 import cz.cuni.matfyz.collector.wrappers.abstractwrapper.AbstractParser;
-import cz.cuni.matfyz.collector.wrappers.cachedresult.ConsumedResult;
+import cz.cuni.matfyz.collector.wrappers.queryresult.ConsumedResult;
 import cz.cuni.matfyz.collector.wrappers.exceptions.ParseException;
-import cz.cuni.matfyz.collector.wrappers.cachedresult.CachedResult;
+import cz.cuni.matfyz.collector.wrappers.queryresult.CachedResult;
 
 import java.util.HashMap;
 import java.util.Map;

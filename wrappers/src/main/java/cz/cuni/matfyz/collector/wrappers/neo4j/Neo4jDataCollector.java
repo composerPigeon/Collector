@@ -2,14 +2,15 @@ package cz.cuni.matfyz.collector.wrappers.neo4j;
 
 import cz.cuni.matfyz.collector.model.DataModel;
 import cz.cuni.matfyz.collector.wrappers.abstractwrapper.AbstractDataCollector;
-import cz.cuni.matfyz.collector.wrappers.cachedresult.CachedResult;
-import cz.cuni.matfyz.collector.wrappers.cachedresult.ConsumedResult;
+import cz.cuni.matfyz.collector.wrappers.queryresult.CachedResult;
+import cz.cuni.matfyz.collector.wrappers.queryresult.ConsumedResult;
 import cz.cuni.matfyz.collector.wrappers.exceptions.DataCollectException;
 import cz.cuni.matfyz.collector.wrappers.exceptions.ParseException;
 import cz.cuni.matfyz.collector.wrappers.exceptions.QueryExecutionException;
 import org.neo4j.driver.Result;
 import org.neo4j.driver.summary.ResultSummary;
 
+import java.math.BigDecimal;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -67,14 +68,14 @@ public class Neo4jDataCollector extends AbstractDataCollector<ResultSummary, Res
             if (isNumber && (Character.isDigit(ch) || ch == '.'))
                 number.append(ch);
             else if (isNumber && !Character.isDigit(ch)) {
-                number.append(ch);
+                unit.append(ch);
                 isNumber = false;
             } else {
                 unit.append(ch);
             }
         }
 
-        return (Integer.parseInt(number.toString()) * _parseUnit(unit.toString()));
+        return (new BigDecimal(number.toString()).longValue() * _parseUnit(unit.toString()));
     }
 
     /**
@@ -321,6 +322,8 @@ public class Neo4jDataCollector extends AbstractDataCollector<ResultSummary, Res
         for (String colName : result.getColumnNames()) {
             for (String type : result.getColumnTypes(colName)) {
                 _model.resultData().setColumnTypeByteSize(colName, type, Neo4jResources.DefaultSizes.getAvgColumnSizeByType(type));
+                double ratio = result.getColumnTypeRatio(colName, type);
+                _model.resultData().setColumnTypeRatio(colName, type, ratio);
             }
         }
     }
