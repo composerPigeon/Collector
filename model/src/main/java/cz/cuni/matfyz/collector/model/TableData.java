@@ -68,9 +68,26 @@ public class TableData implements Mappable<String, Object> {
         }
     }
 
+    public void setColumnTypeRatio(String colName, String colType, double ratio) {
+        if (_columns.containsKey(colName)) {
+            _columns.get(colName).setColumnTypeRatio(colType, ratio);
+        }
+        else {
+            _columns.put(colName, new ColumnData());
+            _columns.get(colName).setColumnTypeRatio(colType, ratio);
+        }
+    }
+
     public int getColumnMaxByteSize(String colName) {
         if (_columns.containsKey(colName)) {
             return _columns.get(colName).getMaxByteSize();
+        }
+        throw new IllegalArgumentException("Column " + colName + " in table " + _name + " does not exists");
+    }
+
+    public int getColumnTypeByteSize(String colName, String colType) {
+        if (_columns.containsKey(colName)) {
+            return _columns.get(colName).getColumnTypeByteSize(colType);
         }
         throw new IllegalArgumentException("Column " + colName + " in table " + _name + " does not exists");
     }

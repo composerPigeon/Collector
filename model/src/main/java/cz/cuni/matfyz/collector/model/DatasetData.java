@@ -155,6 +155,23 @@ public class DatasetData implements Mappable<String, Object> {
         }
     }
 
+    public void setColumnTypeRatio(String tableName, String colName, String colType, double ratio) {
+        if (_tables.containsKey(tableName)) {
+            _tables.get(tableName).setColumnTypeRatio(colName, colType, ratio);
+        }
+        else {
+            _tables.put(tableName, new TableData(tableName));
+            _tables.get(tableName).setColumnTypeRatio(colName, colType, ratio);
+        }
+    }
+
+    public int getColumnTypeByteSize(String tableName, String colName, String colType) {
+        if (_tables.containsKey(tableName)) {
+            return _tables.get(tableName).getColumnTypeByteSize(colName, colType);
+        }
+        throw new IllegalArgumentException("TableName " + tableName + " does not exists in DataModel");
+    }
+
     public int getColumnMaxByteSize(String tableName, String colName) {
         if (_tables.containsKey(tableName)) {
             return _tables.get(tableName).getColumnMaxByteSize(colName);

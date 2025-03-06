@@ -44,6 +44,13 @@ public class ColumnData implements Mappable<String, Object> {
         return _maxByteSize;
     }
 
+    public int getColumnTypeByteSize(String colType) {
+        if (_types.containsKey(colType)) {
+            return _types.get(colType).getByteSize();
+        }
+        throw new IllegalArgumentException("Column does not contain type '" + colType + "'");
+    }
+
     /**
      * Set byteSize for type in _types for this column
      * @param columnType for which type
@@ -60,6 +67,15 @@ public class ColumnData implements Mappable<String, Object> {
             _types.get(columnType).setByteSize(size);
         }
 
+    }
+
+    public void setColumnTypeRatio(String columnType, double ratio) {
+        if (_types.containsKey(columnType))
+            _types.get(columnType).setRatio(ratio);
+        else {
+            _types.put(columnType, new ColumnType(columnType));
+            _types.get(columnType).setRatio(ratio);
+        }
     }
 
     /**

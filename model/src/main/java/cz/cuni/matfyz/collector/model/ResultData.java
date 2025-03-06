@@ -41,6 +41,9 @@ public class ResultData implements Mappable<String, Object> {
     public void addColumnType(String columnName, String columnType) {
         _resultTable.addColumnType(columnName, columnType);
     }
+    public void setColumnTypeRatio(String columnName, String columnType, double ratio) {
+        _resultTable.setColumnTypeRatio(columnName, columnType, ratio);
+    }
 
     /**
      * Method for parsing ResultData to map for saving via org.bson.Document
