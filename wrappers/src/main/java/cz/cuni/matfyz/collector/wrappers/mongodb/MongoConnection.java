@@ -5,14 +5,11 @@ import com.mongodb.client.MongoDatabase;
 import cz.cuni.matfyz.collector.model.DataModel;
 import cz.cuni.matfyz.collector.wrappers.abstractwrapper.AbstractConnection;
 
-import cz.cuni.matfyz.collector.wrappers.cachedresult.CachedResult;
-import cz.cuni.matfyz.collector.wrappers.cachedresult.ConsumedResult;
+import cz.cuni.matfyz.collector.wrappers.queryresult.CachedResult;
+import cz.cuni.matfyz.collector.wrappers.queryresult.ConsumedResult;
 import cz.cuni.matfyz.collector.wrappers.exceptions.ParseException;
 import cz.cuni.matfyz.collector.wrappers.exceptions.QueryExecutionException;
 import org.bson.Document;
-
-import java.util.ArrayList;
-import java.util.List;
 
 /**
  * Mongodb implementation of AbstractConnection

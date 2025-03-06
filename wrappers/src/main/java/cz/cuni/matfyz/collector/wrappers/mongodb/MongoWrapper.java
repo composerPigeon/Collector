@@ -3,14 +3,10 @@ package cz.cuni.matfyz.collector.wrappers.mongodb;
 import com.mongodb.client.MongoClient;
 import com.mongodb.client.MongoClients;
 import com.mongodb.client.MongoDatabase;
-import cz.cuni.matfyz.collector.wrappers.cachedresult.CachedResult;
 import cz.cuni.matfyz.collector.wrappers.mongodb.queryparser.MongoQueryParser;
-import org.bson.Document;
 import cz.cuni.matfyz.collector.model.DataModel;
 import cz.cuni.matfyz.collector.wrappers.abstractwrapper.AbstractWrapper;
 import cz.cuni.matfyz.collector.wrappers.exceptions.WrapperException;
-
-import java.util.List;
 
 /**
  * Class representing Wrapper for mongodb database

@@ -1,17 +1,14 @@
 package cz.cuni.matfyz.collector.wrappers.mongodb;
 
-import com.mongodb.client.MongoDatabase;
 import cz.cuni.matfyz.collector.model.DataModel;
 import cz.cuni.matfyz.collector.wrappers.abstractwrapper.AbstractDataCollector;
-import cz.cuni.matfyz.collector.wrappers.cachedresult.CachedResult;
-import cz.cuni.matfyz.collector.wrappers.cachedresult.ConsumedResult;
+import cz.cuni.matfyz.collector.wrappers.queryresult.CachedResult;
+import cz.cuni.matfyz.collector.wrappers.queryresult.ConsumedResult;
 import cz.cuni.matfyz.collector.wrappers.exceptions.DataCollectException;
 import cz.cuni.matfyz.collector.wrappers.exceptions.QueryExecutionException;
 import org.bson.Document;
 
-import javax.xml.crypto.Data;
 import java.util.*;
-import java.util.concurrent.ExecutionException;
 
 /**
  * Class which is responsible for collecting all the statistical data for mongodb wrapper after query is evaluated
@@ -290,6 +287,8 @@ public class MongoDataCollector extends AbstractDataCollector<Document, Document
                     Integer size = MongoResources.DefaultSizes.getAvgColumnSizeByType(colType);
                     if (size != null)
                         _model.resultData().setColumnTypeByteSize(colName, colType, size);
+                    double ratio = result.getColumnTypeRatio(colName, colType);
+                    _model.resultData().setColumnTypeRatio(colName, colType, ratio);
                 }
             }
         }

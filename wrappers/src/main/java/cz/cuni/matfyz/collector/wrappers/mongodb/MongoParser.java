@@ -3,18 +3,15 @@ package cz.cuni.matfyz.collector.wrappers.mongodb;
 import com.mongodb.client.MongoDatabase;
 import cz.cuni.matfyz.collector.model.DataModel;
 import cz.cuni.matfyz.collector.wrappers.abstractwrapper.AbstractParser;
-import cz.cuni.matfyz.collector.wrappers.cachedresult.CachedResult;
-import cz.cuni.matfyz.collector.wrappers.cachedresult.ConsumedResult;
+import cz.cuni.matfyz.collector.wrappers.queryresult.CachedResult;
+import cz.cuni.matfyz.collector.wrappers.queryresult.ConsumedResult;
 import cz.cuni.matfyz.collector.wrappers.exceptions.ParseException;
 import org.bson.BsonValue;
 import org.bson.Document;
-import org.bson.RawBsonArray;
 import org.bson.RawBsonDocument;
 
-import javax.print.Doc;
 import java.util.List;
 import java.util.Optional;
-import java.util.RandomAccess;
 
 /**
  * Class responsible for parsing results and explain plans of Mongodb database
