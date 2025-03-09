@@ -5,7 +5,6 @@ import cz.cuni.matfyz.collector.persistor.AbstractPersistor;
 import cz.cuni.matfyz.collector.persistor.MongoPersistor;
 import cz.cuni.matfyz.collector.persistor.PersistorException;
 import cz.cuni.matfyz.collector.server.configurationproperties.PersistorProperties;
-import cz.cuni.matfyz.collector.server.executions.Execution;
 import cz.cuni.matfyz.collector.server.executions.ExecutionState;
 import jakarta.annotation.PostConstruct;
 import org.springframework.beans.factory.annotation.Autowired;

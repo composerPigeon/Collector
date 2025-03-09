@@ -10,13 +10,12 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
 import java.util.List;
-import java.util.Queue;
 
 /**
  * Class representing manager of execution processes
  */
 @Component
-public class ExecutionsManager {
+public class ExecutionsManager implements AutoCloseable {
     @Autowired
     private PersistorContainer _persistor;
 
@@ -24,7 +23,7 @@ public class ExecutionsManager {
     private ExecutionsQueue _queue;
 
     /**
-     * Mehod thet creates execution and insert it into ExecutionsQueue
+     * Mehod that creates execution and insert it into ExecutionsQueue
      * @param instanceName instance identifier on query should be executed when scheduler will schedule this query execution
      * @param query query to bo execute on specified instance
      * @return generated uuid for newly created execution
@@ -120,7 +119,7 @@ public class ExecutionsManager {
     }
 
     /**
-     * Method for saving result of execution into peristor
+     * Method for saving result of execution into persistor
      * @param uuid execution identifier
      * @param model instance of DataModel to be saved as result
      * @throws ExecutionManagerException when some PersistorException occur during the process
@@ -137,7 +136,7 @@ public class ExecutionsManager {
     }
 
     /**
-     * Method for saving error of execution into peristor
+     * Method for saving error of execution into persistor
      * @param uuid execution identifier
      * @param errorMsg error message produced by error which interrupted process of query evaluation
      * @throws ExecutionManagerException when some PersistorException occur during the process
@@ -150,5 +149,9 @@ public class ExecutionsManager {
             String errMsg = ErrorMessages.saveExecutionErrorErrorMsg(uuid);
             throw new ExecutionManagerException(errMsg, e);
         }
+    }
+
+    public void close() throws Exception {
+        _queue.close();
     }
 }

@@ -45,7 +45,7 @@ public class MongoPersistor extends AbstractPersistor {
     public void saveExecution(String uuid, DataModel model) throws PersistorException {
         try {
             Document document = new Document();
-            document.put("id", uuid);
+            document.put("_id", uuid);
             document.put("model", model.toMap());
             _database.getCollection("executions").insertOne(document);
         } catch (MongoException e) {
@@ -63,7 +63,7 @@ public class MongoPersistor extends AbstractPersistor {
     public void saveExecutionError(String uuid, String errMsg) throws PersistorException {
         try {
             Document document = new Document();
-            document.put("id", uuid);
+            document.put("_id", uuid);
             document.put("error", errMsg);
             _database.getCollection("executions").insertOne(document);
         } catch (MongoException e) {
@@ -80,7 +80,7 @@ public class MongoPersistor extends AbstractPersistor {
     @Override
     public String getExecutionResult(String uuid) throws PersistorException {
         try {
-            var result = _database.getCollection("executions").find(new Document("id", uuid));
+            var result = _database.getCollection("executions").find(new Document("_id", uuid));
             for (var document : result) {
                 if (document.containsKey("model"))
                     return document.get("model", Document.class).toJson();
@@ -102,7 +102,7 @@ public class MongoPersistor extends AbstractPersistor {
      */
     @Override
     public boolean getExecutionStatus(String uuid) throws PersistorException {
-        try (var resultIter = _database.getCollection("executions").find(new Document("id", uuid)).iterator()) {
+        try (var resultIter = _database.getCollection("executions").find(new Document("_id", uuid)).iterator()) {
             return resultIter.hasNext();
         } catch (MongoException e) {
             throw new PersistorException(e);
