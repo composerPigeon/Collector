@@ -138,5 +138,7 @@ public class MongoResources {
             else
                 return  null;
         }
+
+        public static int PAGE_SIZE = 4096;
     }
 }

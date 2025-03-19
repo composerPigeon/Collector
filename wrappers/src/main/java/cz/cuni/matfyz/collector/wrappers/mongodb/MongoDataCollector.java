@@ -23,16 +23,10 @@ public class MongoDataCollector extends AbstractDataCollector<Document, Document
 
     /**
      * Method which will save page size
-     * @param collectionName inputted collectionName
      * @throws QueryExecutionException when some QueryExecutionException occur during running help query
      */
-    private void _collectPageSize(String collectionName) throws QueryExecutionException {
-        CachedResult result = _connection.executeQuery(MongoResources.getCollectionStatsCommand(collectionName));
-
-        if (result.next()) {
-            int pageSize = result.getDocument("wiredTiger").get("block-manager", Document.class).getInteger("file allocation unit size");
-            _model.datasetData().setDataSetPageSize(pageSize);
-        }
+    private void _collectPageSize() throws QueryExecutionException {
+        _model.datasetData().setDataSetPageSize(MongoResources.DefaultSizes.PAGE_SIZE);
     }
 
     /**
@@ -319,7 +313,7 @@ public class MongoDataCollector extends AbstractDataCollector<Document, Document
     public DataModel collectData(ConsumedResult result) throws DataCollectException {
         try {
             String collName = _getCollectionName();
-            _collectPageSize(collName);
+            _collectPageSize();
             _collectDatasetData();
             _collectIndexesData(collName);
             _collectTableData(collName);
