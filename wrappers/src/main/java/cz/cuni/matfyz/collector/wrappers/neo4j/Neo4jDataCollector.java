@@ -98,13 +98,14 @@ public class Neo4jDataCollector extends AbstractDataCollector<ResultSummary, Res
      * @throws QueryExecutionException when it is thrown from some of the help queries
      */
     private void _collectDatasetSize() throws QueryExecutionException {
-        PropertiesSizeData nodeSizes = _fetchNodePropertiesSize(Neo4jResources.getAllNodesQuery());
-        PropertiesSizeData edgeSizes = _fetchEdgePropertiesSize(Neo4jResources.getAllRelationsQuery());
-        long size = nodeSizes.getByteSize() + edgeSizes.getByteSize();
-        _model.datasetData().setDataSetSize(size);
-        _model.datasetData().setDataSetSizeInPages((int) Math.ceil(
-                (double) size / Neo4jResources.DefaultSizes.PAGE_SIZE
-        ));
+        CachedResult result = _connection.executeQuery(Neo4jResources.getDatabaseSizesQuery());
+        if (result.next()) {
+            long size = result.getLong("totalStoreSize");
+            _model.datasetData().setDataSetSize(size);
+            _model.datasetData().setDataSetSizeInPages((int) Math.ceil(
+                    (double) size / Neo4jResources.DefaultSizes.PAGE_SIZE
+            ));
+        }
     }
 
     /**
@@ -121,8 +122,8 @@ public class Neo4jDataCollector extends AbstractDataCollector<ResultSummary, Res
     // Save ColumnData
 
     /**
-     * Mathod responsible for saving all column data
-     * @param label is label of node or edge from neo4j graoh
+     * Method responsible for saving all column data
+     * @param label is label of node or edge from neo4j graph
      * @param property is field for which data we are interested in
      * @param isNode boolean which indicates if we are parsing node property or edge property
      * @throws QueryExecutionException when some of the help queries fail

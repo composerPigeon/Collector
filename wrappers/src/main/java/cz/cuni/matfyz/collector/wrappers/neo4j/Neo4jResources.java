@@ -27,13 +27,16 @@ public class Neo4jResources {
     public static String getConstraintCountForLabelQuery(String label) {
         return "show constraints yield labelsOrTypes where \"" + label + "\" in labelsOrTypes return count(*) as count;";
     }
-    public static String getAllNodesQuery() {
-        return "match (n) return n;";
-    }
-    public static String getAllRelationsQuery() {
-        return "match ()-[e]->() return e;";
-    }
+    //public static String getAllNodesQuery() {
+    //    return "match (n) return n;";
+    //}
+    //public static String getAllRelationsQuery() {
+    //    return "match ()-[e]->() return e;";
+    //}
 
+    public static String getDatabaseSizesQuery() {
+        return "call apoc.monitor.store()";
+    }
     public static String getPageCacheSizeQuery() {
         return "show settings yield name, value where name=\"server.memory.pagecache.size\";";
     }
