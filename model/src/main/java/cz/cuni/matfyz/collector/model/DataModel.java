@@ -35,10 +35,10 @@ public class DataModel implements Mappable<String, Object> {
         _resultData = new ResultData();
     }
 
-    public DatasetData datasetData() {
+    public DatasetData dataset() {
         return _datasetData;
     }
-    public ResultData resultData() {
+    public ResultData result() {
         return _resultData;
     }
 

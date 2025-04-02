@@ -29,7 +29,7 @@ class PostgresDataCollector extends AbstractDataCollector<String, ResultSet, Str
         CachedResult result = _connection.executeQuery(PostgresResources.getPageSizeQuery());
         if (result.next()) {
             int pageSize = result.getInt("current_setting");
-            _model.datasetData().setDataSetPageSize(pageSize);
+            _model.dataset().setDataSetPageSize(pageSize);
         }
     }
 
@@ -41,7 +41,7 @@ class PostgresDataCollector extends AbstractDataCollector<String, ResultSet, Str
         int pageSize = _model.getPageSize();
         if (pageSize > 0) {
             long sizeInPages = (long) Math.ceil((double)size / (double)pageSize);
-            _model.datasetData().setDataSetSizeInPages(sizeInPages);
+            _model.dataset().setDataSetSizeInPages(sizeInPages);
         }
     }
 
@@ -53,7 +53,7 @@ class PostgresDataCollector extends AbstractDataCollector<String, ResultSet, Str
         CachedResult result = _connection.executeQuery(PostgresResources.getDatasetSizeQuery(_datasetName));
         if (result.next()) {
             long dataSetSize = result.getLong("pg_database_size");
-            _model.datasetData().setDataSetSize(dataSetSize);
+            _model.dataset().setDataSetSize(dataSetSize);
             _collectDatasetSizeInPages(dataSetSize);
         }
     }
@@ -66,7 +66,7 @@ class PostgresDataCollector extends AbstractDataCollector<String, ResultSet, Str
         CachedResult result = _connection.executeQuery(PostgresResources.getCacheSizeQuery());
         if (result.next()) {
             long size = result.getLong("shared_buffers");
-            _model.datasetData().setDataSetCacheSize(size);
+            _model.dataset().setDataSetCacheSize(size);
         }
     }
 
@@ -93,8 +93,8 @@ class PostgresDataCollector extends AbstractDataCollector<String, ResultSet, Str
         if (res.next()) {
             double ratio = res.getDouble("n_distinct");
             int size = res.getInt("avg_width");
-            _model.datasetData().setColumnDistinctRatio(tableName, colName, ratio);
-            _model.datasetData().setColumnTypeByteSize(tableName, colName, typeName, size);
+            _model.dataset().setColumnDistinctRatio(tableName, colName, ratio);
+            _model.dataset().setColumnTypeByteSize(tableName, colName, typeName, size);
         }
 
     }
@@ -112,7 +112,7 @@ class PostgresDataCollector extends AbstractDataCollector<String, ResultSet, Str
             _collectNumericDataForCol(tableName, colName, type);
 
             boolean mandatory = result.getBoolean("attnotnull");
-            _model.datasetData().setColumnMandatory(tableName, colName, mandatory);
+            _model.dataset().setColumnMandatory(tableName, colName, mandatory);
         }
     }
 
@@ -155,7 +155,7 @@ class PostgresDataCollector extends AbstractDataCollector<String, ResultSet, Str
         CachedResult result = _connection.executeQuery(PostgresResources.getRowCountForTableQuery(tableName));
         if (result.next()) {
             long rowCount = result.getLong("reltuples");
-            _model.datasetData().setTableRowCount(tableName, rowCount);
+            _model.dataset().setTableRowCount(tableName, rowCount);
         }
     }
 
@@ -168,7 +168,7 @@ class PostgresDataCollector extends AbstractDataCollector<String, ResultSet, Str
         CachedResult result = _connection.executeQuery(PostgresResources.getConstraintsCountForTableQuery(tableName));
         if (result.next()) {
             long count = result.getLong("relchecks");
-            _model.datasetData().setTableConstraintCount(tableName, count);
+            _model.dataset().setTableConstraintCount(tableName, count);
         }
     }
 
@@ -181,7 +181,7 @@ class PostgresDataCollector extends AbstractDataCollector<String, ResultSet, Str
         CachedResult result = _connection.executeQuery(PostgresResources.getTableSizeInPagesQuery(tableName));
         if (result.next()) {
             long sizeInPages = result.getLong("relpages");
-           _model.datasetData().setTableSizeInPages(tableName, sizeInPages);
+           _model.dataset().setTableSizeInPages(tableName, sizeInPages);
         }
     }
 
@@ -194,7 +194,7 @@ class PostgresDataCollector extends AbstractDataCollector<String, ResultSet, Str
         CachedResult result = _connection.executeQuery(PostgresResources.getTableSizeQuery(tableName));
         if (result.next()){
             long size = result.getLong("pg_total_relation_size");
-            _model.datasetData().setTableByteSize(tableName, size);
+            _model.dataset().setTableByteSize(tableName, size);
         }
     }
 
@@ -223,7 +223,7 @@ class PostgresDataCollector extends AbstractDataCollector<String, ResultSet, Str
         CachedResult result = _connection.executeQuery(PostgresResources.getTableNameForIndexQuery(indexName));
         if (result.next()) {
             String tableName = result.getString("tablename");
-            _model.datasetData().addTable(tableName);
+            _model.dataset().addTable(tableName);
         }
     }
 
@@ -236,7 +236,7 @@ class PostgresDataCollector extends AbstractDataCollector<String, ResultSet, Str
         CachedResult result = _connection.executeQuery(PostgresResources.getRowCountForTableQuery(indexName));
         if (result.next()) {
             long rowCount = result.getLong("reltuples");
-            _model.datasetData().setIndexRowCount(indexName, rowCount);
+            _model.dataset().setIndexRowCount(indexName, rowCount);
         }
     }
 
@@ -249,7 +249,7 @@ class PostgresDataCollector extends AbstractDataCollector<String, ResultSet, Str
         CachedResult result = _connection.executeQuery(PostgresResources.getTableSizeInPagesQuery(indexName));
         if (result.next()) {
             long sizeInPages = result.getLong("relpages");
-            _model.datasetData().setIndexSizeInPages(indexName, sizeInPages);
+            _model.dataset().setIndexSizeInPages(indexName, sizeInPages);
         }
     }
 
@@ -262,7 +262,7 @@ class PostgresDataCollector extends AbstractDataCollector<String, ResultSet, Str
         CachedResult result = _connection.executeQuery(PostgresResources.getTableSizeQuery(indexName));
         if (result.next()) {
             long size = result.getLong("pg_total_relation_size");
-            _model.datasetData().setIndexByteSize(indexName, size);
+            _model.dataset().setIndexByteSize(indexName, size);
         }
     }
 
@@ -307,7 +307,7 @@ class PostgresDataCollector extends AbstractDataCollector<String, ResultSet, Str
      */
     private void _collectResultData(ConsumedResult mainResult) throws QueryExecutionException, DataCollectException {
         long rowCount = mainResult.getRowCount();
-        _model.resultData().setRowCount(rowCount);
+        _model.result().setRowCount(rowCount);
 
         long sizeInBytes = 0;
         double colSize = 0;
@@ -315,20 +315,20 @@ class PostgresDataCollector extends AbstractDataCollector<String, ResultSet, Str
             colSize = 0;
             for (String colType : mainResult.getColumnTypes(columnName)) {
                 String tableName = _getTableNameForColumn(columnName, colType);
-                int typeSize = _model.datasetData().getColumnTypeByteSize(tableName, columnName, colType);
-                _model.resultData().setColumnTypeByteSize(columnName, colType, typeSize);
+                int typeSize = _model.dataset().getColumnTypeByteSize(tableName, columnName, colType);
+                _model.result().setColumnTypeByteSize(columnName, colType, typeSize);
                 double ratio = mainResult.getColumnTypeRatio(columnName, colType);
-                _model.resultData().setColumnTypeRatio(columnName, colType, ratio);
+                _model.result().setColumnTypeRatio(columnName, colType, ratio);
                 colSize += typeSize * ratio;
             }
             sizeInBytes += Math.round(colSize);
         }
         sizeInBytes *= rowCount;
-        _model.resultData().setByteSize(sizeInBytes);
+        _model.result().setByteSize(sizeInBytes);
 
         int pageSize = _model.getPageSize();
         if (pageSize > 0)
-            _model.resultData().setSizeInPages((int)Math.ceil((double) sizeInBytes / pageSize));
+            _model.result().setSizeInPages((int)Math.ceil((double) sizeInBytes / pageSize));
     }
 
     /**

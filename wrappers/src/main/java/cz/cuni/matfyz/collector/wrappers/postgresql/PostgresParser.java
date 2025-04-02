@@ -28,7 +28,7 @@ public class PostgresParser extends AbstractParser<String, ResultSet> {
     private void _saveExecTime(Map<String, Object> root, DataModel dataModel) {
         Object result = root.get("Execution Time");
         if (result instanceof Double time) {
-            dataModel.resultData().setExecutionTime(time);
+            dataModel.result().setExecutionTime(time);
         }
     }
 
@@ -39,7 +39,7 @@ public class PostgresParser extends AbstractParser<String, ResultSet> {
      */
     private void _parseTableName(Map<String, Object> node, DataModel dataModel) {
         if (node.get("Relation Name") instanceof String tableName) {
-            dataModel.datasetData().addTable(tableName);
+            dataModel.dataset().addTable(tableName);
         }
     }
 
@@ -50,7 +50,7 @@ public class PostgresParser extends AbstractParser<String, ResultSet> {
      */
     private void _parseIndexName(Map<String, Object> node, DataModel dataModel) {
         if (node.get("Index Name") instanceof String relName) {
-            dataModel.datasetData().addIndex(relName);
+            dataModel.dataset().addIndex(relName);
         }
     }
 

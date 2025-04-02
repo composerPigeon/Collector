@@ -13,9 +13,10 @@ import cz.cuni.matfyz.collector.wrappers.exceptions.WrapperException;
  */
 public class MongoWrapper extends AbstractWrapper {
 
-    public MongoClient _client;
-    public MongoDatabase _database;
-    public MongoParser _parser;
+    protected MongoClient _client;
+    protected MongoDatabase _database;
+    protected MongoParser _parser;
+
     public MongoWrapper(String host, int port, String datasetName, String user, String password) {
         super(host, port, datasetName, user, password);
         _client = MongoClients.create(MongoResources.getConnectionLink(host, port, user, password));
@@ -24,7 +25,7 @@ public class MongoWrapper extends AbstractWrapper {
     }
 
     /**
-     * Mathod which evaluates the main query, collects the data and return it as a model
+     * Method which evaluates the main query, collects the data and return it as a model
      * @param query inputted query
      * @return instance of DataModel containing statistical measures of the inputted query
      * @throws WrapperException when some of its implementing exceptions occur

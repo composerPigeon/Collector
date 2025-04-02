@@ -30,9 +30,21 @@ public class MongoParser extends AbstractParser<Document, Document> {
      * @param command node of explain result
      */
     private void _parseTableNames(DataModel model, Document command) {
-        String collectionName = command.getString("find");
-        if (collectionName != null)
-            model.datasetData().addTable(collectionName);
+        //TODO: Add aggregate support, because of views
+        if (command.containsKey("find")) {
+            String collectionName = command.getString("find");
+            if (collectionName != null)
+                model.dataset().addTable(collectionName);
+        }
+        if (command.containsKey("aggregate")) {
+            List<Document> pipeline = command.getList("pipeline", Document.class);
+            for (Document stage : pipeline) {
+                if (stage.containsKey("$lookup")) {
+                    String collName = stage.get("$lookup", Document.class).getString("from");
+                    model.dataset().addTable(collName);
+                }
+            }
+        }
     }
 
     /**
@@ -44,7 +56,7 @@ public class MongoParser extends AbstractParser<Document, Document> {
         if ("IXSCAN".equals(stage.getString("stage"))) {
             String indexName = stage.getString("indexName");
             if (indexName != null) {
-                model.datasetData().addIndex(indexName);
+                model.dataset().addIndex(indexName);
             }
         }
         if (stage.containsKey("inputStage")) {
@@ -60,7 +72,7 @@ public class MongoParser extends AbstractParser<Document, Document> {
     private void _parseExecutionStats(DataModel model, Document node) {
         if (node.getBoolean("executionSuccess")) {
 
-            model.resultData().setExecutionTime(Double.valueOf(node.getInteger("executionTimeMillis")));
+            model.result().setExecutionTime(Double.valueOf(node.getInteger("executionTimeMillis")));
         }
     }
 

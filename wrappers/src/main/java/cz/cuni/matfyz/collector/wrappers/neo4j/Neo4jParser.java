@@ -33,7 +33,7 @@ public class Neo4jParser extends AbstractParser<ResultSummary, Result> {
      */
     private void _parseExecutionTime(DataModel model, ResultSummary summary ) {
         long nanoseconds = summary.resultAvailableAfter(TimeUnit.NANOSECONDS);
-        model.resultData().setExecutionTime((double) nanoseconds / (1_000_000));
+        model.result().setExecutionTime((double) nanoseconds / (1_000_000));
     }
 
     /**
@@ -44,7 +44,7 @@ public class Neo4jParser extends AbstractParser<ResultSummary, Result> {
     private void _parseNodeTableName(DataModel model, Plan operator) {
         String details = operator.arguments().get("Details").asString();
         String tableName = details.split(":")[1];
-        model.datasetData().addTable(tableName);
+        model.dataset().addTable(tableName);
     }
 
     /**
@@ -80,7 +80,7 @@ public class Neo4jParser extends AbstractParser<ResultSummary, Result> {
     private void _parseRelationTableName(DataModel model, Plan operator) {
         String details = operator.arguments().get("Details").asString();
         String tableName = _parseRelationDetailsForLabel(details);
-        model.datasetData().addTable(tableName);
+        model.dataset().addTable(tableName);
     }
 
     /**
@@ -119,7 +119,7 @@ public class Neo4jParser extends AbstractParser<ResultSummary, Result> {
         String indexType = details[0];
         String[] indexIdentifiers = _parseIndexIdentifier(details[2].split(":")[1]);
 
-        model.datasetData().addIndex(indexType + ':' + indexIdentifiers[0] + ':' + indexIdentifiers[1]);
+        model.dataset().addIndex(indexType + ':' + indexIdentifiers[0] + ':' + indexIdentifiers[1]);
     }
 
     /**
