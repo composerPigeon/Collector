@@ -1,20 +1,14 @@
 package cz.cuni.matfyz.collector.model;
 
-import com.fasterxml.jackson.annotation.JsonIgnore;
-
 import java.util.HashMap;
 import java.util.LinkedHashMap;
 import java.util.Map;
-import java.util.Set;
 
 /**
  * Class holding statistical data about table
  */
-public class TableData implements Mappable<String, Object> {
+public class TableData {
 
-    /** Field containing table name */
-    @JsonIgnore
-    final private String _name;
     /** Field containing size of table in bytes */
     public Long _size;
     /** Field containing size of table in pages */
@@ -26,9 +20,8 @@ public class TableData implements Mappable<String, Object> {
 
     private final HashMap<String, ColumnData> _columns;
 
-    public TableData(String name) {
+    public TableData() {
         _columns = new HashMap<>();
-        _name = name;
         _size = null;
         _sizeInPages = null;
         _rowCount = null;
@@ -57,69 +50,13 @@ public class TableData implements Mappable<String, Object> {
         }
     }
 
-    //Columns setting methods
-    public void setColumnTypeByteSize(String colName, String colType, int size) {
-        if (_columns.containsKey(colName)) {
-            _columns.get(colName).setColumnTypeSize(colType, size);
+    public ColumnData getColumn(String columnName, boolean createIfNotExist) throws IllegalArgumentException {
+        if (!_columns.containsKey(columnName) && createIfNotExist) {
+            _columns.put(columnName, new ColumnData());
+        } else if (!_columns.containsKey(columnName) && !createIfNotExist) {
+            throw new IllegalArgumentException("Column '" + columnName + "' does not exist");
         }
-        else {
-            _columns.put(colName, new ColumnData());
-            _columns.get(colName).setColumnTypeSize(colType, size);
-        }
-    }
-
-    public void setColumnTypeRatio(String colName, String colType, double ratio) {
-        if (_columns.containsKey(colName)) {
-            _columns.get(colName).setColumnTypeRatio(colType, ratio);
-        }
-        else {
-            _columns.put(colName, new ColumnData());
-            _columns.get(colName).setColumnTypeRatio(colType, ratio);
-        }
-    }
-
-    public int getColumnMaxByteSize(String colName) {
-        if (_columns.containsKey(colName)) {
-            return _columns.get(colName).getMaxByteSize();
-        }
-        throw new IllegalArgumentException("Column " + colName + " in table " + _name + " does not exists");
-    }
-
-    public int getColumnTypeByteSize(String colName, String colType) {
-        if (_columns.containsKey(colName)) {
-            return _columns.get(colName).getColumnTypeByteSize(colType);
-        }
-        throw new IllegalArgumentException("Column " + colName + " in table " + _name + " does not exists");
-    }
-
-    public void setColumnDistinctRatio(String colName, double ratio) {
-        if(_columns.containsKey(colName)) {
-            _columns.get(colName).setDistinctRatio(ratio);
-        }
-        else {
-            _columns.put(colName, new ColumnData());
-            _columns.get(colName).setDistinctRatio(ratio);
-        }
-    }
-
-    public void addColumnType(String colName, String type) {
-        if(_columns.containsKey(colName)) {
-            _columns.get(colName).addType(type);
-        }
-        else {
-            _columns.put(colName, new ColumnData());
-            _columns.get(colName).addType(type);
-        }
-    }
-
-    public void setColumnMandatory(String colName, boolean value) {
-        if(_columns.containsKey(colName)) {
-            _columns.get(colName).setMandatory(value);
-        }
-        else {
-            _columns.put(colName, new ColumnData());
-            _columns.get(colName).setMandatory(value);
-        }
+        return _columns.get(columnName);
     }
 
     /**

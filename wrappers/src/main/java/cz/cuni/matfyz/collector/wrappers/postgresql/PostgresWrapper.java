@@ -1,7 +1,8 @@
 package cz.cuni.matfyz.collector.wrappers.postgresql;
 
-import cz.cuni.matfyz.collector.wrappers.abstractwrapper.AbstractWrapper;
 import cz.cuni.matfyz.collector.model.DataModel;
+import cz.cuni.matfyz.collector.wrappers.abstractwrapper.AbstractWrapper;
+import cz.cuni.matfyz.collector.model.QueryData;
 import cz.cuni.matfyz.collector.wrappers.queryresult.ConsumedResult;
 import cz.cuni.matfyz.collector.wrappers.exceptions.WrapperException;
 
@@ -28,7 +29,7 @@ public class PostgresWrapper extends AbstractWrapper {
         try (
            var connection = new PostgresConnection(PostgresResources.getConnectionLink(_hostName, _port, _datasetName, _userName, _password), _parser);
         ) {
-            DataModel dataModel = new DataModel(query, PostgresResources.DATABASE_NAME, _datasetName);
+            DataModel dataModel = DataModel.CreateForQuery(query, PostgresResources.DATABASE_NAME, _datasetName);
             ConsumedResult result = connection.executeMainQuery(query, dataModel);
 
             var collector = new PostgresDataCollector(connection, dataModel, _datasetName);

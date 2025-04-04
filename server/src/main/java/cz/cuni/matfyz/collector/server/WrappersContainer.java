@@ -1,6 +1,5 @@
 package cz.cuni.matfyz.collector.server;
 
-import com.fasterxml.jackson.databind.ObjectMapper;
 import cz.cuni.matfyz.collector.model.DataModel;
 import cz.cuni.matfyz.collector.server.configurationproperties.Instance;
 import cz.cuni.matfyz.collector.server.configurationproperties.WrappersProperties;

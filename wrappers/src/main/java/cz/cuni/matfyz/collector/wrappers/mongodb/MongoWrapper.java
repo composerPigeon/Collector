@@ -33,8 +33,7 @@ public class MongoWrapper extends AbstractWrapper {
     @Override
     public DataModel executeQuery(String query) throws WrapperException {
         try (var connection = new MongoConnection(_database, _parser)) {
-            var model = new DataModel(query, MongoResources.DATABASE_NAME, _datasetName);
-
+            var model = DataModel.CreateForQuery(query, MongoResources.DATABASE_NAME, _datasetName);
             var command = MongoQueryParser.parseQueryToCommmand(query);
             var result = connection.executeMainQuery(command, model);
 

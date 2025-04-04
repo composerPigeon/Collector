@@ -21,7 +21,7 @@ public class MongoPersistor extends AbstractPersistor {
     }
 
     /**
-     * Method for building connection link of inputed params
+     * Method for building connection link of inputted params
      * @param hostName hostName of database
      * @param port port of database
      * @param userName userName to authenticate

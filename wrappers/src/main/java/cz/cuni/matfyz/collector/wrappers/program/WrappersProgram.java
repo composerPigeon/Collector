@@ -1,5 +1,6 @@
 package cz.cuni.matfyz.collector.wrappers.program;
 
+import com.fasterxml.jackson.core.JsonProcessingException;
 import cz.cuni.matfyz.collector.model.DataModel;
 import cz.cuni.matfyz.collector.wrappers.exceptions.WrapperException;
 import cz.cuni.matfyz.collector.wrappers.mongodb.MongoWrapper;
@@ -9,7 +10,7 @@ import java.util.logging.Logger;
 public class WrappersProgram {
 
     private static final Logger _logger = Logger.getLogger(WrappersProgram.class.getName());
-    private static void mongoTests() throws WrapperException {
+    private static void mongoTests() throws WrapperException, JsonProcessingException {
         MongoWrapper mongoWrapper = new MongoWrapper(
                 "localhost",
                 27017,
@@ -21,7 +22,7 @@ public class WrappersProgram {
         DataModel mongoModel = mongoWrapper.executeQuery("db.costumers.find()");
         System.out.println(mongoModel.toJson());
 
-        // It will fail for this command, beacuse we do not support count() function
+        // It will fail for this command, because we do not support count() function
         //mongoModel = mongoWrapper.executeQuery("db.costumers.find().count()");
         //System.out.println(mongoModel.toJson());
 
@@ -31,7 +32,7 @@ public class WrappersProgram {
         mongoModel = mongoWrapper.executeQuery("db.costumers.find({\"customer_id\": { \"$gt\": 30 }})");
         System.out.println(mongoModel.toJson());
 
-        // It will fail for this command, beacuse we do not support aggregate() function
+        // It will fail for this command, because we do not support aggregate() function
         //mongoModel = mongoWrapper.executeQuery("db.costumers.aggregate()");
         //System.out.println(mongoModel.toJson());
     }
@@ -46,7 +47,7 @@ public class WrappersProgram {
                     7687,
                     "neo4j",
                     "neo4j",
-                    "MiGWwErj5UxFfac"
+                    "password"
             );
 
             DataModel neo4jModel = neo4jWrapper.executeQuery("MATCH (n) RETURN n;");
@@ -63,7 +64,7 @@ public class WrappersProgram {
             DataModel postgresModel = postgresWrapper.executeQuery("SELECT * FROM fact_trendings;");
             System.out.println(postgresModel.toJson());
 
-        } catch (WrapperException e) {
+        } catch (WrapperException | JsonProcessingException e) {
             _logger.severe(e.getMessage());
         }
 

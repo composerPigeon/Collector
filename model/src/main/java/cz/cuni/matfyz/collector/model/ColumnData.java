@@ -1,13 +1,11 @@
 package cz.cuni.matfyz.collector.model;
 
-import com.fasterxml.jackson.annotation.JsonIgnore;
-
 import java.util.*;
 
 /**
  * Class responsible for representing collected statistical data about individual columns
  */
-public class ColumnData implements Mappable<String, Object> {
+public class ColumnData {
 
     /**
      * Field holding information about statistical distribution of values. In PostgreSQL it holds ratio of distinct values.
@@ -19,9 +17,6 @@ public class ColumnData implements Mappable<String, Object> {
      */
     private final HashMap<String, ColumnType> _types;
 
-    @JsonIgnore
-    private Integer _maxByteSize;
-
     /**
      * Field holding information if column is mandatory to be set for entity in database.
      */
@@ -30,7 +25,6 @@ public class ColumnData implements Mappable<String, Object> {
     public ColumnData() {
         _ratio = null;
         _mandatory = null;
-        _maxByteSize = null;
         _types = new HashMap<>();
     }
 
@@ -39,43 +33,8 @@ public class ColumnData implements Mappable<String, Object> {
      *
      * @return value stored in _size field
      */
-    @JsonIgnore
     public int getMaxByteSize() {
-        return _maxByteSize;
-    }
-
-    public int getColumnTypeByteSize(String colType) {
-        if (_types.containsKey(colType)) {
-            return _types.get(colType).getByteSize();
-        }
-        throw new IllegalArgumentException("Column does not contain type '" + colType + "'");
-    }
-
-    /**
-     * Set byteSize for type in _types for this column
-     * @param columnType for which type
-     * @param size byte size to be set
-     */
-    public void setColumnTypeSize(String columnType, int size) {
-        if (_maxByteSize == null || size > _maxByteSize)
-            _maxByteSize = size;
-
-        if (_types.containsKey(columnType))
-            _types.get(columnType).setByteSize(size);
-        else {
-            _types.put(columnType, new ColumnType(columnType));
-            _types.get(columnType).setByteSize(size);
-        }
-
-    }
-
-    public void setColumnTypeRatio(String columnType, double ratio) {
-        if (_types.containsKey(columnType))
-            _types.get(columnType).setRatio(ratio);
-        else {
-            _types.put(columnType, new ColumnType(columnType));
-            _types.get(columnType).setRatio(ratio);
-        }
+        return _types.values().stream().map(ColumnType::getByteSize).max(Integer::compareTo).orElse(0);
     }
 
     /**
@@ -84,9 +43,17 @@ public class ColumnData implements Mappable<String, Object> {
      */
     public void addType(String columnType) {
         if (!_types.containsKey(columnType))
-            _types.put(columnType, new ColumnType(columnType));
+            _types.put(columnType, new ColumnType());
     }
 
+    public ColumnType getColumnType(String columnType, boolean createNew) {
+        if (!_types.containsKey(columnType) && createNew) {
+            _types.put(columnType, new ColumnType());
+        } else if (!_types.containsKey(columnType) && !createNew) {
+            throw new IllegalArgumentException("Column '" + columnType + "' does not exists in DataModel");
+        }
+        return _types.get(columnType);
+    }
 
     public void setMandatory(boolean value) {
         if (_mandatory == null)
@@ -110,7 +77,7 @@ public class ColumnData implements Mappable<String, Object> {
      * @return converted map
      */
     public Map<String, Object> toMap() {
-        Map<String, Object> map = new LinkedHashMap<>();
+        var map = new LinkedHashMap<String, Object>();
         if (_ratio != null)
             map.put("ratio", _ratio);
         if (_mandatory != null)

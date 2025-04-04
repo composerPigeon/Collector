@@ -27,7 +27,7 @@ public class Neo4jDataCollector extends AbstractDataCollector<ResultSummary, Res
      * Method which saves page size used by databases storage engine
      */
     private void _collectPageSize() {
-        _model.dataset().setDataSetPageSize(Neo4jResources.DefaultSizes.PAGE_SIZE);
+        _model.setPageSize(Neo4jResources.DefaultSizes.PAGE_SIZE);
     }
 
     /**
@@ -88,7 +88,7 @@ public class Neo4jDataCollector extends AbstractDataCollector<ResultSummary, Res
         if (result.next()) {
             String stringSize = result.getString("value");
             if (!"No Value".equals(stringSize)) {
-                _model.dataset().setDataSetCacheSize(_parsePageCacheSize(stringSize));
+                _model.setDatasetCacheSize(_parsePageCacheSize(stringSize));
             }
         }
     }
@@ -101,8 +101,8 @@ public class Neo4jDataCollector extends AbstractDataCollector<ResultSummary, Res
         CachedResult result = _connection.executeQuery(Neo4jResources.getDatabaseSizesQuery());
         if (result.next()) {
             long size = result.getLong("totalStoreSize");
-            _model.dataset().setDataSetSize(size);
-            _model.dataset().setDataSetSizeInPages((int) Math.ceil(
+            _model.setDatasetByteSize(size);
+            _model.setDatasetSizeInPages((int) Math.ceil(
                     (double) size / Neo4jResources.DefaultSizes.PAGE_SIZE
             ));
         }
@@ -133,11 +133,11 @@ public class Neo4jDataCollector extends AbstractDataCollector<ResultSummary, Res
                 _connection.executeQuery(Neo4jResources.getEdgePropertyTypeAndMandatoryQuery(label, property));
         if (result.next()) {
             boolean mandatory = result.getBoolean("mandatory");
-            _model.dataset().setColumnMandatory(label, property, mandatory);
+            _model.setColumnMandatory(label, property, mandatory);
 
             for (String type : result.getList("propertyTypes", String.class)) {
                 int columnSize = Neo4jResources.DefaultSizes.getAvgColumnSizeByType(type);
-                _model.dataset().setColumnTypeByteSize(label, property, type, columnSize);
+                _model.setColumnTypeByteSize(label, property, type, columnSize);
             }
         }
     }
@@ -205,19 +205,19 @@ public class Neo4jDataCollector extends AbstractDataCollector<ResultSummary, Res
 
     /**
      * Method responsible for saving how much constraints were used on entities of specified label
-     * @param label speciufies entities we are interested in
+     * @param label specifies entities we are interested in
      * @throws QueryExecutionException when help query fails
      */
     private void _collectTableConstraintCount(String label) throws QueryExecutionException {
         CachedResult result = _connection.executeQuery(Neo4jResources.getConstraintCountForLabelQuery(label));
         if (result.next()) {
-            long count = result.getLong("count");
-            _model.dataset().setTableConstraintCount(label, count);
+            int count = result.getInt("count");
+            _model.setTableConstraintCount(label, count);
         }
     }
 
     /**
-     * Mathod responsible for saving sizes of entities of specific labels
+     * Method responsible for saving sizes of entities of specific labels
      * @param tableName is label of entities we are interested in
      * @param isNode indicates if we are interested in nodes or edges
      * @throws QueryExecutionException when some of the help queries fails
@@ -227,11 +227,11 @@ public class Neo4jDataCollector extends AbstractDataCollector<ResultSummary, Res
         long size = sizes.getByteSize();
         long rowCount = sizes.getCount();
 
-        _model.dataset().setTableByteSize(tableName, size);
-        _model.dataset().setTableSizeInPages(tableName, (int) Math.ceil(
+        _model.setTableByteSize(tableName, size);
+        _model.setTableSizeInPages(tableName, (int) Math.ceil(
                 (double) size / Neo4jResources.DefaultSizes.PAGE_SIZE
         ));
-        _model.dataset().setTableRowCount(tableName, rowCount);
+        _model.setTableRowCount(tableName, rowCount);
     }
 
     /**
@@ -268,7 +268,7 @@ public class Neo4jDataCollector extends AbstractDataCollector<ResultSummary, Res
      * @param indexNames specify index by its name
      */
     private void _collectTableNameFor(String[] indexNames) {
-        _model.dataset().addTable(indexNames[1]);
+        _model.addTable(indexNames[1]);
     }
 
     /**
@@ -284,9 +284,9 @@ public class Neo4jDataCollector extends AbstractDataCollector<ResultSummary, Res
         long size = (long) Math.ceil((double) (sizes.getByteSize()) / 3);
         long rowCount = sizes.getCount();
 
-        _model.dataset().setIndexRowCount(indexName, rowCount);
-        _model.dataset().setIndexByteSize(indexName, size);
-        _model.dataset().setIndexSizeInPages(indexName,
+        _model.setIndexRowCount(indexName, rowCount);
+        _model.setIndexByteSize(indexName, size);
+        _model.setIndexSizeInPages(indexName,
                 (int) Math.ceil((double) size / Neo4jResources.DefaultSizes.PAGE_SIZE)
         );
     }
@@ -312,19 +312,19 @@ public class Neo4jDataCollector extends AbstractDataCollector<ResultSummary, Res
      */
     private void _collectResultData(ConsumedResult result) {
         long size = result.getByteSize();
-        _model.result().setByteSize(size);
+        _model.setResultByteSize(size);
 
         long count = result.getRowCount();
-        _model.result().setRowCount(count);
+        _model.setResultRowCount(count);
 
         long sizeInPages = (long) Math.ceil((double) size / Neo4jResources.DefaultSizes.PAGE_SIZE);
-        _model.result().setSizeInPages(sizeInPages);
+        _model.setResultSizeInPages(sizeInPages);
 
         for (String colName : result.getColumnNames()) {
             for (String type : result.getColumnTypes(colName)) {
-                _model.result().setColumnTypeByteSize(colName, type, Neo4jResources.DefaultSizes.getAvgColumnSizeByType(type));
+                _model.setResultColumnTypeByteSize(colName, type, Neo4jResources.DefaultSizes.getAvgColumnSizeByType(type));
                 double ratio = result.getColumnTypeRatio(colName, type);
-                _model.result().setColumnTypeRatio(colName, type, ratio);
+                _model.setResultColumnTypeRatio(colName, type, ratio);
             }
         }
     }

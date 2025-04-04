@@ -6,7 +6,7 @@ import java.util.Map;
 /**
  * Class for saving statistical data about index
  */
-public class IndexData implements Mappable<String, Object> {
+public class IndexData {
     /** Field holding index size in bytes */
     public Long _size;
     /** Field holding index size in pages */
@@ -32,18 +32,14 @@ public class IndexData implements Mappable<String, Object> {
         if (_rowCount == null) {_rowCount = count;}
     }
 
-    /**
-     * Method for converting IndexData to Map to use in org.bson.Document
-     * @return converted map
-     */
     public Map<String, Object> toMap() {
-        Map<String, Object> result = new LinkedHashMap<>();
+        var map = new LinkedHashMap<String, Object>();
         if (_size != null)
-            result.put("size", _size);
+            map.put("size", _size);
         if (_sizeInPages != null)
-            result.put("sizeInPages", _sizeInPages);
+            map.put("sizeInPages", _sizeInPages);
         if (_rowCount != null)
-            result.put("rowCount", _rowCount);
-        return result;
+            map.put("rowCount", _rowCount);
+        return map;
     }
 }

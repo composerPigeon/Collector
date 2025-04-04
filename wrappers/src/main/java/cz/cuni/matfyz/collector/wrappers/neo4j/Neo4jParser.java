@@ -33,7 +33,7 @@ public class Neo4jParser extends AbstractParser<ResultSummary, Result> {
      */
     private void _parseExecutionTime(DataModel model, ResultSummary summary ) {
         long nanoseconds = summary.resultAvailableAfter(TimeUnit.NANOSECONDS);
-        model.result().setExecutionTime((double) nanoseconds / (1_000_000));
+        model.setResultExecutionTime((double) nanoseconds / (1_000_000));
     }
 
     /**
@@ -44,7 +44,7 @@ public class Neo4jParser extends AbstractParser<ResultSummary, Result> {
     private void _parseNodeTableName(DataModel model, Plan operator) {
         String details = operator.arguments().get("Details").asString();
         String tableName = details.split(":")[1];
-        model.dataset().addTable(tableName);
+        model.addTable(tableName);
     }
 
     /**
@@ -80,7 +80,7 @@ public class Neo4jParser extends AbstractParser<ResultSummary, Result> {
     private void _parseRelationTableName(DataModel model, Plan operator) {
         String details = operator.arguments().get("Details").asString();
         String tableName = _parseRelationDetailsForLabel(details);
-        model.dataset().addTable(tableName);
+        model.addTable(tableName);
     }
 
     /**
@@ -119,7 +119,7 @@ public class Neo4jParser extends AbstractParser<ResultSummary, Result> {
         String indexType = details[0];
         String[] indexIdentifiers = _parseIndexIdentifier(details[2].split(":")[1]);
 
-        model.dataset().addIndex(indexType + ':' + indexIdentifiers[0] + ':' + indexIdentifiers[1]);
+        model.addIndex(indexType + ':' + indexIdentifiers[0] + ':' + indexIdentifiers[1]);
     }
 
     /**
@@ -217,7 +217,7 @@ public class Neo4jParser extends AbstractParser<ResultSummary, Result> {
     /**
      * Method for parsing ordinal result to Cached result
      * @param result result of some query
-     * @return insance of CachedResult
+     * @return instance of CachedResult
      */
     @Override
     public CachedResult parseResult(Result result) {
@@ -300,8 +300,8 @@ public class Neo4jParser extends AbstractParser<ResultSummary, Result> {
      * Class which represents properties of entities from neo4j graph
      */
     private static class PropertyData {
-        private Object _value;
-        private String _type;
+        private final Object _value;
+        private final String _type;
 
         private PropertyData(Object value, String type) {
             _value = value;

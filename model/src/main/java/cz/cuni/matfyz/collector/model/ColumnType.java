@@ -1,20 +1,17 @@
 package cz.cuni.matfyz.collector.model;
 
-import com.fasterxml.jackson.annotation.JsonIgnore;
-
 import java.util.LinkedHashMap;
 import java.util.Map;
 
-public class ColumnType implements Mappable<String, Object> {
-    private final String _typeName;
+public class ColumnType {
     private Integer _byteSize;
     private Double _ratio;
 
-    public ColumnType(String typeName) {
-        _typeName = typeName;
+    public ColumnType() {
+        _byteSize = null;
+        _ratio = null;
     }
 
-    @JsonIgnore
     public int getByteSize() { return _byteSize; }
 
     public void setByteSize(int size) {
@@ -28,9 +25,7 @@ public class ColumnType implements Mappable<String, Object> {
     }
 
     public Map<String, Object> toMap() {
-        Map<String, Object> map = new LinkedHashMap<>();
-        if (_typeName != null)
-            map.put("typeName", _typeName);
+        var map = new LinkedHashMap<String, Object>();
         if (_byteSize != null)
             map.put("byteSize", _byteSize);
         if (_ratio != null)

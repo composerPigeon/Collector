@@ -21,7 +21,7 @@ public abstract class AbstractConnection<TPlan, TResult, TQuery> implements Auto
 
     /**
      * Method for executing query from execution. Whole result from database is then cached into memory
-     * @param query inputed query
+     * @param query inputted query
      * @return result of this query
      * @throws QueryExecutionException when some problem occur during the process
      */
@@ -29,15 +29,15 @@ public abstract class AbstractConnection<TPlan, TResult, TQuery> implements Auto
 
     /**
      * Method for executing query and computing statistical data about result, which are then returned as Consumed result. The result is computed without caching.
-     * @param query inputed query
+     * @param query inputted query
      * @return consumed result of this query, which holds statistical data of result such as rowCount or byteSize...
      * @throws QueryExecutionException when some problem occur during the process
      */
     public abstract ConsumedResult executeQueryAndConsume(TQuery query) throws QueryExecutionException;
 
     /**
-     * Mathod for executing main query, which is consumed, but also includes some explain tree parsing etc.
-     * @param query inputed query
+     * Method for executing main query, which is consumed, but also includes some explain tree parsing etc.
+     * @param query inputted query
      * @param toModel DataModel which is used for storing data parsed from explain tree
      * @return consumed result of this query
      * @throws QueryExecutionException when some problem occur during process

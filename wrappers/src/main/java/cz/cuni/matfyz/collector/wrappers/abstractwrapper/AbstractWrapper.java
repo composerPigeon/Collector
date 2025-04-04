@@ -4,7 +4,7 @@ import cz.cuni.matfyz.collector.model.DataModel;
 import cz.cuni.matfyz.collector.wrappers.exceptions.WrapperException;
 
 /**
- * Class which represents unified API for comunication with all wrappers from server module
+ * Class which represents unified API for communication with all wrappers from server module
  */
 public abstract class AbstractWrapper {
     /** Field containing hostName, with which was the connection to the database established */
@@ -28,7 +28,7 @@ public abstract class AbstractWrapper {
 
     /**
      * Method which is executed by QueryScheduler to compute statistical result of query over this wrapper
-     * @param query inputed
+     * @param query inputted
      * @return instance of DataModel which contains all measured data
      * @throws WrapperException when some problem occur during process, message of this exception is saved as a result to execution if some error is thrown during evaluation
      */

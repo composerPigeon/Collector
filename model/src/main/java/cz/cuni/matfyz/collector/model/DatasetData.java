@@ -1,16 +1,14 @@
 package cz.cuni.matfyz.collector.model;
 
-import com.fasterxml.jackson.annotation.JsonIgnore;
-
 import java.util.*;
 
 /** Class holding statistical data about dataset */
-public class DatasetData implements Mappable<String, Object> {
+public class DatasetData {
 
     /** Field containing size of dataset in bytes */
-    private Long _dataSetSize;
+    private Long _datasetSize;
     /** Field containing size of dataset in pages (virtual disk block size) */
-    private Long _dataSetSizeInPages;
+    private Long _datasetSizeInPages;
     /** Field containing size of page in bytes */
     private Integer _pageSize;
     /** Field containing size of caches in bytes which could be used for query caching */
@@ -23,26 +21,25 @@ public class DatasetData implements Mappable<String, Object> {
         _tables = new HashMap<>();
         _indexes = new HashMap<>();
 
-        _dataSetSize = null;
-        _dataSetSizeInPages = null;
+        _datasetSize = null;
+        _datasetSizeInPages = null;
         _pageSize = null;
         _cacheSize = null;
     }
 
     // Database setting methods
     public void setDataSetSize(long size) {
-        if(_dataSetSize == null)
-            _dataSetSize = size;
+        if(_datasetSize == null)
+            _datasetSize = size;
     }
 
     public void setDataSetSizeInPages(long dataSetSizeInPages) {
-        if (_dataSetSizeInPages == null) { _dataSetSizeInPages = dataSetSizeInPages; }
+        if (_datasetSizeInPages == null) { _datasetSizeInPages = dataSetSizeInPages; }
     }
     public void setDataSetPageSize(int pageSize) {
         if (_pageSize == null)
             _pageSize = pageSize;
     }
-    @JsonIgnore
     public int getDataSetPageSize() {
         return _pageSize;
     }
@@ -52,160 +49,39 @@ public class DatasetData implements Mappable<String, Object> {
             _cacheSize = size;
     }
 
-    //Tables setting methods
-    public void setTableByteSize(String tableName, long size) {
-        if (_tables.containsKey(tableName)) {
-            _tables.get(tableName).setByteSize(size);
+    public TableData getTable(String tableName, boolean createIfNotExist) throws IllegalArgumentException {
+        if (!_tables.containsKey(tableName) && createIfNotExist) {
+            _tables.put(tableName, new TableData());
+        } else if (!_tables.containsKey(tableName) && !createIfNotExist) {
+            throw new IllegalArgumentException("Table '" + tableName + "' does not exists in DataModel");
         }
-        else {
-            _tables.put(tableName, new TableData(tableName));
-            _tables.get(tableName).setByteSize(size);
-        }
+        return _tables.get(tableName);
     }
 
-    public void setTableSizeInPages(String tableName, long sizeInPages) {
-        if (_tables.containsKey(tableName)) {
-            _tables.get(tableName).setSizeInPages(sizeInPages);
-        }
-        else {
-            _tables.put(tableName, new TableData(tableName));
-            _tables.get(tableName).setSizeInPages(sizeInPages);
-        }
-    }
-
-    public void setTableRowCount(String tableName, long count) {
-        if (_tables.containsKey(tableName)) {
-            _tables.get(tableName).setRowCount(count);
-        }
-        else {
-            _tables.put(tableName, new TableData(tableName));
-            _tables.get(tableName).setRowCount(count);
-        }
-    }
-
-    public void setTableConstraintCount(String tableName, long count) {
-        if (_tables.containsKey(tableName)) {
-            _tables.get(tableName).setConstraintCount(count);
-        } else {
-            _tables.put(tableName, new TableData(tableName));
-            _tables.get(tableName).setConstraintCount(count);
-        }
-    }
-
-    // Indexes setting methods
-    public void setIndexByteSize(String inxName, long size) {
-        if (_indexes.containsKey(inxName)) {
-            _indexes.get(inxName).setByteSize(size);
-        }
-        else {
+    public IndexData getIndex(String inxName, boolean createIfNotExist) {
+        if (!_indexes.containsKey(inxName) && createIfNotExist) {
             _indexes.put(inxName, new IndexData());
-            _indexes.get(inxName).setByteSize(size);
+        } else if (!_indexes.containsKey(inxName) && !createIfNotExist) {
+            throw new IllegalArgumentException("Index '" + inxName + "' does not exists in DataModel");
         }
+        return _indexes.get(inxName);
     }
 
-    public void setIndexSizeInPages(String inxName, long sizeInPages) {
-        if (_indexes.containsKey(inxName)) {
-            _indexes.get(inxName).setSizeInPages(sizeInPages);
-        }
-        else {
-            _indexes.put(inxName, new IndexData());
-            _indexes.get(inxName).setSizeInPages(sizeInPages);
-        }
-    }
-
-    public void setIndexRowCount(String inxName, long count) {
-        if (_indexes.containsKey(inxName)) {
-            _indexes.get(inxName).setRowCount(count);
-        }
-        else {
-            _indexes.put(inxName, new IndexData());
-            _indexes.get(inxName).setRowCount(count);
-        }
-    }
-
-
-    @JsonIgnore
     public Set<String> getTableNames() {
         return _tables.keySet();
     }
     public void addTable(String tableName) {
         if (!_tables.containsKey(tableName)) {
-            _tables.put(tableName, new TableData(tableName));
+            _tables.put(tableName, new TableData());
         }
     }
 
-    @JsonIgnore
     public Set<String> getIndexNames() {
         return _indexes.keySet();
     }
     public void addIndex(String inxName) {
         if(!_indexes.containsKey(inxName)) {
             _indexes.put(inxName, new IndexData());
-        }
-    }
-
-    //Columns setting methods
-    public void setColumnTypeByteSize(String tableName, String colName, String colType, int size) {
-        if(_tables.containsKey(tableName)) {
-            _tables.get(tableName).setColumnTypeByteSize(colName, colType, size);
-        }
-        else {
-            _tables.put(tableName, new TableData(tableName));
-            _tables.get(tableName).setColumnTypeByteSize(colName, colType, size);
-        }
-    }
-
-    public void setColumnTypeRatio(String tableName, String colName, String colType, double ratio) {
-        if (_tables.containsKey(tableName)) {
-            _tables.get(tableName).setColumnTypeRatio(colName, colType, ratio);
-        }
-        else {
-            _tables.put(tableName, new TableData(tableName));
-            _tables.get(tableName).setColumnTypeRatio(colName, colType, ratio);
-        }
-    }
-
-    public int getColumnTypeByteSize(String tableName, String colName, String colType) {
-        if (_tables.containsKey(tableName)) {
-            return _tables.get(tableName).getColumnTypeByteSize(colName, colType);
-        }
-        throw new IllegalArgumentException("TableName " + tableName + " does not exists in DataModel");
-    }
-
-    public int getColumnMaxByteSize(String tableName, String colName) {
-        if (_tables.containsKey(tableName)) {
-            return _tables.get(tableName).getColumnMaxByteSize(colName);
-        }
-        throw new IllegalArgumentException("TableName " + tableName + " does not exists in DataModel");
-    }
-
-    public void setColumnDistinctRatio(String tableName, String colName, double ratio) {
-        if(_tables.containsKey(tableName)) {
-            _tables.get(tableName).setColumnDistinctRatio(colName, ratio);
-        }
-        else {
-            _tables.put(tableName, new TableData(tableName));
-            _tables.get(tableName).setColumnDistinctRatio(colName, ratio);
-        }
-    }
-
-    public void addColumnType(String tableName, String colName, String type) {
-        if(_tables.containsKey(tableName)) {
-            _tables.get(tableName).addColumnType(colName, type);
-        }
-        else {
-            _tables.put(tableName, new TableData(tableName));
-            _tables.get(tableName).addColumnType(colName, type);
-        }
-    }
-
-    public void setColumnMandatory(String tableName, String colName, boolean value) {
-        if(_tables.containsKey(tableName)) {
-            _tables.get(tableName).setColumnMandatory(colName, value);
-        }
-        else {
-            _tables.put(tableName, new TableData(tableName));
-            _tables.get(tableName).setColumnMandatory(colName, value);
         }
     }
 
@@ -233,24 +109,18 @@ public class DatasetData implements Mappable<String, Object> {
         return map;
     }
 
-    /**
-     * Method converting DatasetData to map, that can be stored in org.bson.Document
-     * @return converted map
-     */
     public Map<String, Object> toMap() {
-        Map<String, Object> result = new LinkedHashMap<>();
-        if (_dataSetSize != null)
-            result.put("datasetSize", _dataSetSize);
-        if (_dataSetSizeInPages != null)
-            result.put("datasetSizeInPages", _dataSetSizeInPages);
+        var map = new LinkedHashMap<String, Object>();
+        if (_datasetSize != null)
+            map.put("datasetSize", _datasetSize);
+        if (_datasetSizeInPages != null)
+            map.put("datasetSizeInPages", _datasetSizeInPages);
         if (_pageSize != null)
-            result.put("pageSize", _pageSize);
+            map.put("pageSize", _pageSize);
         if (_cacheSize != null)
-            result.put("cacheSize", _cacheSize);
-
-        result.put("tables", _parseTablesToMap());
-        result.put("indexes", _parseIndexesToMap());
-
-        return result;
+            map.put("cacheSize", _cacheSize);
+        map.put("tables", _parseTablesToMap());
+        map.put("indexes", _parseIndexesToMap());
+        return map;
     }
 }

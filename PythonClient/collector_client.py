@@ -2,8 +2,7 @@
 
 import argparse
 import logging.config
-import requests
-from requests import HTTPError
+import requests as req
 
 import logging
 
@@ -27,44 +26,44 @@ def init_argparse() -> argparse.ArgumentParser:
 
 def create_execution(instance: str, query: str) -> str:
     try:
-        response = requests.post(
+        response = req.post(
             url = f"http://{HOST}:{PORT}/query",
             json = { "instance": instance, "query": query }
         )
         print(response.content)
         response.raise_for_status()
         return response.text
-    except HTTPError as e:
+    except req.HTTPError as e:
         logging.error(f"Error creating execution: {e}")
 
 def list_wrappers() -> str:
     try:
-        response = requests.get(
+        response = req.get(
             url=f"http://{HOST}:{PORT}/instances/list"
         )
         response.raise_for_status()
         return response.text
-    except HTTPError as e:
+    except req.HTTPError as e:
         logging.error(f"Error listing wrappers: {e}")
 
 def get_status(uuid: str) -> str:
     try:
-        response = requests.get(
+        response = req.get(
             url=f"http://{HOST}:{PORT}/query/{uuid}/state"
         )
         response.raise_for_status()
         return response.text
-    except HTTPError as e:
+    except req.HTTPError as e:
             logging.error(f"Error getting state of execution {uuid}: {e}")
 
 def get_result(uuid: str) -> str:
     try:
-        response = requests.get(
+        response = req.get(
             url=f"http://{HOST}:{PORT}/query/{uuid}/result"
         )
         response.raise_for_status()
         return response.text
-    except HTTPError as e:
+    except req.HTTPError as e:
             logging.error(f"Error getting result of execution {uuid}: {e}")
 
 

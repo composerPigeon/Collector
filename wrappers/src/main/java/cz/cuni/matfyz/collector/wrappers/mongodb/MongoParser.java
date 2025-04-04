@@ -30,20 +30,22 @@ public class MongoParser extends AbstractParser<Document, Document> {
      * @param command node of explain result
      */
     private void _parseTableNames(DataModel model, Document command) {
-        //TODO: Add aggregate support, because of views
         if (command.containsKey("find")) {
             String collectionName = command.getString("find");
             if (collectionName != null)
-                model.dataset().addTable(collectionName);
+                model.addTable(collectionName);
         }
         if (command.containsKey("aggregate")) {
             List<Document> pipeline = command.getList("pipeline", Document.class);
             for (Document stage : pipeline) {
                 if (stage.containsKey("$lookup")) {
                     String collName = stage.get("$lookup", Document.class).getString("from");
-                    model.dataset().addTable(collName);
+                    model.addTable(collName);
                 }
             }
+        }
+        if (command.containsKey("aggregate")) {
+            throw new UnsupportedOperationException("Aggregation is not supported operation yet, even for views creation.");
         }
     }
 
@@ -56,7 +58,7 @@ public class MongoParser extends AbstractParser<Document, Document> {
         if ("IXSCAN".equals(stage.getString("stage"))) {
             String indexName = stage.getString("indexName");
             if (indexName != null) {
-                model.dataset().addIndex(indexName);
+                model.addIndex(indexName);
             }
         }
         if (stage.containsKey("inputStage")) {
@@ -72,7 +74,7 @@ public class MongoParser extends AbstractParser<Document, Document> {
     private void _parseExecutionStats(DataModel model, Document node) {
         if (node.getBoolean("executionSuccess")) {
 
-            model.result().setExecutionTime(Double.valueOf(node.getInteger("executionTimeMillis")));
+            model.setResultExecutionTime(Double.valueOf(node.getInteger("executionTimeMillis")));
         }
     }
 
@@ -97,7 +99,7 @@ public class MongoParser extends AbstractParser<Document, Document> {
     // Parse Result
 
     /**
-     * Mathod which parses BsonValue to type it is using
+     * Method which parses BsonValue to type it is using
      * @param value the BsonValue to be parsed
      * @return string representation of parsed type
      */
@@ -129,7 +131,7 @@ public class MongoParser extends AbstractParser<Document, Document> {
     }
 
     /**
-     * Mathod which will fetch all documents from cursor to result
+     * Method which will fetch all documents from cursor to result
      * @param batch fetched documents
      * @param builder builder responsible for building the result
      */
@@ -143,7 +145,7 @@ public class MongoParser extends AbstractParser<Document, Document> {
     }
 
     /**
-     * Method which will parse curor result to CachedResult
+     * Method which will parse cursor result to CachedResult
      * @param cursor cursor document from native result
      * @param builder for CachedResult used to build it
      */

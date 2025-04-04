@@ -23,70 +23,70 @@ public class PostgresParser extends AbstractParser<String, ResultSet> {
     /**
      * Method which saves the execution time of query to model
      * @param root explain trees root
-     * @param dataModel model to save data
+     * @param model model to save data
      */
-    private void _saveExecTime(Map<String, Object> root, DataModel dataModel) {
+    private void _saveExecTime(Map<String, Object> root, DataModel model) {
         Object result = root.get("Execution Time");
         if (result instanceof Double time) {
-            dataModel.result().setExecutionTime(time);
+            model.setResultExecutionTime(time);
         }
     }
 
     /**
      * Method which parser table names from explain tree to model
      * @param node explain trees node
-     * @param dataModel model to save data
+     * @param model model to save data
      */
-    private void _parseTableName(Map<String, Object> node, DataModel dataModel) {
+    private void _parseTableName(Map<String, Object> node, DataModel model) {
         if (node.get("Relation Name") instanceof String tableName) {
-            dataModel.dataset().addTable(tableName);
+            model.addTable(tableName);
         }
     }
 
     /**
      * Method which parses index names from explain tree to model
      * @param node explain trees node
-     * @param dataModel model to save data
+     * @param model model to save data
      */
-    private void _parseIndexName(Map<String, Object> node, DataModel dataModel) {
+    private void _parseIndexName(Map<String, Object> node, DataModel model) {
         if (node.get("Index Name") instanceof String relName) {
-            dataModel.dataset().addIndex(relName);
+            model.addIndex(relName);
         }
     }
 
     /**
      * Method which parses tho root of the explain tree
      * @param root root of the explain tree
-     * @param dataModel model to save data
+     * @param model model to save data
      */
     @SuppressWarnings({"unchecked", "rawtypes"})
-    private void _parseTree(Map<String, Object> root, DataModel dataModel) {
+    private void _parseTree(Map<String, Object> root, DataModel model) {
         if (root.containsKey("Execution Time")) {
-            _saveExecTime(root, dataModel);
+            _saveExecTime(root, model);
         }
         if (root.containsKey("Plan") && root.get("Plan") instanceof Map node) {
-            _parseSubTree(node, dataModel);
+            _parseSubTree(node, model);
         }
     }
 
     /**
      * Method which recursively parses the subtree of explain result
-     * @param root actua node of explain tree to be parsed
-     * @param dataModel model to save important data
+     * @param root actual node of explain tree to be parsed
+     * @param model model to save important data
      */
     @SuppressWarnings({"unchecked", "rawtypes"})
-    private void _parseSubTree(Map<String, Object> root, DataModel dataModel) {
+    private void _parseSubTree(Map<String, Object> root, DataModel model) {
         if (root.get("Node Type") instanceof String nodeType) {
             if (nodeType.contains("Seq Scan")) {
-                _parseTableName(root, dataModel);
+                _parseTableName(root, model);
             } else if (nodeType.contains("Index Scan")) {
-                _parseIndexName(root, dataModel);
+                _parseIndexName(root, model);
             }
 
             if (root.containsKey("Plans") && root.get("Plans") instanceof List list) {
                 for(Object o: list) {
                     if (o instanceof Map node) {
-                        _parseSubTree(node, dataModel);
+                        _parseSubTree(node, model);
                     }
                 }
             }
@@ -95,7 +95,7 @@ public class PostgresParser extends AbstractParser<String, ResultSet> {
 
 
     /**
-     * Mathod which parse explain tree and important data saves to DataModel
+     * Method which parse explain tree and important data saves to DataModel
      * @param toModel instance of DataModel where collected information are stored
      * @param explainTree explain tree to be parsed
      * @throws ParseException when JsonProcessingException occurs during the process
@@ -123,7 +123,7 @@ public class PostgresParser extends AbstractParser<String, ResultSet> {
      * @param builder builder to accumulate all values
      * @param metData metaData to get type information about columns
      * @param resultSet native result of parsed query
-     * @throws SQLException
+     * @throws SQLException when sql exception occur
      */
     private void _addDataToBuilder(
             CachedResult.Builder builder,

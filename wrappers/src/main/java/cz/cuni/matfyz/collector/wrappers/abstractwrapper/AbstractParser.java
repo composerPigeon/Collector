@@ -22,7 +22,7 @@ public abstract class AbstractParser<TPlan, TResult> {
     /**
      * Method for parsing native result to cached one
      * @param result result of some query
-     * @return it's equivqlent result of mine unified type CachedResult
+     * @return it's equivalent result of mine unified type CachedResult
      * @throws ParseException when some error occur during parsing of result
      */
     public abstract CachedResult parseResult(TResult result) throws ParseException;

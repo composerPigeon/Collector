@@ -6,14 +6,14 @@ import java.util.Map;
 /**
  * Class for saving statistical data about result
  */
-public class ResultData implements Mappable<String, Object> {
+public class ResultData {
 
     /** Field containing execution time in millis */
     private Double _executionTime;
     private final TableData _resultTable;
 
     public ResultData() {
-        _resultTable = new TableData("");
+        _resultTable = new TableData();
         _executionTime = null;
     }
 
@@ -34,16 +34,7 @@ public class ResultData implements Mappable<String, Object> {
         if (_executionTime == null) _executionTime = time;
     }
 
-    // Column data setters
-    public void setColumnTypeByteSize(String columnName, String columnType, int size) {
-        _resultTable.setColumnTypeByteSize(columnName, columnType, size);
-    }
-    public void addColumnType(String columnName, String columnType) {
-        _resultTable.addColumnType(columnName, columnType);
-    }
-    public void setColumnTypeRatio(String columnName, String columnType, double ratio) {
-        _resultTable.setColumnTypeRatio(columnName, columnType, ratio);
-    }
+    public ColumnData getColumn(String columnName, boolean createIfNotExist) throws IllegalArgumentException { return _resultTable.getColumn(columnName, createIfNotExist); }
 
     /**
      * Method for parsing ResultData to map for saving via org.bson.Document
