@@ -1,12 +1,11 @@
 package cz.cuni.matfyz.collector.model;
 
-import java.util.LinkedHashMap;
 import java.util.Map;
 
 /**
  * Class for saving statistical data about result
  */
-public class ResultData {
+public class ResultData implements MapWritable {
 
     /** Field containing execution time in millis */
     private Double _executionTime;
@@ -36,15 +35,10 @@ public class ResultData {
 
     public ColumnData getColumn(String columnName, boolean createIfNotExist) throws IllegalArgumentException { return _resultTable.getColumn(columnName, createIfNotExist); }
 
-    /**
-     * Method for parsing ResultData to map for saving via org.bson.Document
-     * @return converted map
-     */
-    public Map<String, Object> toMap() {
-        Map<String, Object> map = new LinkedHashMap<>();
+    public TableData getResultTable() { return _resultTable; }
+
+    public void WriteTo(Map<String, Object> map) {
         if (_executionTime != null)
             map.put("executionTime", _executionTime);
-        map.put("resultTable", _resultTable.toMap());
-        return map;
     }
 }

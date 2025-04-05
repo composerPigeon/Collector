@@ -3,7 +3,7 @@ package cz.cuni.matfyz.collector.model;
 import java.util.*;
 
 /** Class holding statistical data about dataset */
-public class DatasetData {
+public class DatasetData implements MapWritable {
 
     /** Field containing size of dataset in bytes */
     private Long _datasetSize;
@@ -85,32 +85,7 @@ public class DatasetData {
         }
     }
 
-    /**
-     * private method for converting _tables map to valid map that can be in future converted to json
-     * @return converted map
-     */
-    private Map<String, Object> _parseTablesToMap() {
-        Map<String, Object> map = new LinkedHashMap<>();
-        for (var entry : _tables.entrySet()) {
-            map.put(entry.getKey(), entry.getValue().toMap());
-        }
-        return map;
-    }
-
-    /**
-     * private method for converting _indexes map to valid map that can be in future converted to json
-     * @return converted map
-     */
-    private Map<String, Object> _parseIndexesToMap() {
-        Map<String, Object> map = new LinkedHashMap<>();
-        for (var entry : _indexes.entrySet()) {
-            map.put(entry.getKey(), entry.getValue().toMap());
-        }
-        return map;
-    }
-
-    public Map<String, Object> toMap() {
-        var map = new LinkedHashMap<String, Object>();
+    public void WriteTo(Map<String, Object> map) {
         if (_datasetSize != null)
             map.put("datasetSize", _datasetSize);
         if (_datasetSizeInPages != null)
@@ -119,8 +94,35 @@ public class DatasetData {
             map.put("pageSize", _pageSize);
         if (_cacheSize != null)
             map.put("cacheSize", _cacheSize);
-        map.put("tables", _parseTablesToMap());
-        map.put("indexes", _parseIndexesToMap());
-        return map;
     }
+
+    public MapWritableCollection<TableData> tables = new MapWritableCollection<TableData>() {
+        @Override
+        public Set<Map.Entry<String, TableData>> getItems() {
+            return Set.of();
+        }
+        @Override
+        public void AppendTo(Map<String, Object> rootMap, Map<String, Object> itemsMap) {
+            rootMap.put("tables", itemsMap);
+        }
+        @Override
+        public boolean hasNext() {
+            return true;
+        }
+    };
+
+    public MapWritableCollection<IndexData> indexes = new MapWritableCollection<IndexData>() {
+        @Override
+        public Set<Map.Entry<String, IndexData>> getItems() {
+            return _indexes.entrySet();
+        }
+        @Override
+        public void AppendTo(Map<String, Object> rootMap, Map<String, Object> itemsMap) {
+            rootMap.put("indexes", itemsMap);
+        }
+        @Override
+        public boolean hasNext() {
+            return false;
+        }
+    };
 }

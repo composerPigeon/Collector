@@ -3,7 +3,7 @@ package cz.cuni.matfyz.collector.model;
 import java.util.LinkedHashMap;
 import java.util.Map;
 
-public class ColumnType {
+public class ColumnType implements MapWritable {
     private Integer _byteSize;
     private Double _ratio;
 
@@ -24,12 +24,11 @@ public class ColumnType {
             _ratio = ratio;
     }
 
-    public Map<String, Object> toMap() {
-        var map = new LinkedHashMap<String, Object>();
+    @Override
+    public void WriteTo(Map<String, Object> map) {
         if (_byteSize != null)
             map.put("byteSize", _byteSize);
         if (_ratio != null)
             map.put("ratio", _ratio);
-        return map;
     }
 }

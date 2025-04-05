@@ -94,7 +94,41 @@ public class QueryDataModel implements DataModel {
         return mapper.writeValueAsString(toMap());
     }
 
+    private Map<String, Object> writeToMap(String key, MapWritable value, Map<String, Object> rootMap) {
+        var map = new LinkedHashMap<String, Object>();
+        value.WriteTo(map);
+        if (rootMap != null && key != null)
+            rootMap.put(key, map);
+        return map;
+    }
+
+    private void writeItemsTo(Map<String, Object> map, MapWritableCollection<? extends MapWritable> collection) {
+        var itemsMap = new LinkedHashMap<String, Object>();
+        for (var entry : collection.getItems()) {
+            var itemMap = writeToMap(entry.getKey(), entry.getValue(), itemsMap);
+            if (collection.hasNext()) {
+                var next = (MapWritableCollection<? extends MapWritable>)entry.getValue();
+                writeItemsTo(itemMap, next);
+            }
+        }
+        collection.AppendTo(map, itemsMap);
+    }
+
     @Override
-    public Map<String, Object> toMap() { return _query.toMap(); }
+    public Map<String, Object> toMap() {
+        var queryMap = writeToMap(null, _query, null);
+
+        var datasetMap = writeToMap("datasetData", _query.getDataset(), queryMap);
+
+        writeItemsTo(datasetMap, _query.getDataset().tables);
+
+        writeItemsTo(datasetMap, _query.getDataset().indexes);
+
+        var resultMap = writeToMap("resultData", _query.getResult(), queryMap);
+        var resultTableMap = writeToMap("resultTable", _query.getResult().getResultTable(), resultMap);
+        writeItemsTo(resultTableMap, _query.getResult().getResultTable());
+
+        return queryMap;
+    }
 }
 

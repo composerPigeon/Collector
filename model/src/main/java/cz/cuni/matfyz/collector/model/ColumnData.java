@@ -5,7 +5,7 @@ import java.util.*;
 /**
  * Class responsible for representing collected statistical data about individual columns
  */
-public class ColumnData {
+public class ColumnData implements MapWritable, MapWritableCollection<ColumnType> {
 
     /**
      * Field holding information about statistical distribution of values. In PostgreSQL it holds ratio of distinct values.
@@ -64,26 +64,24 @@ public class ColumnData {
         if (_ratio == null) {_ratio = ratio;}
     }
 
-    private Map<String, Object> _parseColumnTypesToMap() {
-        Map<String, Object> map = new HashMap<>();
-        for (var entry : _types.entrySet()) {
-            map.put(entry.getKey(), entry.getValue().toMap());
-        }
-        return map;
-    }
-
-    /**
-     * Method converting ColumnData object to map for saving it as part of org.bson.Document
-     * @return converted map
-     */
-    public Map<String, Object> toMap() {
-        var map = new LinkedHashMap<String, Object>();
+    @Override
+    public void WriteTo(Map<String, Object> map) {
         if (_ratio != null)
             map.put("ratio", _ratio);
         if (_mandatory != null)
             map.put("mandatory", _mandatory);
-        map.put("types", _parseColumnTypesToMap());
-        return map;
     }
 
+    @Override
+    public Set<Map.Entry<String, ColumnType>> getItems() {
+        return _types.entrySet();
+    }
+    @Override
+    public void AppendTo(Map<String, Object> rootMap, Map<String, Object> itemsMap) {
+        rootMap.put("types", itemsMap);
+    }
+    @Override
+    public boolean hasNext() {
+        return false;
+    }
 }

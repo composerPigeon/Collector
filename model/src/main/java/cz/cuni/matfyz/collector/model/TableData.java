@@ -1,13 +1,13 @@
 package cz.cuni.matfyz.collector.model;
 
 import java.util.HashMap;
-import java.util.LinkedHashMap;
 import java.util.Map;
+import java.util.Set;
 
 /**
  * Class holding statistical data about table
  */
-public class TableData {
+public class TableData implements MapWritable, MapWritableCollection<ColumnData> {
 
     /** Field containing size of table in bytes */
     public Long _size;
@@ -59,24 +59,7 @@ public class TableData {
         return _columns.get(columnName);
     }
 
-    /**
-     * Private method for converting columns to valid map to save in org.bson.Document
-     * @return converted map
-     */
-    public Map<String, Object> _parseColumnsToMap() {
-        Map<String, Object> map = new LinkedHashMap<>();
-        for (var entry : _columns.entrySet()) {
-            map.put(entry.getKey(), entry.getValue().toMap());
-        }
-        return map;
-    }
-
-    /**
-     * Method for converting TableData to map for saving in org.Bson.Document
-     * @return converted map
-     */
-    public Map<String, Object> toMap() {
-        Map<String, Object> map = new LinkedHashMap<>();
+    public void WriteTo(Map<String, Object> map) {
         if (_size != null)
             map.put("size", _size);
         if (_sizeInPages != null)
@@ -85,7 +68,20 @@ public class TableData {
             map.put("rowCount", _rowCount);
         if (_constraintCount != null)
             map.put("constraintCount", _constraintCount);
-        map.put("columns", _parseColumnsToMap());
-        return map;
+    }
+
+    @Override
+    public Set<Map.Entry<String, ColumnData>> getItems() {
+        return _columns.entrySet();
+    }
+
+    @Override
+    public void AppendTo(Map<String, Object> rootMap, Map<String, Object> itemsMap) {
+        itemsMap.put("columns", _columns);
+    }
+
+    @Override
+    public boolean hasNext() {
+        return true;
     }
 }

@@ -6,7 +6,7 @@ import java.util.Map;
 /**
  * Class for saving statistical data about index
  */
-public class IndexData {
+public class IndexData implements MapWritable {
     /** Field holding index size in bytes */
     public Long _size;
     /** Field holding index size in pages */
@@ -32,14 +32,13 @@ public class IndexData {
         if (_rowCount == null) {_rowCount = count;}
     }
 
-    public Map<String, Object> toMap() {
-        var map = new LinkedHashMap<String, Object>();
+    @Override
+    public void WriteTo(Map<String, Object> map) {
         if (_size != null)
             map.put("size", _size);
         if (_sizeInPages != null)
             map.put("sizeInPages", _sizeInPages);
         if (_rowCount != null)
             map.put("rowCount", _rowCount);
-        return map;
     }
 }
