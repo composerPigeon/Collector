@@ -99,15 +99,15 @@ public class DatasetData implements MapWritable {
     public MapWritableCollection<TableData> tables = new MapWritableCollection<TableData>() {
         @Override
         public Set<Map.Entry<String, TableData>> getItems() {
-            return Set.of();
+            return _tables.entrySet();
         }
         @Override
         public void AppendTo(Map<String, Object> rootMap, Map<String, Object> itemsMap) {
             rootMap.put("tables", itemsMap);
         }
         @Override
-        public boolean hasNext() {
-            return true;
+        public MapWritableCollection<ColumnData> getCollectionFor(String name) {
+            return getTable(name, false);
         }
     };
 
@@ -121,8 +121,8 @@ public class DatasetData implements MapWritable {
             rootMap.put("indexes", itemsMap);
         }
         @Override
-        public boolean hasNext() {
-            return false;
+        public MapWritableCollection<MapWritable> getCollectionFor(String name) {
+            return null;
         }
     };
 }

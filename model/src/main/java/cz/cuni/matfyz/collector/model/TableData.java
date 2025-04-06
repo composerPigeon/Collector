@@ -77,11 +77,11 @@ public class TableData implements MapWritable, MapWritableCollection<ColumnData>
 
     @Override
     public void AppendTo(Map<String, Object> rootMap, Map<String, Object> itemsMap) {
-        itemsMap.put("columns", _columns);
+        rootMap.put("columns", itemsMap);
     }
 
     @Override
-    public boolean hasNext() {
-        return true;
+    public MapWritableCollection<ColumnType> getCollectionFor(String name) {
+        return getColumn(name, false);
     }
 }

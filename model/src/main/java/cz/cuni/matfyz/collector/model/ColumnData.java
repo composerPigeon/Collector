@@ -81,7 +81,7 @@ public class ColumnData implements MapWritable, MapWritableCollection<ColumnType
         rootMap.put("types", itemsMap);
     }
     @Override
-    public boolean hasNext() {
-        return false;
+    public MapWritableCollection<MapWritable> getCollectionFor(String name) {
+        return null;
     }
 }

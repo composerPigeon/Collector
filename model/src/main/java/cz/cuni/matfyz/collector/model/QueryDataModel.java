@@ -106,10 +106,9 @@ public class QueryDataModel implements DataModel {
         var itemsMap = new LinkedHashMap<String, Object>();
         for (var entry : collection.getItems()) {
             var itemMap = writeToMap(entry.getKey(), entry.getValue(), itemsMap);
-            if (collection.hasNext()) {
-                var next = (MapWritableCollection<? extends MapWritable>)entry.getValue();
+            var next = collection.getCollectionFor(entry.getKey());
+            if (next != null)
                 writeItemsTo(itemMap, next);
-            }
         }
         collection.AppendTo(map, itemsMap);
     }
