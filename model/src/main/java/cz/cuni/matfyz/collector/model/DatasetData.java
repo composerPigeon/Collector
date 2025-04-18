@@ -85,7 +85,7 @@ public class DatasetData implements MapWritable {
         }
     }
 
-    public void WriteTo(Map<String, Object> map) {
+    public void writeTo(Map<String, Object> map) {
         if (_datasetSize != null)
             map.put("datasetSize", _datasetSize);
         if (_datasetSizeInPages != null)

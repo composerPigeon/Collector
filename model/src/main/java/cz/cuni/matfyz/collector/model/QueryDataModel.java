@@ -96,7 +96,7 @@ public class QueryDataModel implements DataModel {
 
     private Map<String, Object> writeToMap(String key, MapWritable value, Map<String, Object> rootMap) {
         var map = new LinkedHashMap<String, Object>();
-        value.WriteTo(map);
+        value.writeTo(map);
         if (rootMap != null && key != null)
             rootMap.put(key, map);
         return map;

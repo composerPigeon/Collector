@@ -35,7 +35,7 @@ public class QueryData implements MapWritable {
         return _resultData;
     }
 
-    public void WriteTo(Map<String, Object> map) {
+    public void writeTo(Map<String, Object> map) {
         map.put("query", _query);
         map.put("databaseName", _databaseName);
         map.put("datasetName", _datasetName);

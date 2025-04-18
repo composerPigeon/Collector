@@ -59,7 +59,7 @@ public class TableData implements MapWritable, MapWritableCollection<ColumnData>
         return _columns.get(columnName);
     }
 
-    public void WriteTo(Map<String, Object> map) {
+    public void writeTo(Map<String, Object> map) {
         if (_size != null)
             map.put("size", _size);
         if (_sizeInPages != null)

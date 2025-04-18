@@ -37,7 +37,7 @@ public class ResultData implements MapWritable {
 
     public TableData getResultTable() { return _resultTable; }
 
-    public void WriteTo(Map<String, Object> map) {
+    public void writeTo(Map<String, Object> map) {
         if (_executionTime != null)
             map.put("executionTime", _executionTime);
     }

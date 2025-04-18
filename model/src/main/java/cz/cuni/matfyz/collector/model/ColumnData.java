@@ -65,7 +65,7 @@ public class ColumnData implements MapWritable, MapWritableCollection<ColumnType
     }
 
     @Override
-    public void WriteTo(Map<String, Object> map) {
+    public void writeTo(Map<String, Object> map) {
         if (_ratio != null)
             map.put("ratio", _ratio);
         if (_mandatory != null)

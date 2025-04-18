@@ -25,7 +25,7 @@ public class ColumnType implements MapWritable {
     }
 
     @Override
-    public void WriteTo(Map<String, Object> map) {
+    public void writeTo(Map<String, Object> map) {
         if (_byteSize != null)
             map.put("byteSize", _byteSize);
         if (_ratio != null)

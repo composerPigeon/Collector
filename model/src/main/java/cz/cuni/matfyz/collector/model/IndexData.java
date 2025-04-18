@@ -33,7 +33,7 @@ public class IndexData implements MapWritable {
     }
 
     @Override
-    public void WriteTo(Map<String, Object> map) {
+    public void writeTo(Map<String, Object> map) {
         if (_size != null)
             map.put("size", _size);
         if (_sizeInPages != null)
