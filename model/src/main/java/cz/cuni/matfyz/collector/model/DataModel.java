@@ -15,9 +15,9 @@ public interface DataModel {
     public void setResultSizeInPages(long size);
     public void setResultRowCount(long count);
 
-    public void setDatasetByteSize(long size);
-    public void setDatasetSizeInPages(long size);
-    public void setDatasetCacheSize(long size);
+    public void setDatabaseByteSize(long size);
+    public void setDatabaseSizeInPages(long size);
+    public void setDatabaseCacheSize(long size);
     public void setPageSize(int size);
     public int getPageSize();
 

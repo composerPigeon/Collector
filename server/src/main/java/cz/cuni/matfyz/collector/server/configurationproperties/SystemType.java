@@ -3,7 +3,7 @@ package cz.cuni.matfyz.collector.server.configurationproperties;
 /**
  * Enum representing dbType parsed from application.properties
  */
-public enum DBType {
+public enum SystemType {
     Neo4j,
     PostgreSQL,
     MongoDB

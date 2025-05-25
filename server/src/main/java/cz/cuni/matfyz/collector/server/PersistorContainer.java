@@ -26,7 +26,7 @@ public class PersistorContainer {
         _persistor = new MongoPersistor(
                 _properties.getHostName(),
                 _properties.getPort(),
-                _properties.getDatasetName(),
+                _properties.getDatabaseName(),
                 _properties.getCredentials().getUserName(),
                 _properties.getCredentials().getPassword()
         );

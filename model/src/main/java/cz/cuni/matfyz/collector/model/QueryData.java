@@ -5,40 +5,40 @@ import java.util.*;
 /**
  * Main class holding gathered statistical data which can be eventually transformed to json for persistent storage
  */
-public class QueryData implements MapWritable {
+class QueryData implements MapWritable {
 
     /** Field containing dbType for which is this record relevant */
-    private final String _databaseName;
+    private final String _systemName;
 
     /** Field containing name of dataset */
-    private final String _datasetName;
+    private final String _databaseName;
 
     /** Field containing query for which were these statistical data gathered. */
     private final String _query;
 
-    private final DatasetData _datasetData;
+    private final DatabaseData _datasetData;
     private final ResultData _resultData;
 
-    public QueryData(String query, String databaseName, String datasetName) {
+    public QueryData(String query, String systemName, String databaseName) {
         _query = query;
+        _systemName = systemName;
         _databaseName = databaseName;
-        _datasetName = datasetName;
 
-        _datasetData = new DatasetData();
+        _datasetData = new DatabaseData();
         _resultData = new ResultData();
     }
 
-    public DatasetData getDataset() {
+    public DatabaseData getDatabaseData() {
         return _datasetData;
     }
-    public ResultData getResult() {
+    public ResultData getResultData() {
         return _resultData;
     }
 
     public void writeTo(Map<String, Object> map) {
         map.put("query", _query);
+        map.put("systemName", _systemName);
         map.put("databaseName", _databaseName);
-        map.put("datasetName", _datasetName);
     }
 
 

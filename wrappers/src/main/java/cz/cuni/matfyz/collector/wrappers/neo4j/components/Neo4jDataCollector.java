@@ -93,7 +93,7 @@ public class Neo4jDataCollector extends AbstractDataCollector<Result, String, Re
         if (result.next()) {
             String stringSize = result.getString("value");
             if (!"No Value".equals(stringSize)) {
-                _model.setDatasetCacheSize(_parsePageCacheSize(stringSize));
+                _model.setDatabaseCacheSize(_parsePageCacheSize(stringSize));
             }
         }
     }
@@ -106,8 +106,8 @@ public class Neo4jDataCollector extends AbstractDataCollector<Result, String, Re
         CachedResult result = executeQuery(Neo4jResources.getDatabaseSizesQuery());
         if (result.next()) {
             long size = result.getLong("totalStoreSize");
-            _model.setDatasetByteSize(size);
-            _model.setDatasetSizeInPages((int) Math.ceil(
+            _model.setDatabaseByteSize(size);
+            _model.setDatabaseSizeInPages((int) Math.ceil(
                     (double) size / Neo4jResources.DefaultSizes.PAGE_SIZE
             ));
         }

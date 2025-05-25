@@ -48,7 +48,7 @@ public class PostgresDataCollector extends AbstractDataCollector<ResultSet, Stri
         int pageSize = _model.getPageSize();
         if (pageSize > 0) {
             long sizeInPages = (long) Math.ceil((double)size / (double)pageSize);
-            _model.setDatasetSizeInPages(sizeInPages);
+            _model.setDatabaseSizeInPages(sizeInPages);
         }
     }
 
@@ -60,7 +60,7 @@ public class PostgresDataCollector extends AbstractDataCollector<ResultSet, Stri
         CachedResult result = executeQuery(PostgresResources.getDatasetSizeQuery(_databaseName));
         if (result.next()) {
             long dataSetSize = result.getLong("pg_database_size");
-            _model.setDatasetByteSize(dataSetSize);
+            _model.setDatabaseByteSize(dataSetSize);
             _collectDatabaseSizeInPages(dataSetSize);
         }
     }
@@ -74,7 +74,7 @@ public class PostgresDataCollector extends AbstractDataCollector<ResultSet, Stri
         CachedResult result = executeQuery(PostgresResources.getCacheSizeQuery());
         if (result.next()) {
             long size = result.getLong("shared_buffers");
-            _model.setDatasetCacheSize(size);
+            _model.setDatabaseCacheSize(size);
         }
     }
 

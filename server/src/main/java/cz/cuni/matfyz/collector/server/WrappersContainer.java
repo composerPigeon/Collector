@@ -3,7 +3,6 @@ package cz.cuni.matfyz.collector.server;
 import cz.cuni.matfyz.collector.model.DataModel;
 import cz.cuni.matfyz.collector.server.configurationproperties.Instance;
 import cz.cuni.matfyz.collector.server.configurationproperties.WrappersProperties;
-import cz.cuni.matfyz.collector.wrappers.abstractwrapper.AbstractWrapper;
 import cz.cuni.matfyz.collector.wrappers.abstractwrapper.Wrapper;
 import cz.cuni.matfyz.collector.wrappers.exceptions.WrapperException;
 import cz.cuni.matfyz.collector.wrappers.mongodb.MongoWrapper;
@@ -34,25 +33,25 @@ public class WrappersContainer {
     public void init() {
         _wrappers = new HashMap<>();
         for (Instance instance : _properties.getWrappers()) {
-            switch (instance.getDbType()) {
+            switch (instance.getSystemType()) {
                 case PostgreSQL -> _wrappers.put(instance.getInstanceName(), new PostgresWrapper(
                         instance.getHostName(),
                         instance.getPort(),
-                        instance.getDatasetName(),
+                        instance.getDatabaseName(),
                         instance.getCredentials().getUserName(),
                         instance.getCredentials().getPassword()
                 ));
                 case Neo4j -> _wrappers.put(instance.getInstanceName(), new Neo4jWrapper(
                         instance.getHostName(),
                         instance.getPort(),
-                        instance.getDatasetName(),
+                        instance.getDatabaseName(),
                         instance.getCredentials().getUserName(),
                         instance.getCredentials().getPassword()
                 ));
                 case MongoDB -> _wrappers.put(instance.getInstanceName(), new MongoWrapper(
                         instance.getHostName(),
                         instance.getPort(),
-                        instance.getDatasetName(),
+                        instance.getDatabaseName(),
                         instance.getCredentials().getUserName(),
                         instance.getCredentials().getPassword()
                 ));

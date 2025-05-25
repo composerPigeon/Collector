@@ -44,7 +44,7 @@ public class MongoDataCollector extends AbstractDataCollector<Document, Document
 
         if (stats.next()) {
             long size = stats.getDocument("wiredTiger").get("cache", Document.class).getLong("maximum bytes configured");
-            _model.setDatasetCacheSize(size);
+            _model.setDatabaseCacheSize(size);
         }
     }
 
@@ -57,9 +57,9 @@ public class MongoDataCollector extends AbstractDataCollector<Document, Document
 
         if (stats.next()) {
             long size = stats.getLong("storageSize");
-            _model.setDatasetByteSize(size);
+            _model.setDatabaseByteSize(size);
             long sizeInPages = (long) Math.ceil((double)size / _model.getPageSize());
-            _model.setDatasetSizeInPages(sizeInPages);
+            _model.setDatabaseSizeInPages(sizeInPages);
         }
         _collectCacheDatabaseSize();
     }

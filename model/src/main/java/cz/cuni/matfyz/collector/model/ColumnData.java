@@ -10,7 +10,7 @@ public class ColumnData implements MapWritable, MapWritableCollection<ColumnType
     /**
      * Field holding information about statistical distribution of values. In PostgreSQL it holds ratio of distinct values.
      */
-    private Double _ratio;
+    private Double _valuesRatio;
 
     /**
      * Field holding dominant data type of column.
@@ -23,7 +23,7 @@ public class ColumnData implements MapWritable, MapWritableCollection<ColumnType
     private Boolean _mandatory;
 
     public ColumnData() {
-        _ratio = null;
+        _valuesRatio = null;
         _mandatory = null;
         _types = new HashMap<>();
     }
@@ -61,13 +61,14 @@ public class ColumnData implements MapWritable, MapWritableCollection<ColumnType
     }
 
     public void setDistinctRatio(double ratio) {
-        if (_ratio == null) {_ratio = ratio;}
+        if (_valuesRatio == null) {
+            _valuesRatio = ratio;}
     }
 
     @Override
     public void writeTo(Map<String, Object> map) {
-        if (_ratio != null)
-            map.put("ratio", _ratio);
+        if (_valuesRatio != null)
+            map.put("ratio", _valuesRatio);
         if (_mandatory != null)
             map.put("mandatory", _mandatory);
     }

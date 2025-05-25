@@ -3,12 +3,12 @@ package cz.cuni.matfyz.collector.model;
 import java.util.*;
 
 /** Class holding statistical data about dataset */
-public class DatasetData implements MapWritable {
+public class DatabaseData implements MapWritable {
 
     /** Field containing size of dataset in bytes */
-    private Long _datasetSize;
+    private Long _databaseSize;
     /** Field containing size of dataset in pages (virtual disk block size) */
-    private Long _datasetSizeInPages;
+    private Long _databaseSizeInPages;
     /** Field containing size of page in bytes */
     private Integer _pageSize;
     /** Field containing size of caches in bytes which could be used for query caching */
@@ -17,34 +17,34 @@ public class DatasetData implements MapWritable {
     private final HashMap<String, TableData> _tables;
     private final HashMap<String, IndexData> _indexes;
 
-    public DatasetData() {
+    public DatabaseData() {
         _tables = new HashMap<>();
         _indexes = new HashMap<>();
 
-        _datasetSize = null;
-        _datasetSizeInPages = null;
+        _databaseSize = null;
+        _databaseSizeInPages = null;
         _pageSize = null;
         _cacheSize = null;
     }
 
     // Database setting methods
-    public void setDataSetSize(long size) {
-        if(_datasetSize == null)
-            _datasetSize = size;
+    public void setDatabaseSize(long size) {
+        if(_databaseSize == null)
+            _databaseSize = size;
     }
 
-    public void setDataSetSizeInPages(long dataSetSizeInPages) {
-        if (_datasetSizeInPages == null) { _datasetSizeInPages = dataSetSizeInPages; }
+    public void setDatabaseSizeInPages(long dataSetSizeInPages) {
+        if (_databaseSizeInPages == null) { _databaseSizeInPages = dataSetSizeInPages; }
     }
-    public void setDataSetPageSize(int pageSize) {
+    public void setDatabasePageSize(int pageSize) {
         if (_pageSize == null)
             _pageSize = pageSize;
     }
-    public int getDataSetPageSize() {
+    public int getDatabasePageSize() {
         return _pageSize;
     }
 
-    public void setDataSetCacheSize(long size) {
+    public void setDatabaseCacheSize(long size) {
         if(_cacheSize == null)
             _cacheSize = size;
     }
@@ -86,10 +86,10 @@ public class DatasetData implements MapWritable {
     }
 
     public void writeTo(Map<String, Object> map) {
-        if (_datasetSize != null)
-            map.put("datasetSize", _datasetSize);
-        if (_datasetSizeInPages != null)
-            map.put("datasetSizeInPages", _datasetSizeInPages);
+        if (_databaseSize != null)
+            map.put("databaseSize", _databaseSize);
+        if (_databaseSizeInPages != null)
+            map.put("databaseSizeInPages", _databaseSizeInPages);
         if (_pageSize != null)
             map.put("pageSize", _pageSize);
         if (_cacheSize != null)

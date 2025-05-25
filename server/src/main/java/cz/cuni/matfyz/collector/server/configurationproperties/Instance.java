@@ -7,7 +7,7 @@ import org.springframework.boot.context.properties.bind.ConstructorBinding;
  */
 public class Instance {
     /** Field holding database type based on which wrapper implementation will be picked up */
-    private final DBType _dbType;
+    private final SystemType _systemType;
     /** Field holding instance name specified by user */
     private final String _instanceName;
     /** Field holding hostName to connect to database */
@@ -15,21 +15,21 @@ public class Instance {
     /** Field holding port to connect to database */
     private final int _port;
     /** Field holding datasetName to connect to database */
-    private final String _datasetName;
+    private final String _databaseName;
     private final Credentials _credentials;
 
     @ConstructorBinding
-    public Instance(DBType dbType, String instanceName, String hostName, int port, String datasetName, Credentials credentials) {
-        _dbType = dbType;
+    public Instance(SystemType systemType, String instanceName, String hostName, int port, String databaseName, Credentials credentials) {
+        _systemType = systemType;
         _instanceName = instanceName;
         _hostName = hostName;
         _port = port;
-        _datasetName = datasetName;
+        _databaseName = databaseName;
         _credentials = credentials;
     }
 
-    public DBType getDbType() {
-        return _dbType;
+    public SystemType getSystemType() {
+        return _systemType;
     }
     public String getInstanceName() {
         return _instanceName;
@@ -41,8 +41,8 @@ public class Instance {
         return _port;
     }
 
-    public String getDatasetName() {
-        return _datasetName;
+    public String getDatabaseName() {
+        return _databaseName;
     }
 
     public Credentials getCredentials() {

@@ -11,18 +11,18 @@ import org.springframework.boot.context.properties.bind.ConstructorBinding;
 @ConfigurationPropertiesScan
 public class PersistorProperties {
     /** Field containing hostName to connect to persistor */
-    private String _hostName;
+    private final String _hostName;
     /** Field containing hostName to connect to persistor */
-    private int _port;
+    private final int _port;
     /** Field containing datasetName to specify which to use in persistor */
-    private String _datasetName;
-    private Credentials _credentials;
+    private final String _databaseName;
+    private final Credentials _credentials;
 
     @ConstructorBinding
-    public PersistorProperties(String hostName, int port, String datasetName, Credentials credentials) {
+    public PersistorProperties(String hostName, int port, String databaseName, Credentials credentials) {
         _hostName = hostName;
         _port = port;
-        _datasetName = datasetName;
+        _databaseName = databaseName;
         _credentials = credentials;
     }
 
@@ -32,8 +32,8 @@ public class PersistorProperties {
     public int getPort() {
         return _port;
     }
-    public String getDatasetName() {
-        return _datasetName;
+    public String getDatabaseName() {
+        return _databaseName;
     }
     public Credentials getCredentials() {
         return _credentials;

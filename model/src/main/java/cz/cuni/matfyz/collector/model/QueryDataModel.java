@@ -7,7 +7,7 @@ import java.util.LinkedHashMap;
 import java.util.Map;
 import java.util.Set;
 
-public class QueryDataModel implements DataModel {
+class QueryDataModel implements DataModel {
     private final QueryData _query;
 
     public QueryDataModel(String query, String databaseName, String datasetName) {
@@ -16,76 +16,76 @@ public class QueryDataModel implements DataModel {
 
     //ResultData
     @Override
-    public void setResultExecutionTime(double time) { _query.getResult().setExecutionTime(time); }
+    public void setResultExecutionTime(double time) { _query.getResultData().setExecutionTime(time); }
 
     @Override
-    public void setResultByteSize(long size) { _query.getResult().setByteSize(size); }
+    public void setResultByteSize(long size) { _query.getResultData().setByteSize(size); }
 
     @Override
-    public void setResultSizeInPages(long size) { _query.getResult().setSizeInPages(size); }
+    public void setResultSizeInPages(long size) { _query.getResultData().setSizeInPages(size); }
 
     @Override
-    public void setResultRowCount(long count) { _query.getResult().setRowCount(count); }
+    public void setResultRowCount(long count) { _query.getResultData().setRowCount(count); }
 
     //DatasetData
     @Override
-    public void setDatasetByteSize(long size) { _query.getDataset().setDataSetSize(size); }
+    public void setDatabaseByteSize(long size) { _query.getDatabaseData().setDatabaseSize(size); }
     @Override
-    public void setDatasetSizeInPages(long size) { _query.getDataset().setDataSetSizeInPages(size); }
+    public void setDatabaseSizeInPages(long size) { _query.getDatabaseData().setDatabaseSizeInPages(size); }
     @Override
-    public void setDatasetCacheSize(long size) { _query.getDataset().setDataSetCacheSize(size); }
+    public void setDatabaseCacheSize(long size) { _query.getDatabaseData().setDatabaseCacheSize(size); }
     @Override
-    public void setPageSize(int size) { _query.getDataset().setDataSetPageSize(size); }
+    public void setPageSize(int size) { _query.getDatabaseData().setDatabasePageSize(size); }
     @Override
-    public int getPageSize() { return _query.getDataset().getDataSetPageSize(); }
+    public int getPageSize() { return _query.getDatabaseData().getDatabasePageSize(); }
 
     //TableData
     @Override
-    public void setTableByteSize(String tableName, long size) { _query.getDataset().getTable(tableName, true).setByteSize(size); }
+    public void setTableByteSize(String tableName, long size) { _query.getDatabaseData().getTable(tableName, true).setByteSize(size); }
     @Override
-    public void setTableSizeInPages(String tableName, long size) { _query.getDataset().getTable(tableName, true).setSizeInPages(size); }
+    public void setTableSizeInPages(String tableName, long size) { _query.getDatabaseData().getTable(tableName, true).setSizeInPages(size); }
     @Override
-    public void setTableRowCount(String tableName, long count) { _query.getDataset().getTable(tableName, true).setRowCount(count); }
+    public void setTableRowCount(String tableName, long count) { _query.getDatabaseData().getTable(tableName, true).setRowCount(count); }
     @Override
-    public void setTableConstraintCount(String tableName, int count) { _query.getDataset().getTable(tableName, true).setConstraintCount(count); }
+    public void setTableConstraintCount(String tableName, int count) { _query.getDatabaseData().getTable(tableName, true).setConstraintCount(count); }
     @Override
-    public void addTable(String tableName) { _query.getDataset().addTable(tableName); }
+    public void addTable(String tableName) { _query.getDatabaseData().addTable(tableName); }
     @Override
-    public Set<String> getTableNames() { return _query.getDataset().getTableNames(); }
+    public Set<String> getTableNames() { return _query.getDatabaseData().getTableNames(); }
 
     //IndexData
     @Override
-    public void setIndexByteSize(String indexName, long size) { _query.getDataset().getIndex(indexName, true).setByteSize(size); }
+    public void setIndexByteSize(String indexName, long size) { _query.getDatabaseData().getIndex(indexName, true).setByteSize(size); }
     @Override
-    public void setIndexSizeInPages(String indexName, long size) { _query.getDataset().getIndex(indexName, true).setSizeInPages(size); }
+    public void setIndexSizeInPages(String indexName, long size) { _query.getDatabaseData().getIndex(indexName, true).setSizeInPages(size); }
     @Override
-    public void setIndexRowCount(String indexName, long count) { _query.getDataset().getIndex(indexName, true).setRowCount(count); }
+    public void setIndexRowCount(String indexName, long count) { _query.getDatabaseData().getIndex(indexName, true).setRowCount(count); }
     @Override
-    public void addIndex(String indexName) { _query.getDataset().addIndex(indexName); }
+    public void addIndex(String indexName) { _query.getDatabaseData().addIndex(indexName); }
     @Override
-    public Set<String> getIndexNames() { return _query.getDataset().getIndexNames(); }
+    public Set<String> getIndexNames() { return _query.getDatabaseData().getIndexNames(); }
 
     //ColumnData
     @Override
-    public void setColumnMandatory(String tableName, String columnName, boolean mandatory) { _query.getDataset().getTable(tableName, true).getColumn(columnName, true).setMandatory(mandatory); }
+    public void setColumnMandatory(String tableName, String columnName, boolean mandatory) { _query.getDatabaseData().getTable(tableName, true).getColumn(columnName, true).setMandatory(mandatory); }
     @Override
-    public void setColumnDistinctRatio(String tableName, String columnName, double ratio) { _query.getDataset().getTable(tableName, true).getColumn(columnName, true).setDistinctRatio(ratio); }
+    public void setColumnDistinctRatio(String tableName, String columnName, double ratio) { _query.getDatabaseData().getTable(tableName, true).getColumn(columnName, true).setDistinctRatio(ratio); }
     @Override
-    public int getColumnMaxByteSize(String tableName, String columnName) { return _query.getDataset().getTable(tableName, false).getColumn(columnName, false).getMaxByteSize(); }
+    public int getColumnMaxByteSize(String tableName, String columnName) { return _query.getDatabaseData().getTable(tableName, false).getColumn(columnName, false).getMaxByteSize(); }
 
     //ColumnTypeData
     @Override
-    public void setColumnTypeByteSize(String tableName, String columnName, String typeName, int size) { _query.getDataset().getTable(tableName, true).getColumn(columnName, true).getColumnType(typeName, true).setByteSize(size); }
+    public void setColumnTypeByteSize(String tableName, String columnName, String typeName, int size) { _query.getDatabaseData().getTable(tableName, true).getColumn(columnName, true).getColumnType(typeName, true).setByteSize(size); }
     @Override
-    public void setResultColumnTypeByteSize(String columnName, String typeName, int size) { _query.getResult().getColumn(columnName, true).getColumnType(typeName, true).setByteSize(size);}
+    public void setResultColumnTypeByteSize(String columnName, String typeName, int size) { _query.getResultData().getColumn(columnName, true).getColumnType(typeName, true).setByteSize(size);}
     @Override
-    public void setColumnTypeRatio(String tableName, String columnName, String typeName, double ratio) { _query.getDataset().getTable(tableName, true).getColumn(columnName, true).getColumnType(typeName, true).setRatio(ratio); }
+    public void setColumnTypeRatio(String tableName, String columnName, String typeName, double ratio) { _query.getDatabaseData().getTable(tableName, true).getColumn(columnName, true).getColumnType(typeName, true).setRatio(ratio); }
     @Override
-    public void setResultColumnTypeRatio(String columnName, String typeName, double ratio) { _query.getResult().getColumn(columnName, true).getColumnType(typeName, true).setRatio(ratio); }
+    public void setResultColumnTypeRatio(String columnName, String typeName, double ratio) { _query.getResultData().getColumn(columnName, true).getColumnType(typeName, true).setRatio(ratio); }
     @Override
-    public void addColumnType(String tableName, String columnName, String typeName) { _query.getDataset().getTable(tableName, true).getColumn(columnName, true).addType(typeName); }
+    public void addColumnType(String tableName, String columnName, String typeName) { _query.getDatabaseData().getTable(tableName, true).getColumn(columnName, true).addType(typeName); }
     @Override
-    public int getColumnTypeByteSize(String tableName, String columnName, String typeName) { return _query.getDataset().getTable(tableName, false).getColumn(columnName, false).getColumnType(typeName, false).getByteSize(); }
+    public int getColumnTypeByteSize(String tableName, String columnName, String typeName) { return _query.getDatabaseData().getTable(tableName, false).getColumn(columnName, false).getColumnType(typeName, false).getByteSize(); }
 
     @Override
     public String toJson() throws JsonProcessingException {
@@ -117,15 +117,15 @@ public class QueryDataModel implements DataModel {
     public Map<String, Object> toMap() {
         var queryMap = writeToMap(null, _query, null);
 
-        var datasetMap = writeToMap("datasetData", _query.getDataset(), queryMap);
+        var datasetMap = writeToMap("databaseData", _query.getDatabaseData(), queryMap);
 
-        writeItemsTo(datasetMap, _query.getDataset().tables);
+        writeItemsTo(datasetMap, _query.getDatabaseData().tables);
 
-        writeItemsTo(datasetMap, _query.getDataset().indexes);
+        writeItemsTo(datasetMap, _query.getDatabaseData().indexes);
 
-        var resultMap = writeToMap("resultData", _query.getResult(), queryMap);
-        var resultTableMap = writeToMap("resultTable", _query.getResult().getResultTable(), resultMap);
-        writeItemsTo(resultTableMap, _query.getResult().getResultTable());
+        var resultMap = writeToMap("resultData", _query.getResultData(), queryMap);
+        var resultTableMap = writeToMap("resultTable", _query.getResultData().getResultTable(), resultMap);
+        writeItemsTo(resultTableMap, _query.getResultData().getResultTable());
 
         return queryMap;
     }
