@@ -5,13 +5,16 @@ package cz.cuni.matfyz.collector.wrappers.postgresql;
  * Class which hold all queries used for gathering statistics data
  */
 public abstract class PostgresResources {
-    public static final String DATABASE_NAME = "PostgreSQL";
+    public static final String SYSTEM_NAME = "PostgreSQL";
+
     public static String getExplainPlanQuery(String query) {
         return "explain (analyze true, format json) " + query;
     }
+
     public static String getDatasetSizeQuery(String datasetName) {
         return "select pg_database_size('" + datasetName + "')";
     }
+
     public static String getPageSizeQuery() {
         return "select current_setting('block_size')";
     }

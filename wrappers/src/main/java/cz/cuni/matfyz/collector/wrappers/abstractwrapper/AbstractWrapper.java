@@ -1,36 +1,71 @@
 package cz.cuni.matfyz.collector.wrappers.abstractwrapper;
 
 import cz.cuni.matfyz.collector.model.DataModel;
-import cz.cuni.matfyz.collector.wrappers.exceptions.WrapperException;
+import cz.cuni.matfyz.collector.wrappers.abstractwrapper.components.*;
+import cz.cuni.matfyz.collector.wrappers.exceptions.*;
 
-/**
- * Class which represents unified API for communication with all wrappers from server module
- */
-public abstract class AbstractWrapper {
-    /** Field containing hostName, with which was the connection to the database established */
-    protected final String _hostName;
-    /** Field containing datasetName, with which was the connection to the database established */
-    protected final String _datasetName;
-    /** Field containing userName, with which was the connection to the database established */
-    protected final String _userName;
-    /** Field containing password, with which was the connection to the database established */
-    protected final String _password;
-    /** Field containing port, with which was the connection to the database established */
-    protected final int _port;
+public abstract class AbstractWrapper<TResult, TQuery, TPlan> implements Wrapper, AutoCloseable {
 
-    public AbstractWrapper(String host, int port, String datasetName, String user, String password) {
-        _hostName = host;
-        _datasetName = datasetName;
-        _userName = user;
-        _password = password;
-        _port = port;
+    protected final ConnectionData _connectionData;
+
+    protected WrapperExceptionsFactory _exceptionsFactory;
+
+    protected AbstractQueryResultParser<TResult> _resultParser;
+
+    protected AbstractExplainPlanParser<TPlan> _explainPlanParser;
+
+    public AbstractWrapper(ConnectionData connectionData) {
+        _connectionData = connectionData;
+        _exceptionsFactory = createExceptionsFactory();
+        _resultParser = createResultParser();
+        _explainPlanParser = createExplainPlanParser();
     }
 
-    /**
-     * Method which is executed by QueryScheduler to compute statistical result of query over this wrapper
-     * @param query inputted
-     * @return instance of DataModel which contains all measured data
-     * @throws WrapperException when some problem occur during process, message of this exception is saved as a result to execution if some error is thrown during evaluation
-     */
-    public abstract DataModel executeQuery(String query) throws WrapperException;
+    protected WrapperExceptionsFactory createExceptionsFactory() {
+        return new WrapperExceptionsFactory(_connectionData);
+    }
+
+    protected abstract AbstractQueryResultParser<TResult> createResultParser();
+
+    protected abstract AbstractExplainPlanParser<TPlan> createExplainPlanParser();
+
+    public final DataModel executeQuery(String query) throws WrapperException {
+        var context = createExecutionContext(query, DataModel.CreateForQuery(query, _connectionData.systemName, _connectionData.databaseName));
+
+        try (var connection = createConnection(context)) {
+            context.setConnection(connection);
+            setDependenciesBeforeExecutionIfNeeded(context);
+
+            var inputQuery = parseInputQuery(query, context);
+            var explainResult = connection.executeWithExplain(inputQuery);
+
+            var mainResult = _resultParser.parseResultAndConsume(explainResult.result());
+            _explainPlanParser.parsePlan(explainResult.plan(), context.getModel());
+
+
+            var dataCollector = createDataCollector(context);
+            dataCollector.collectData(mainResult);
+
+            removeDependenciesAfterExecutionIfPossible(context);
+            return context.getModel();
+        }
+    }
+
+    protected ExecutionContext<TResult, TQuery, TPlan> createExecutionContext(String query, DataModel model) {
+        return new ExecutionContext<>(query, _exceptionsFactory, model);
+    }
+
+    protected abstract AbstractConnection<TResult, TQuery, TPlan> createConnection(ExecutionContext<TResult, TQuery, TPlan> context) throws ConnectionException;
+
+    protected void setDependenciesBeforeExecutionIfNeeded(ExecutionContext<TResult, TQuery, TPlan> context) throws WrapperException { }
+
+    protected abstract TQuery parseInputQuery(String query, ExecutionContext<TResult, TQuery, TPlan> context) throws ParseException, WrapperUnsupportedOperationException;
+
+    protected abstract AbstractDataCollector<TResult, TQuery, TPlan> createDataCollector(ExecutionContext<TResult, TQuery, TPlan> context) throws DataCollectException;
+
+    protected void removeDependenciesAfterExecutionIfPossible(ExecutionContext<TResult, TQuery, TPlan> context) throws WrapperException { }
+
+
+
+    public record ConnectionData(String host, int port, String systemName, String databaseName, String user, String password) { }
 }

@@ -37,12 +37,6 @@ public class CachedResult {
     public void refresh() { _cursor = -1; }
 
     /**
-     * Method for getting actual record which is pointed by _cursor
-     * @return instance of Map which represents one record from database
-     */
-    public Map<String, Object> getRecord() { return _records.get(_cursor); }
-
-    /**
      * Method for checking of this collection of records have column of this columnName
      * @param colName inputted columnName
      * @return true if this column exists
@@ -73,6 +67,14 @@ public class CachedResult {
         }
         else if (value instanceof Integer intValue) {
             return intValue;
+        }
+        else if (value instanceof Long longValue) {
+            if (longValue < Integer.MAX_VALUE && longValue > Integer.MIN_VALUE) {
+                return longValue.intValue();
+            }
+            else {
+                throw new ClassCastException("Cannot cast long to int, because it is out of range");
+            }
         }
         else if (value instanceof String strValue){
             return Integer.parseInt(strValue);
@@ -227,7 +229,7 @@ public class CachedResult {
     }
 
     /**
-     * Builder class which represents builder reponsible for building CachedResult and filling it with all records
+     * Builder class which represents builder responsible for building CachedResult and filling it with all records
      */
     public static class Builder {
         private final List<Map<String, Object>> _records;

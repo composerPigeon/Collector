@@ -77,7 +77,7 @@ public class ConsumedResult {
      */
     public static class Builder {
 
-        private Map<String, Map<String, Integer>> _columnTypes;
+        private final Map<String, Map<String, Integer>> _columnTypes;
         private long _byteSize;
         private long _count;
 
@@ -105,15 +105,6 @@ public class ConsumedResult {
                 addColumnType(counts, type);
                 _columnTypes.put(colName, counts);
             }
-        }
-
-        /**
-         * Method for getting info whether data about column specified by columnName are present
-         * @param colName to select column by columnName
-         * @return true if column's type of inputted columnName is already present in columnTypes map
-         */
-        public boolean containsTypeForCol(String colName) {
-            return _columnTypes.containsKey(colName);
         }
 
         /**

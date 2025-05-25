@@ -1,41 +1,69 @@
 package cz.cuni.matfyz.collector.wrappers.postgresql;
 
-import cz.cuni.matfyz.collector.model.DataModel;
 import cz.cuni.matfyz.collector.wrappers.abstractwrapper.AbstractWrapper;
-import cz.cuni.matfyz.collector.model.QueryData;
-import cz.cuni.matfyz.collector.wrappers.queryresult.ConsumedResult;
-import cz.cuni.matfyz.collector.wrappers.exceptions.WrapperException;
+import cz.cuni.matfyz.collector.wrappers.abstractwrapper.components.AbstractExplainPlanParser;
+import cz.cuni.matfyz.collector.wrappers.abstractwrapper.components.AbstractQueryResultParser;
+import cz.cuni.matfyz.collector.wrappers.abstractwrapper.components.ExecutionContext;
+import cz.cuni.matfyz.collector.wrappers.exceptions.*;
+import cz.cuni.matfyz.collector.wrappers.postgresql.components.PostgresConnection;
+import cz.cuni.matfyz.collector.wrappers.postgresql.components.PostgresDataCollector;
+import cz.cuni.matfyz.collector.wrappers.postgresql.components.PostgresExplainPlanParser;
+import cz.cuni.matfyz.collector.wrappers.postgresql.components.PostgresQueryResultParser;
 
 import java.sql.*;
 
 /**
  * Class which represents the wrapper operating over PostgreSQL database
  */
-public class PostgresWrapper extends AbstractWrapper {
-    private final PostgresParser _parser;
-    public PostgresWrapper(String host, int port, String datasetName, String user, String password) {
-        super(host, port, datasetName, user, password);
-        _parser =  new PostgresParser();
+public class PostgresWrapper extends AbstractWrapper<ResultSet, String, String> {
+    public PostgresWrapper(String host, int port, String databaseName, String user, String password) {
+        super(new ConnectionData(host, port, PostgresResources.SYSTEM_NAME, databaseName, user, password));
     }
 
-    /**
-     * Method which gets the main query executes it, parse explai tree and collect all statistical data about the result and then return as instance of DataModel
-     * @param query inputted query
-     * @return instance of DataModel
-     * @throws WrapperException when some of the implementing exceptions occur during the process
-     */
     @Override
-    public DataModel executeQuery(String query) throws WrapperException {
-        try (
-           var connection = new PostgresConnection(PostgresResources.getConnectionLink(_hostName, _port, _datasetName, _userName, _password), _parser);
-        ) {
-            DataModel dataModel = DataModel.CreateForQuery(query, PostgresResources.DATABASE_NAME, _datasetName);
-            ConsumedResult result = connection.executeMainQuery(query, dataModel);
+    protected WrapperExceptionsFactory createExceptionsFactory() {
+        return new PostgresExceptionsFactory(_connectionData);
+    }
 
-            var collector = new PostgresDataCollector(connection, dataModel, _datasetName);
-            return collector.collectData(result);
-        } catch (SQLException e) {
-            throw new WrapperException(e);
+    @Override
+    protected AbstractQueryResultParser<ResultSet> createResultParser() {
+        return new PostgresQueryResultParser(_exceptionsFactory);
+    }
+
+    @Override
+    protected AbstractExplainPlanParser<String> createExplainPlanParser() {
+        return new PostgresExplainPlanParser(_exceptionsFactory);
+    }
+
+    @Override
+    protected PostgresConnection createConnection(ExecutionContext<ResultSet, String, String> context) throws ConnectionException {
+        return new PostgresConnection(
+            PostgresResources.getConnectionLink(
+                _connectionData.host(),
+                _connectionData.port(),
+                _connectionData.databaseName(),
+                _connectionData.user(),
+                _connectionData.password()
+            ),
+            _exceptionsFactory
+        );
+    }
+
+    @Override
+    protected String parseInputQuery(String query, ExecutionContext<ResultSet, String, String> context) {
+        return query;
+    }
+
+    @Override
+    protected PostgresDataCollector createDataCollector(ExecutionContext<ResultSet, String, String> context) throws DataCollectException {
+        try {
+            return new PostgresDataCollector(context, _resultParser, _connectionData.databaseName());
+        } catch (ConnectionException e) {
+            throw _exceptionsFactory.dataCollectorNotInitialized(e);
         }
+    }
+
+    @Override
+    public void close() throws Exception {
     }
 }

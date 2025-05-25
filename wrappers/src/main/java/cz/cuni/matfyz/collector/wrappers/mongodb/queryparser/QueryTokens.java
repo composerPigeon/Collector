@@ -136,7 +136,7 @@ public class QueryTokens {
 
         /**
          * Builder method which creates instance of QueryTokens from this builder
-         * @return insance of QueryTokens
+         * @return instance of QueryTokens
          */
         public QueryTokens toTokens() {
             return new QueryTokens(

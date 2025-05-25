@@ -1,14 +1,12 @@
 package cz.cuni.matfyz.collector.wrappers.neo4j;
 
-import java.time.LocalDate;
-import java.time.ZonedDateTime;
 import java.util.List;
 
 /**
  * Class which contains all help queries used for collecting data and constants for calculating sizes etc.
  */
 public class Neo4jResources {
-    public static final String DATABASE_NAME = "Neo4j";
+    public static final String SYSTEM_NAME = "Neo4j";
     public static String getExplainPlanQuery(String query) {
         return "profile " + query;
     }
@@ -27,12 +25,6 @@ public class Neo4jResources {
     public static String getConstraintCountForLabelQuery(String label) {
         return "show constraints yield labelsOrTypes where \"" + label + "\" in labelsOrTypes return count(*) as count;";
     }
-    //public static String getAllNodesQuery() {
-    //    return "match (n) return n;";
-    //}
-    //public static String getAllRelationsQuery() {
-    //    return "match ()-[e]->() return e;";
-    //}
 
     public static String getDatabaseSizesQuery() {
         return "call apoc.monitor.store()";

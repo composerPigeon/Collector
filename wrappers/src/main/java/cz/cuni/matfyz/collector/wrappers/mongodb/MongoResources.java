@@ -1,11 +1,7 @@
 package cz.cuni.matfyz.collector.wrappers.mongodb;
 
-import org.bson.BsonValue;
 import org.bson.Document;
 
-import javax.print.Doc;
-import java.nio.charset.Charset;
-import java.nio.charset.StandardCharsets;
 import java.util.LinkedList;
 import java.util.List;
 
@@ -13,7 +9,7 @@ import java.util.List;
  * Class containing all help queries used for gather data and some constants for computing sizes etc.
  */
 public class MongoResources {
-    public static final String DATABASE_NAME = "MongoDB";
+    public static final String SYSTEM_NAME = "MongoDB";
 
     public static Document getExplainCommand(Document command) {
         if (command.containsKey("aggregate")) {

@@ -4,6 +4,7 @@ import cz.cuni.matfyz.collector.model.DataModel;
 import cz.cuni.matfyz.collector.server.configurationproperties.Instance;
 import cz.cuni.matfyz.collector.server.configurationproperties.WrappersProperties;
 import cz.cuni.matfyz.collector.wrappers.abstractwrapper.AbstractWrapper;
+import cz.cuni.matfyz.collector.wrappers.abstractwrapper.Wrapper;
 import cz.cuni.matfyz.collector.wrappers.exceptions.WrapperException;
 import cz.cuni.matfyz.collector.wrappers.mongodb.MongoWrapper;
 import cz.cuni.matfyz.collector.wrappers.neo4j.Neo4jWrapper;
@@ -24,7 +25,7 @@ public class WrappersContainer {
     @Autowired
     private WrappersProperties _properties;
 
-    private Map<String, AbstractWrapper> _wrappers;
+    private Map<String, Wrapper> _wrappers;
 
     /**
      * Method for initializing all wrappers from properties
