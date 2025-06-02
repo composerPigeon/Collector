@@ -4,25 +4,26 @@ import cz.cuni.matfyz.collector.model.DataModel;
 import cz.cuni.matfyz.collector.wrappers.abstractwrapper.components.*;
 import cz.cuni.matfyz.collector.wrappers.exceptions.*;
 
-public abstract class AbstractWrapper<TResult, TQuery, TPlan> implements Wrapper, AutoCloseable {
+public abstract class AbstractWrapper<TResult, TQuery, TPlan> extends AbstractComponent implements Wrapper, AutoCloseable {
 
     protected final ConnectionData _connectionData;
-
-    protected WrapperExceptionsFactory _exceptionsFactory;
 
     protected AbstractQueryResultParser<TResult> _resultParser;
 
     protected AbstractExplainPlanParser<TPlan> _explainPlanParser;
 
-    public AbstractWrapper(ConnectionData connectionData) {
+    public AbstractWrapper(ConnectionData connectionData, WrapperExceptionsFactory exceptionsFactory) {
+        super(exceptionsFactory);
         _connectionData = connectionData;
-        _exceptionsFactory = createExceptionsFactory();
         _resultParser = createResultParser();
         _explainPlanParser = createExplainPlanParser();
     }
 
-    protected WrapperExceptionsFactory createExceptionsFactory() {
-        return new WrapperExceptionsFactory(_connectionData);
+    public AbstractWrapper(ConnectionData connectionData) {
+        super(new WrapperExceptionsFactory(connectionData));
+        _connectionData = connectionData;
+        _resultParser = createResultParser();
+        _explainPlanParser = createExplainPlanParser();
     }
 
     protected abstract AbstractQueryResultParser<TResult> createResultParser();
@@ -52,7 +53,7 @@ public abstract class AbstractWrapper<TResult, TQuery, TPlan> implements Wrapper
     }
 
     protected ExecutionContext<TResult, TQuery, TPlan> createExecutionContext(String query, DataModel model) {
-        return new ExecutionContext<>(query, _exceptionsFactory, model);
+        return new ExecutionContext<>(query, getExceptionsFactory(), model);
     }
 
     protected abstract AbstractConnection<TResult, TQuery, TPlan> createConnection(ExecutionContext<TResult, TQuery, TPlan> context) throws ConnectionException;

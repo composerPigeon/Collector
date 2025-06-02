@@ -1,8 +1,11 @@
 package cz.cuni.matfyz.collector.model;
 
+import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 
+import java.lang.instrument.IllegalClassFormatException;
+import java.text.ParseException;
 import java.util.LinkedHashMap;
 import java.util.Map;
 import java.util.Set;
@@ -88,46 +91,15 @@ class QueryDataModel implements DataModel {
     public int getColumnTypeByteSize(String tableName, String columnName, String typeName) { return _query.getDatabaseData().getTable(tableName, false).getColumn(columnName, false).getColumnType(typeName, false).getByteSize(); }
 
     @Override
-    public String toJson() throws JsonProcessingException {
-        ObjectMapper mapper = new ObjectMapper();
-        mapper.writerWithDefaultPrettyPrinter();
-        return mapper.writeValueAsString(toMap());
-    }
-
-    private Map<String, Object> writeToMap(String key, MapWritable value, Map<String, Object> rootMap) {
-        var map = new LinkedHashMap<String, Object>();
-        value.writeTo(map);
-        if (rootMap != null && key != null)
-            rootMap.put(key, map);
-        return map;
-    }
-
-    private void writeItemsTo(Map<String, Object> map, MapWritableCollection<? extends MapWritable> collection) {
-        var itemsMap = new LinkedHashMap<String, Object>();
-        for (var entry : collection.getItems()) {
-            var itemMap = writeToMap(entry.getKey(), entry.getValue(), itemsMap);
-            var next = collection.getCollectionFor(entry.getKey());
-            if (next != null)
-                writeItemsTo(itemMap, next);
+    public String toJson() throws DataModelException {
+        try {
+            ObjectMapper mapper = new ObjectMapper();
+            mapper.writerWithDefaultPrettyPrinter();
+            mapper.setSerializationInclusion(JsonInclude.Include.NON_NULL);
+            return mapper.writeValueAsString(_query);
+        } catch (JsonProcessingException e) {
+            throw new DataModelException("Problem parsing DataModel to json", e);
         }
-        collection.AppendTo(map, itemsMap);
-    }
-
-    @Override
-    public Map<String, Object> toMap() {
-        var queryMap = writeToMap(null, _query, null);
-
-        var datasetMap = writeToMap("databaseData", _query.getDatabaseData(), queryMap);
-
-        writeItemsTo(datasetMap, _query.getDatabaseData().tables);
-
-        writeItemsTo(datasetMap, _query.getDatabaseData().indexes);
-
-        var resultMap = writeToMap("resultData", _query.getResultData(), queryMap);
-        var resultTableMap = writeToMap("resultTable", _query.getResultData().getResultTable(), resultMap);
-        writeItemsTo(resultTableMap, _query.getResultData().getResultTable());
-
-        return queryMap;
     }
 }
 

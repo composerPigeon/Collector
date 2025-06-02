@@ -3,10 +3,14 @@ package cz.cuni.matfyz.collector.server;
 import cz.cuni.matfyz.collector.model.DataModel;
 import cz.cuni.matfyz.collector.server.configurationproperties.Instance;
 import cz.cuni.matfyz.collector.server.configurationproperties.WrappersProperties;
+import cz.cuni.matfyz.collector.wrappers.abstractwrapper.AbstractWrapper;
 import cz.cuni.matfyz.collector.wrappers.abstractwrapper.Wrapper;
 import cz.cuni.matfyz.collector.wrappers.exceptions.WrapperException;
+import cz.cuni.matfyz.collector.wrappers.mongodb.MongoResources;
 import cz.cuni.matfyz.collector.wrappers.mongodb.MongoWrapper;
+import cz.cuni.matfyz.collector.wrappers.neo4j.Neo4jResources;
 import cz.cuni.matfyz.collector.wrappers.neo4j.Neo4jWrapper;
+import cz.cuni.matfyz.collector.wrappers.postgresql.PostgresResources;
 import cz.cuni.matfyz.collector.wrappers.postgresql.PostgresWrapper;
 
 import jakarta.annotation.PostConstruct;
@@ -35,25 +39,34 @@ public class WrappersContainer {
         for (Instance instance : _properties.getWrappers()) {
             switch (instance.getSystemType()) {
                 case PostgreSQL -> _wrappers.put(instance.getInstanceName(), new PostgresWrapper(
-                        instance.getHostName(),
-                        instance.getPort(),
-                        instance.getDatabaseName(),
-                        instance.getCredentials().getUserName(),
-                        instance.getCredentials().getPassword()
+                        new AbstractWrapper.ConnectionData(
+                                instance.getHostName(),
+                                instance.getPort(),
+                                PostgresResources.SYSTEM_NAME,
+                                instance.getDatabaseName(),
+                                instance.getCredentials().getUserName(),
+                                instance.getCredentials().getPassword()
+                        )
                 ));
                 case Neo4j -> _wrappers.put(instance.getInstanceName(), new Neo4jWrapper(
-                        instance.getHostName(),
-                        instance.getPort(),
-                        instance.getDatabaseName(),
-                        instance.getCredentials().getUserName(),
-                        instance.getCredentials().getPassword()
+                        new AbstractWrapper.ConnectionData(
+                                instance.getHostName(),
+                                instance.getPort(),
+                                Neo4jResources.SYSTEM_NAME,
+                                instance.getDatabaseName(),
+                                instance.getCredentials().getUserName(),
+                                instance.getCredentials().getPassword()
+                        )
                 ));
                 case MongoDB -> _wrappers.put(instance.getInstanceName(), new MongoWrapper(
-                        instance.getHostName(),
-                        instance.getPort(),
-                        instance.getDatabaseName(),
-                        instance.getCredentials().getUserName(),
-                        instance.getCredentials().getPassword()
+                        new AbstractWrapper.ConnectionData(
+                                instance.getHostName(),
+                                instance.getPort(),
+                                MongoResources.SYSTEM_NAME,
+                                instance.getDatabaseName(),
+                                instance.getCredentials().getUserName(),
+                                instance.getCredentials().getPassword()
+                        )
                 ));
             }
         }

@@ -36,7 +36,7 @@ public class PostgresConnection extends AbstractConnection<ResultSet, String, St
             ResultSet result = _statement.executeQuery(query);
             return new ResultWithPlan<>(result, plan);
         } catch (SQLException e) {
-            throw _exceptionsFactory.queryExecutionWithExplainFailed(e);
+            throw getExceptionsFactory().queryExecutionWithExplainFailed(e);
         }
     }
 
@@ -51,7 +51,7 @@ public class PostgresConnection extends AbstractConnection<ResultSet, String, St
         try {
             return _statement.executeQuery(query);
         } catch (SQLException e) {
-            throw _exceptionsFactory.queryExecutionFailed(e);
+            throw getExceptionsFactory().queryExecutionFailed(e);
         }
     }
 

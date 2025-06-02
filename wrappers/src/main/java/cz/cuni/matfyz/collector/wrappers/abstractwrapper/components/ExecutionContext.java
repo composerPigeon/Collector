@@ -41,6 +41,10 @@ public class ExecutionContext<TResult, TQuery, TPlan> {
             throw _exceptionsFactory.connectionNotOpen();
     }
 
+    public <TFactory> TFactory getExceptionsFactory(Class<TFactory> factoryClass) {
+        return factoryClass.cast(_exceptionsFactory);
+    }
+
     public WrapperExceptionsFactory getExceptionsFactory() {
         return _exceptionsFactory;
     }

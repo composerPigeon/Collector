@@ -5,12 +5,10 @@ import cz.cuni.matfyz.collector.wrappers.exceptions.WrapperExceptionsFactory;
 import cz.cuni.matfyz.collector.wrappers.queryresult.CachedResult;
 import cz.cuni.matfyz.collector.wrappers.queryresult.ConsumedResult;
 
-public abstract class AbstractQueryResultParser<TResult> {
-
-    protected WrapperExceptionsFactory _exceptionsFactory;
+public abstract class AbstractQueryResultParser<TResult> extends AbstractComponent {
 
     public AbstractQueryResultParser(WrapperExceptionsFactory exceptionsFactory) {
-        _exceptionsFactory = exceptionsFactory;
+        super(exceptionsFactory);
     }
 
     public abstract CachedResult parseResultAndCache(TResult result) throws ParseException;

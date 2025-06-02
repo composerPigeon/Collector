@@ -1,20 +1,29 @@
 package cz.cuni.matfyz.collector.model;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
+import com.fasterxml.jackson.annotation.JsonProperty;
+
 import java.util.*;
 
 /** Class holding statistical data about dataset */
-public class DatabaseData implements MapWritable {
+public class DatabaseData {
 
     /** Field containing size of dataset in bytes */
+    @JsonProperty("databaseSize")
     private Long _databaseSize;
     /** Field containing size of dataset in pages (virtual disk block size) */
+    @JsonProperty("databaseSizeInPages")
     private Long _databaseSizeInPages;
     /** Field containing size of page in bytes */
+    @JsonProperty("pageSize")
     private Integer _pageSize;
     /** Field containing size of caches in bytes which could be used for query caching */
+    @JsonProperty("cacheSize")
     private Long _cacheSize;
 
+    @JsonProperty("tables")
     private final HashMap<String, TableData> _tables;
+    @JsonProperty("indexes")
     private final HashMap<String, IndexData> _indexes;
 
     public DatabaseData() {
@@ -40,6 +49,8 @@ public class DatabaseData implements MapWritable {
         if (_pageSize == null)
             _pageSize = pageSize;
     }
+
+    @JsonIgnore
     public int getDatabasePageSize() {
         return _pageSize;
     }
@@ -49,6 +60,7 @@ public class DatabaseData implements MapWritable {
             _cacheSize = size;
     }
 
+    @JsonIgnore
     public TableData getTable(String tableName, boolean createIfNotExist) throws IllegalArgumentException {
         if (!_tables.containsKey(tableName) && createIfNotExist) {
             _tables.put(tableName, new TableData());
@@ -58,6 +70,7 @@ public class DatabaseData implements MapWritable {
         return _tables.get(tableName);
     }
 
+    @JsonIgnore
     public IndexData getIndex(String inxName, boolean createIfNotExist) {
         if (!_indexes.containsKey(inxName) && createIfNotExist) {
             _indexes.put(inxName, new IndexData());
@@ -67,6 +80,7 @@ public class DatabaseData implements MapWritable {
         return _indexes.get(inxName);
     }
 
+    @JsonIgnore
     public Set<String> getTableNames() {
         return _tables.keySet();
     }
@@ -76,6 +90,7 @@ public class DatabaseData implements MapWritable {
         }
     }
 
+    @JsonIgnore
     public Set<String> getIndexNames() {
         return _indexes.keySet();
     }
@@ -84,45 +99,4 @@ public class DatabaseData implements MapWritable {
             _indexes.put(inxName, new IndexData());
         }
     }
-
-    public void writeTo(Map<String, Object> map) {
-        if (_databaseSize != null)
-            map.put("databaseSize", _databaseSize);
-        if (_databaseSizeInPages != null)
-            map.put("databaseSizeInPages", _databaseSizeInPages);
-        if (_pageSize != null)
-            map.put("pageSize", _pageSize);
-        if (_cacheSize != null)
-            map.put("cacheSize", _cacheSize);
-    }
-
-    public MapWritableCollection<TableData> tables = new MapWritableCollection<TableData>() {
-        @Override
-        public Set<Map.Entry<String, TableData>> getItems() {
-            return _tables.entrySet();
-        }
-        @Override
-        public void AppendTo(Map<String, Object> rootMap, Map<String, Object> itemsMap) {
-            rootMap.put("tables", itemsMap);
-        }
-        @Override
-        public MapWritableCollection<ColumnData> getCollectionFor(String name) {
-            return getTable(name, false);
-        }
-    };
-
-    public MapWritableCollection<IndexData> indexes = new MapWritableCollection<IndexData>() {
-        @Override
-        public Set<Map.Entry<String, IndexData>> getItems() {
-            return _indexes.entrySet();
-        }
-        @Override
-        public void AppendTo(Map<String, Object> rootMap, Map<String, Object> itemsMap) {
-            rootMap.put("indexes", itemsMap);
-        }
-        @Override
-        public MapWritableCollection<MapWritable> getCollectionFor(String name) {
-            return null;
-        }
-    };
 }

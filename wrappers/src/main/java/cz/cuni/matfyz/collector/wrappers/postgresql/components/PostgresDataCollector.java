@@ -309,7 +309,7 @@ public class PostgresDataCollector extends AbstractDataCollector<ResultSet, Stri
                 return tableName;
             }
         }
-        throw ((PostgresExceptionsFactory)_exceptionsFactory).tableForColumnNotFound(columnName);
+        throw getExceptionsFactory(PostgresExceptionsFactory.class).tableForColumnNotFound(columnName);
     }
 
     /**

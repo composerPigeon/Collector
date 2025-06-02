@@ -1,25 +1,31 @@
 package cz.cuni.matfyz.collector.model;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
+import com.fasterxml.jackson.annotation.JsonProperty;
+
 import java.util.*;
 
 /**
  * Class responsible for representing collected statistical data about individual columns
  */
-public class ColumnData implements MapWritable, MapWritableCollection<ColumnType> {
+public class ColumnData {
 
     /**
      * Field holding information about statistical distribution of values. In PostgreSQL it holds ratio of distinct values.
      */
+    @JsonProperty("ratio")
     private Double _valuesRatio;
 
     /**
      * Field holding dominant data type of column.
      */
+    @JsonProperty("types")
     private final HashMap<String, ColumnType> _types;
 
     /**
      * Field holding information if column is mandatory to be set for entity in database.
      */
+    @JsonProperty("mandatory")
     private Boolean _mandatory;
 
     public ColumnData() {
@@ -33,6 +39,7 @@ public class ColumnData implements MapWritable, MapWritableCollection<ColumnType
      *
      * @return value stored in _size field
      */
+    @JsonIgnore
     public int getMaxByteSize() {
         return _types.values().stream().map(ColumnType::getByteSize).max(Integer::compareTo).orElse(0);
     }
@@ -46,6 +53,7 @@ public class ColumnData implements MapWritable, MapWritableCollection<ColumnType
             _types.put(columnType, new ColumnType());
     }
 
+    @JsonIgnore
     public ColumnType getColumnType(String columnType, boolean createNew) {
         if (!_types.containsKey(columnType) && createNew) {
             _types.put(columnType, new ColumnType());
@@ -63,26 +71,5 @@ public class ColumnData implements MapWritable, MapWritableCollection<ColumnType
     public void setDistinctRatio(double ratio) {
         if (_valuesRatio == null) {
             _valuesRatio = ratio;}
-    }
-
-    @Override
-    public void writeTo(Map<String, Object> map) {
-        if (_valuesRatio != null)
-            map.put("ratio", _valuesRatio);
-        if (_mandatory != null)
-            map.put("mandatory", _mandatory);
-    }
-
-    @Override
-    public Set<Map.Entry<String, ColumnType>> getItems() {
-        return _types.entrySet();
-    }
-    @Override
-    public void AppendTo(Map<String, Object> rootMap, Map<String, Object> itemsMap) {
-        rootMap.put("types", itemsMap);
-    }
-    @Override
-    public MapWritableCollection<MapWritable> getCollectionFor(String name) {
-        return null;
     }
 }

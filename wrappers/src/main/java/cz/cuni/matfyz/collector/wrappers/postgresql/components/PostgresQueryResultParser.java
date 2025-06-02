@@ -77,7 +77,7 @@ public class PostgresQueryResultParser extends AbstractQueryResultParser<ResultS
             }
             return builder.toResult();
         } catch (SQLException e) {
-            throw _exceptionsFactory.cacheResultFailed(e);
+            throw getExceptionsFactory().cacheResultFailed(e);
         }
     }
 
@@ -98,7 +98,7 @@ public class PostgresQueryResultParser extends AbstractQueryResultParser<ResultS
             }
             return builder.toResult();
         } catch (SQLException e) {
-            throw _exceptionsFactory.consumeResultFailed(e);
+            throw getExceptionsFactory().consumeResultFailed(e);
         }
     }
 }

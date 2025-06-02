@@ -5,6 +5,7 @@ import com.mongodb.client.MongoClient;
 import com.mongodb.client.MongoClients;
 import com.mongodb.client.MongoDatabase;
 import cz.cuni.matfyz.collector.model.DataModel;
+import cz.cuni.matfyz.collector.model.DataModelException;
 import org.bson.Document;
 
 /**
@@ -46,9 +47,9 @@ public class MongoPersistor extends AbstractPersistor {
         try {
             Document document = new Document();
             document.put("_id", uuid);
-            document.put("model", model.toMap());
+            document.put("model", Document.parse(model.toJson()));
             _database.getCollection("executions").insertOne(document);
-        } catch (MongoException e) {
+        } catch (MongoException | DataModelException e) {
             throw new PersistorException(e);
         }
     }

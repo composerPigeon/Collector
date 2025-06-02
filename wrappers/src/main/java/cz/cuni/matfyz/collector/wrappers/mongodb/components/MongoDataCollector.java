@@ -270,8 +270,7 @@ public class MongoDataCollector extends AbstractDataCollector<Document, Document
         for (String collectionName : _model.getTableNames()) {
             return collectionName;
         }
-
-        throw ((MongoExceptionsFactory)_exceptionsFactory).collectionNotParsed();
+        throw getExceptionsFactory(MongoExceptionsFactory.class).collectionNotParsed();
     }
 
     //Save Result data

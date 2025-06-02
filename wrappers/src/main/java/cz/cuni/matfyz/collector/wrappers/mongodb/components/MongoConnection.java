@@ -34,7 +34,7 @@ public class MongoConnection extends AbstractConnection<Document, Document, Docu
         try {
             return _database.runCommand(query);
         } catch (MongoException e) {
-            throw _exceptionsFactory.queryExecutionFailed(e);
+            throw getExceptionsFactory().queryExecutionFailed(e);
         }
     }
 
@@ -45,7 +45,7 @@ public class MongoConnection extends AbstractConnection<Document, Document, Docu
             Document plan = _database.runCommand(MongoResources.getExplainCommand(query));
             return new ResultWithPlan<>(result, plan);
         } catch (MongoException e) {
-            throw _exceptionsFactory.queryExecutionWithExplainFailed(e);
+            throw getExceptionsFactory().queryExecutionWithExplainFailed(e);
         }
     }
 

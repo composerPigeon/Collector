@@ -1,22 +1,31 @@
 package cz.cuni.matfyz.collector.model;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
+import com.fasterxml.jackson.annotation.JsonProperty;
+
 import java.util.*;
 
 /**
  * Main class holding gathered statistical data which can be eventually transformed to json for persistent storage
  */
-class QueryData implements MapWritable {
+class QueryData {
 
     /** Field containing dbType for which is this record relevant */
+    @JsonProperty("systemName")
     private final String _systemName;
 
     /** Field containing name of dataset */
+    @JsonProperty("databaseName")
     private final String _databaseName;
 
     /** Field containing query for which were these statistical data gathered. */
+    @JsonProperty("query")
     private final String _query;
 
-    private final DatabaseData _datasetData;
+    @JsonProperty("databaseData")
+    private final DatabaseData _databaseData;
+
+    @JsonProperty("resultData")
     private final ResultData _resultData;
 
     public QueryData(String query, String systemName, String databaseName) {
@@ -24,22 +33,16 @@ class QueryData implements MapWritable {
         _systemName = systemName;
         _databaseName = databaseName;
 
-        _datasetData = new DatabaseData();
+        _databaseData = new DatabaseData();
         _resultData = new ResultData();
     }
 
+    @JsonIgnore
     public DatabaseData getDatabaseData() {
-        return _datasetData;
+        return _databaseData;
     }
+    @JsonIgnore
     public ResultData getResultData() {
         return _resultData;
     }
-
-    public void writeTo(Map<String, Object> map) {
-        map.put("query", _query);
-        map.put("systemName", _systemName);
-        map.put("databaseName", _databaseName);
-    }
-
-
 }

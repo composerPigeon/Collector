@@ -9,12 +9,10 @@ import cz.cuni.matfyz.collector.wrappers.exceptions.WrapperExceptionsFactory;
  * @param <TResult> type of result which will be parsed by parser
  * @param <TQuery> type of query on which all execute methods will be called
  */
-public abstract class AbstractConnection<TResult, TQuery, TPlan> implements AutoCloseable {
-
-    protected final WrapperExceptionsFactory _exceptionsFactory;
+public abstract class AbstractConnection<TResult, TQuery, TPlan> extends AbstractComponent implements AutoCloseable {
 
     public AbstractConnection(WrapperExceptionsFactory exceptionsFactory) {
-        _exceptionsFactory = exceptionsFactory;
+        super(exceptionsFactory);
     }
 
     /**

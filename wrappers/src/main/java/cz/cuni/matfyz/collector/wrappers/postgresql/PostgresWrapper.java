@@ -16,23 +16,19 @@ import java.sql.*;
  * Class which represents the wrapper operating over PostgreSQL database
  */
 public class PostgresWrapper extends AbstractWrapper<ResultSet, String, String> {
-    public PostgresWrapper(String host, int port, String databaseName, String user, String password) {
-        super(new ConnectionData(host, port, PostgresResources.SYSTEM_NAME, databaseName, user, password));
+    public PostgresWrapper(ConnectionData connectionData) {
+        super(connectionData, new PostgresExceptionsFactory(connectionData));
     }
 
-    @Override
-    protected WrapperExceptionsFactory createExceptionsFactory() {
-        return new PostgresExceptionsFactory(_connectionData);
-    }
 
     @Override
     protected AbstractQueryResultParser<ResultSet> createResultParser() {
-        return new PostgresQueryResultParser(_exceptionsFactory);
+        return new PostgresQueryResultParser(getExceptionsFactory());
     }
 
     @Override
     protected AbstractExplainPlanParser<String> createExplainPlanParser() {
-        return new PostgresExplainPlanParser(_exceptionsFactory);
+        return new PostgresExplainPlanParser(getExceptionsFactory());
     }
 
     @Override
@@ -45,7 +41,7 @@ public class PostgresWrapper extends AbstractWrapper<ResultSet, String, String> 
                 _connectionData.user(),
                 _connectionData.password()
             ),
-            _exceptionsFactory
+            getExceptionsFactory()
         );
     }
 
@@ -59,7 +55,7 @@ public class PostgresWrapper extends AbstractWrapper<ResultSet, String, String> 
         try {
             return new PostgresDataCollector(context, _resultParser, _connectionData.databaseName());
         } catch (ConnectionException e) {
-            throw _exceptionsFactory.dataCollectorNotInitialized(e);
+            throw getExceptionsFactory().dataCollectorNotInitialized(e);
         }
     }
 

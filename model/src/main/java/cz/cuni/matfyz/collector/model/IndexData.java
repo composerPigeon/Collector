@@ -1,17 +1,22 @@
 package cz.cuni.matfyz.collector.model;
 
+import com.fasterxml.jackson.annotation.JsonProperty;
+
 import java.util.LinkedHashMap;
 import java.util.Map;
 
 /**
  * Class for saving statistical data about index
  */
-public class IndexData implements MapWritable {
+public class IndexData {
     /** Field holding index size in bytes */
+    @JsonProperty("byteSize")
     public Long _size;
     /** Field holding index size in pages */
+    @JsonProperty("sizeInPages")
     public Long _sizeInPages;
     /** Field holding index row count */
+    @JsonProperty("rowCount")
     public Long _rowCount;
 
     public IndexData() {
@@ -30,15 +35,5 @@ public class IndexData implements MapWritable {
 
     public void setRowCount(long count) {
         if (_rowCount == null) {_rowCount = count;}
-    }
-
-    @Override
-    public void writeTo(Map<String, Object> map) {
-        if (_size != null)
-            map.put("size", _size);
-        if (_sizeInPages != null)
-            map.put("sizeInPages", _sizeInPages);
-        if (_rowCount != null)
-            map.put("rowCount", _rowCount);
     }
 }

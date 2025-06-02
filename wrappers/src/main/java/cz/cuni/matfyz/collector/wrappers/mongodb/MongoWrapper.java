@@ -23,31 +23,26 @@ public class MongoWrapper extends AbstractWrapper<Document, Document, Document> 
     private final MongoQueryParser _queryParser;
 
 
-    public MongoWrapper(String host, int port, String databaseName, String user, String password) {
-        super(new ConnectionData(host, port, MongoResources.SYSTEM_NAME, databaseName, user, password));
-        _client = MongoClients.create(MongoResources.getConnectionLink(host, port, user, password));
-        _database = _client.getDatabase(databaseName);
-        _queryParser = new MongoQueryParser((MongoExceptionsFactory) _exceptionsFactory);
-    }
-
-    @Override
-    protected WrapperExceptionsFactory createExceptionsFactory() {
-        return new MongoExceptionsFactory(_connectionData);
+    public MongoWrapper(ConnectionData connectionData) {
+        super(connectionData, new MongoExceptionsFactory(connectionData));
+        _client = MongoClients.create(MongoResources.getConnectionLink(connectionData.host(), connectionData.port(), connectionData.user(), connectionData.password()));
+        _database = _client.getDatabase(connectionData.databaseName());
+        _queryParser = new MongoQueryParser(getExceptionsFactory(MongoExceptionsFactory.class));
     }
 
     @Override
     protected AbstractQueryResultParser<Document> createResultParser() {
-        return new MongoQueryResultParser(_exceptionsFactory);
+        return new MongoQueryResultParser(getExceptionsFactory());
     }
 
     @Override
     protected AbstractExplainPlanParser<Document> createExplainPlanParser() {
-        return new MongoExplainPlanParser(_exceptionsFactory);
+        return new MongoExplainPlanParser(getExceptionsFactory());
     }
 
     @Override
     protected AbstractConnection<Document, Document, Document> createConnection(ExecutionContext<Document, Document, Document> context) throws ConnectionException {
-        return new MongoConnection(_database, _exceptionsFactory);
+        return new MongoConnection(_database, getExceptionsFactory());
     }
 
     @Override
@@ -65,7 +60,7 @@ public class MongoWrapper extends AbstractWrapper<Document, Document, Document> 
         try {
             return new MongoDataCollector(context, _resultParser, _connectionData.databaseName());
         } catch (ConnectionException e) {
-            throw _exceptionsFactory.dataCollectorNotInitialized(e);
+            throw getExceptionsFactory().dataCollectorNotInitialized(e);
         }
     }
 

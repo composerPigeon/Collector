@@ -1,14 +1,20 @@
 package cz.cuni.matfyz.collector.model;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
+import com.fasterxml.jackson.annotation.JsonProperty;
+
 import java.util.Map;
 
 /**
  * Class for saving statistical data about result
  */
-public class ResultData implements MapWritable {
+public class ResultData {
 
     /** Field containing execution time in millis */
+    @JsonProperty("executionTime")
     private Double _executionTime;
+
+    @JsonProperty("resultTable")
     private final TableData _resultTable;
 
     public ResultData() {
@@ -33,12 +39,8 @@ public class ResultData implements MapWritable {
         if (_executionTime == null) _executionTime = time;
     }
 
+    @JsonIgnore
     public ColumnData getColumn(String columnName, boolean createIfNotExist) throws IllegalArgumentException { return _resultTable.getColumn(columnName, createIfNotExist); }
 
     public TableData getResultTable() { return _resultTable; }
-
-    public void writeTo(Map<String, Object> map) {
-        if (_executionTime != null)
-            map.put("executionTime", _executionTime);
-    }
 }

@@ -21,24 +21,27 @@ import org.neo4j.driver.summary.ResultSummary;
  */
 public class Neo4jWrapper extends AbstractWrapper<Result, String, ResultSummary> {
     private final Driver _driver;
-    public Neo4jWrapper(String host, int port, String databaseName, String userName, String password) {
-        super(new ConnectionData(host, port, Neo4jResources.SYSTEM_NAME, databaseName, userName, password));
-        _driver = GraphDatabase.driver(Neo4jResources.getConnectionLink(host, port, databaseName), AuthTokens.basic(userName, password));
+    public Neo4jWrapper(ConnectionData connectionData) {
+        super(connectionData);
+        _driver = GraphDatabase.driver(
+                Neo4jResources.getConnectionLink(connectionData.host(), connectionData.port(), connectionData.databaseName()),
+                AuthTokens.basic(connectionData.user(), connectionData.password())
+        );
     }
 
     @Override
     protected AbstractQueryResultParser<Result> createResultParser() {
-        return new Neo4jQueryResultParser(_exceptionsFactory);
+        return new Neo4jQueryResultParser(getExceptionsFactory());
     }
 
     @Override
     protected AbstractExplainPlanParser<ResultSummary> createExplainPlanParser() {
-        return new Neo4jExplainPlanParser(_exceptionsFactory);
+        return new Neo4jExplainPlanParser(getExceptionsFactory());
     }
 
     @Override
     protected Neo4jConnection createConnection(ExecutionContext<Result, String, ResultSummary> context) throws ConnectionException {
-        return new Neo4jConnection(_driver, _connectionData.databaseName(), _exceptionsFactory);
+        return new Neo4jConnection(_driver, _connectionData.databaseName(), getExceptionsFactory());
     }
 
     @Override
@@ -51,7 +54,7 @@ public class Neo4jWrapper extends AbstractWrapper<Result, String, ResultSummary>
         try {
             return new Neo4jDataCollector(context, _resultParser, _connectionData.databaseName());
         } catch (ConnectionException e) {
-            throw _exceptionsFactory.dataCollectorNotInitialized(e);
+            throw getExceptionsFactory().dataCollectorNotInitialized(e);
         }
     }
 

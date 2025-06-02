@@ -7,8 +7,6 @@ import cz.cuni.matfyz.collector.wrappers.exceptions.WrapperExceptionsFactory;
 import cz.cuni.matfyz.collector.wrappers.exceptions.WrapperUnsupportedOperationException;
 import org.bson.Document;
 
-import java.util.List;
-
 public class MongoExplainPlanParser extends AbstractExplainPlanParser<Document> {
 
     public MongoExplainPlanParser(WrapperExceptionsFactory exceptionsFactory) {
@@ -28,7 +26,7 @@ public class MongoExplainPlanParser extends AbstractExplainPlanParser<Document> 
         }
 
         if (command.containsKey("aggregate")) {
-            throw _exceptionsFactory.unsupportedOperation("aggregate");
+            throw getExceptionsFactory().unsupportedOperation("aggregate");
         }
     }
 

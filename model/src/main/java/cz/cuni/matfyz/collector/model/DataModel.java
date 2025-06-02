@@ -46,6 +46,5 @@ public interface DataModel {
 
     public int getColumnTypeByteSize(String tableName, String columnName, String typeName);
 
-    public String toJson() throws JsonProcessingException;
-    public Map<String, Object> toMap();
+    public String toJson() throws DataModelException;
 }

@@ -39,7 +39,7 @@ public class Neo4jConnection extends AbstractConnection<Result, String, ResultSu
         try {
             return _querySession.run(query);
         } catch (Neo4jException e) {
-            throw _exceptionsFactory.queryExecutionFailed(e);
+            throw getExceptionsFactory().queryExecutionFailed(e);
         }
     }
 
@@ -59,7 +59,7 @@ public class Neo4jConnection extends AbstractConnection<Result, String, ResultSu
             Result result = _querySession.run(query);
             return new ResultWithPlan<>(result, plan);
         } catch (Neo4jException e) {
-            throw _exceptionsFactory.queryExecutionWithExplainFailed(e);
+            throw getExceptionsFactory().queryExecutionWithExplainFailed(e);
         }
     }
 

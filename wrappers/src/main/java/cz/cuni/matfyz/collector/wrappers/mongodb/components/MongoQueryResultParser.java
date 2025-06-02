@@ -127,7 +127,7 @@ public class MongoQueryResultParser extends AbstractQueryResultParser<Document> 
             }
             return builder.toResult();
         } catch (QueryExecutionException e) {
-            throw _exceptionsFactory.cacheResultFailed(e);
+            throw getExceptionsFactory().cacheResultFailed(e);
         }
     }
 
@@ -199,7 +199,7 @@ public class MongoQueryResultParser extends AbstractQueryResultParser<Document> 
             }
             return builder.toResult();
         } catch (QueryExecutionException e) {
-            throw _exceptionsFactory.consumeResultFailed(e);
+            throw getExceptionsFactory().consumeResultFailed(e);
         }
     }
 }

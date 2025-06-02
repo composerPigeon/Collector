@@ -1,10 +1,16 @@
 package cz.cuni.matfyz.collector.model;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
+import com.fasterxml.jackson.annotation.JsonProperty;
+
 import java.util.LinkedHashMap;
 import java.util.Map;
 
-public class ColumnType implements MapWritable {
+public class ColumnType {
+    @JsonProperty("byteSize")
     private Integer _byteSize;
+
+    @JsonProperty("ratio")
     private Double _ratio;
 
     public ColumnType() {
@@ -12,6 +18,7 @@ public class ColumnType implements MapWritable {
         _ratio = null;
     }
 
+    @JsonIgnore
     public int getByteSize() { return _byteSize; }
 
     public void setByteSize(int size) {
@@ -22,13 +29,5 @@ public class ColumnType implements MapWritable {
     public void setRatio(double ratio) {
         if (_ratio == null)
             _ratio = ratio;
-    }
-
-    @Override
-    public void writeTo(Map<String, Object> map) {
-        if (_byteSize != null)
-            map.put("byteSize", _byteSize);
-        if (_ratio != null)
-            map.put("ratio", _ratio);
     }
 }
