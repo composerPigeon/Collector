@@ -3,17 +3,15 @@ package cz.cuni.matfyz.collector.model;
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonProperty;
 
-import java.util.LinkedHashMap;
-import java.util.Map;
+public class AttributeType {
 
-public class ColumnType {
     @JsonProperty("byteSize")
     private Integer _byteSize;
 
     @JsonProperty("ratio")
     private Double _ratio;
 
-    public ColumnType() {
+    public AttributeType() {
         _byteSize = null;
         _ratio = null;
     }

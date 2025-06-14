@@ -8,11 +8,14 @@ import java.util.HashMap;
 /**
  * Class holding statistical data about table
  */
-public class TableData {
+public class KindData {
+
+    @JsonIgnore
+    private final String _kindName;
 
     /** Field containing size of table in bytes */
     @JsonProperty("byteSize")
-    private Long _size;
+    private Long _byteSize;
 
     /** Field containing size of table in pages */
     @JsonProperty("sizeInPages")
@@ -26,21 +29,22 @@ public class TableData {
     @JsonProperty("constraintCount")
     private Long _constraintCount;
 
-    @JsonProperty("columns")
-    private final HashMap<String, ColumnData> _columns;
+    @JsonProperty("attributes")
+    private final HashMap<String, AttributeData> _attributes;
 
-    public TableData() {
-        _columns = new HashMap<>();
-        _size = null;
+    public KindData(String kindName) {
+        _attributes = new HashMap<>();
+        _byteSize = null;
         _sizeInPages = null;
         _rowCount = null;
         _constraintCount = null;
+        _kindName = kindName;
     }
 
     //Tables setting methods
     public void setByteSize(long size) {
-        if (_size == null)
-            _size = size;
+        if (_byteSize == null)
+            _byteSize = size;
     }
 
     public void setSizeInPages(long sizeInPages) {
@@ -60,12 +64,18 @@ public class TableData {
     }
 
     @JsonIgnore
-    public ColumnData getColumn(String columnName, boolean createIfNotExist) throws IllegalArgumentException {
-        if (!_columns.containsKey(columnName) && createIfNotExist) {
-            _columns.put(columnName, new ColumnData());
-        } else if (!_columns.containsKey(columnName) && !createIfNotExist) {
-            throw new IllegalArgumentException("Column '" + columnName + "' does not exist");
+    public AttributeData getAttribute(String attributeName) throws DataModelException {
+        if (!_attributes.containsKey(attributeName)) {
+            throw new DataModelException(String.format("Attribute %s.%s does not exist in DataModel instance.", _kindName, attributeName));
         }
-        return _columns.get(columnName);
+        return _attributes.get(attributeName);
+    }
+
+    @JsonIgnore
+    public KindData addAttributeIfNeeded(String attributeName) {
+        if (!_attributes.containsKey(attributeName)) {
+            _attributes.put(attributeName, new AttributeData(attributeName, _kindName));
+        }
+        return this;
     }
 }

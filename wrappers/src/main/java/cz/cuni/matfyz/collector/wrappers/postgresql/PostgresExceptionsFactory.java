@@ -13,4 +13,9 @@ public class PostgresExceptionsFactory extends WrapperExceptionsFactory {
         var message = new Message("no table for column '" + columnName + "' was found").toString();
         return new DataCollectException(message);
     }
+
+    public DataCollectException byteSizeForColumnTypeNotFoundInDataModel(String columnName, String columnType) {
+        var message = new Message(String.format("No byte size for column '%s' of type '%s' was found in data model", columnName, columnType)).toString();
+        return new DataCollectException(message);
+    }
 }

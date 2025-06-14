@@ -8,7 +8,11 @@ import java.util.*;
 /**
  * Class responsible for representing collected statistical data about individual columns
  */
-public class ColumnData {
+public class AttributeData {
+    @JsonIgnore
+    private final String _attributeName;
+    @JsonIgnore
+    private final String _kindName;
 
     /**
      * Field holding information about statistical distribution of values. In PostgreSQL it holds ratio of distinct values.
@@ -20,7 +24,7 @@ public class ColumnData {
      * Field holding dominant data type of column.
      */
     @JsonProperty("types")
-    private final HashMap<String, ColumnType> _types;
+    private final HashMap<String, AttributeType> _types;
 
     /**
      * Field holding information if column is mandatory to be set for entity in database.
@@ -28,7 +32,9 @@ public class ColumnData {
     @JsonProperty("mandatory")
     private Boolean _mandatory;
 
-    public ColumnData() {
+    public AttributeData(String attributeName, String kindName) {
+        _attributeName = attributeName;
+        _kindName = kindName;
         _valuesRatio = null;
         _mandatory = null;
         _types = new HashMap<>();
@@ -41,26 +47,26 @@ public class ColumnData {
      */
     @JsonIgnore
     public int getMaxByteSize() {
-        return _types.values().stream().map(ColumnType::getByteSize).max(Integer::compareTo).orElse(0);
+        return _types.values().stream().map(AttributeType::getByteSize).max(Integer::compareTo).orElse(0);
     }
 
-    /**
-     * Add new column type
-     * @param columnType to be added
-     */
-    public void addType(String columnType) {
-        if (!_types.containsKey(columnType))
-            _types.put(columnType, new ColumnType());
+    private String getAttributeTypeIdentifier(String typeName) {
+        return _kindName + "." + _attributeName + "." + typeName;
     }
 
     @JsonIgnore
-    public ColumnType getColumnType(String columnType, boolean createNew) {
-        if (!_types.containsKey(columnType) && createNew) {
-            _types.put(columnType, new ColumnType());
-        } else if (!_types.containsKey(columnType) && !createNew) {
-            throw new IllegalArgumentException("Column '" + columnType + "' does not exists in DataModel");
+    public AttributeType getAttributeType(String typeName) throws DataModelException{
+        if (!_types.containsKey(typeName)) {
+            throw new DataModelException(String.format("AttributeType '%s.%s.%s' does not exist in DataModel instance.", _kindName, _attributeName, typeName));
         }
-        return _types.get(columnType);
+        return _types.get(typeName);
+    }
+
+    public AttributeData addAttributeTypeIfNeeded(String typeName) {
+        if (!_types.containsKey(typeName)) {
+            _types.put(typeName, new AttributeType());
+        }
+        return this;
     }
 
     public void setMandatory(boolean value) {

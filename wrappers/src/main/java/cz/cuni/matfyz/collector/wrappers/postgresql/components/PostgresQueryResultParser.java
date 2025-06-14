@@ -56,7 +56,7 @@ public class PostgresQueryResultParser extends AbstractQueryResultParser<ResultS
             String columnName = metaData.getColumnName(i);
             String typeName = metaData.getColumnTypeName(i);
 
-            builder.addColumnType(columnName, typeName);
+            builder.addAttributeType(columnName, typeName);
         }
     }
 

@@ -4,14 +4,14 @@ import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 
-import java.lang.instrument.IllegalClassFormatException;
-import java.text.ParseException;
-import java.util.LinkedHashMap;
-import java.util.Map;
 import java.util.Set;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 class QueryDataModel implements DataModel {
     private final QueryData _query;
+
+    private static final Logger logger = LoggerFactory.getLogger(QueryDataModel.class);
 
     public QueryDataModel(String query, String databaseName, String datasetName) {
         _query = new QueryData(query, databaseName, datasetName);
@@ -22,13 +22,13 @@ class QueryDataModel implements DataModel {
     public void setResultExecutionTime(double time) { _query.getResultData().setExecutionTime(time); }
 
     @Override
-    public void setResultByteSize(long size) { _query.getResultData().setByteSize(size); }
+    public void setResultByteSize(long size) { _query.getResultData().getResultKind().setByteSize(size); }
 
     @Override
-    public void setResultSizeInPages(long size) { _query.getResultData().setSizeInPages(size); }
+    public void setResultSizeInPages(long size) { _query.getResultData().getResultKind().setSizeInPages(size); }
 
     @Override
-    public void setResultRowCount(long count) { _query.getResultData().setRowCount(count); }
+    public void setResultRowCount(long count) { _query.getResultData().getResultKind().setRowCount(count); }
 
     //DatasetData
     @Override
@@ -42,53 +42,210 @@ class QueryDataModel implements DataModel {
     @Override
     public int getPageSize() { return _query.getDatabaseData().getDatabasePageSize(); }
 
-    //TableData
+    //KindData
     @Override
-    public void setTableByteSize(String tableName, long size) { _query.getDatabaseData().getTable(tableName, true).setByteSize(size); }
+    public void setKindByteSize(String kindName, long size) {
+        try {
+            _query.getDatabaseData()
+                    .addKindIfNeeded(kindName)
+                    .getKind(kindName)
+                    .setByteSize(size);
+        } catch (DataModelException e) {
+            logger.atError().setCause(e).log(e.getMessage());
+        }
+    }
     @Override
-    public void setTableSizeInPages(String tableName, long size) { _query.getDatabaseData().getTable(tableName, true).setSizeInPages(size); }
+    public void setKindSizeInPages(String kindName, long size) {
+        try {
+            _query.getDatabaseData()
+                    .addKindIfNeeded(kindName)
+                    .getKind(kindName)
+                    .setSizeInPages(size);
+        } catch (DataModelException e) {
+            logger.atError().setCause(e).log(e.getMessage());
+        }
+    }
     @Override
-    public void setTableRowCount(String tableName, long count) { _query.getDatabaseData().getTable(tableName, true).setRowCount(count); }
+    public void setKindRowCount(String kindName, long count) {
+        try {
+            _query.getDatabaseData()
+                    .addKindIfNeeded(kindName)
+                    .getKind(kindName)
+                    .setRowCount(count);
+        } catch (DataModelException e) {
+            logger.atError().setCause(e).log(e.getMessage());
+        }
+    }
     @Override
-    public void setTableConstraintCount(String tableName, int count) { _query.getDatabaseData().getTable(tableName, true).setConstraintCount(count); }
+    public void setKindConstraintCount(String kindName, int count) {
+        try {
+            _query.getDatabaseData()
+                    .addKindIfNeeded(kindName)
+                    .getKind(kindName)
+                    .setConstraintCount(count);
+        } catch (DataModelException e) {
+            logger.atError().setCause(e).log(e.getMessage());
+        }
+    }
     @Override
-    public void addTable(String tableName) { _query.getDatabaseData().addTable(tableName); }
+    public void addKind(String tableName) { _query.getDatabaseData().addKindIfNeeded(tableName); }
     @Override
-    public Set<String> getTableNames() { return _query.getDatabaseData().getTableNames(); }
+    public Set<String> getKindNames() { return _query.getDatabaseData().getKindNames(); }
 
     //IndexData
     @Override
-    public void setIndexByteSize(String indexName, long size) { _query.getDatabaseData().getIndex(indexName, true).setByteSize(size); }
+    public void setIndexByteSize(String indexName, long size) {
+        try {
+            _query.getDatabaseData()
+                    .addIndexIfNeeded(indexName)
+                    .getIndex(indexName)
+                    .setByteSize(size);
+        } catch (DataModelException e) {
+            logger.atError().log(e.getMessage());
+        }
+    }
     @Override
-    public void setIndexSizeInPages(String indexName, long size) { _query.getDatabaseData().getIndex(indexName, true).setSizeInPages(size); }
+    public void setIndexSizeInPages(String indexName, long size) {
+        try {
+            _query.getDatabaseData()
+                    .addIndexIfNeeded(indexName)
+                    .getIndex(indexName)
+                    .setSizeInPages(size);
+        } catch (DataModelException e) {
+            logger.atError().log(e.getMessage());
+        }
+    }
     @Override
-    public void setIndexRowCount(String indexName, long count) { _query.getDatabaseData().getIndex(indexName, true).setRowCount(count); }
+    public void setIndexRowCount(String indexName, long count) {
+        try {
+            _query.getDatabaseData()
+                    .addIndexIfNeeded(indexName)
+                    .getIndex(indexName)
+                    .setRowCount(count);
+        } catch (DataModelException e) {
+            logger.atError().setCause(e).log(e.getMessage());
+        }
+    }
     @Override
-    public void addIndex(String indexName) { _query.getDatabaseData().addIndex(indexName); }
+    public void addIndex(String indexName) { _query.getDatabaseData().addIndexIfNeeded(indexName); }
     @Override
     public Set<String> getIndexNames() { return _query.getDatabaseData().getIndexNames(); }
 
-    //ColumnData
+    //AttributeData
     @Override
-    public void setColumnMandatory(String tableName, String columnName, boolean mandatory) { _query.getDatabaseData().getTable(tableName, true).getColumn(columnName, true).setMandatory(mandatory); }
+    public void setAttributeMandatory(String kindName, String attributeName, boolean mandatory) {
+        try {
+            _query.getDatabaseData()
+                    .addKindIfNeeded(kindName)
+                    .getKind(kindName)
+                    .addAttributeIfNeeded(attributeName)
+                    .getAttribute(attributeName)
+                    .setMandatory(mandatory);
+        } catch (DataModelException e) {
+            logger.atError().setCause(e).log(e.getMessage());
+        }
+    }
     @Override
-    public void setColumnDistinctRatio(String tableName, String columnName, double ratio) { _query.getDatabaseData().getTable(tableName, true).getColumn(columnName, true).setDistinctRatio(ratio); }
+    public void setAttributeValueRatio(String kindName, String attributeName, double ratio) {
+        try {
+            _query.getDatabaseData()
+                    .addKindIfNeeded(kindName)
+                    .getKind(kindName)
+                    .addAttributeIfNeeded(attributeName)
+                    .getAttribute(attributeName)
+                    .setDistinctRatio(ratio);
+        } catch (DataModelException e) {
+            logger.atError().setCause(e).log(e.getMessage());
+        }
+    }
     @Override
-    public int getColumnMaxByteSize(String tableName, String columnName) { return _query.getDatabaseData().getTable(tableName, false).getColumn(columnName, false).getMaxByteSize(); }
+    public int getAttributeMaxByteSize(String kindName, String attributeName) throws DataModelException {
+        return _query.getDatabaseData()
+                .getKind(kindName)
+                .getAttribute(attributeName)
+                .getMaxByteSize();
+    }
 
-    //ColumnTypeData
+    //AttributeTypeData
     @Override
-    public void setColumnTypeByteSize(String tableName, String columnName, String typeName, int size) { _query.getDatabaseData().getTable(tableName, true).getColumn(columnName, true).getColumnType(typeName, true).setByteSize(size); }
+    public void setAttributeTypeByteSize(String kindName, String attributeName, String typeName, int size) {
+        try {
+            _query.getDatabaseData()
+                    .addKindIfNeeded(kindName)
+                    .getKind(kindName)
+                    .addAttributeIfNeeded(attributeName)
+                    .getAttribute(attributeName)
+                    .addAttributeTypeIfNeeded(typeName)
+                    .getAttributeType(typeName)
+                    .setByteSize(size);
+        } catch (DataModelException e) {
+            logger.atError().setCause(e).log(e.getMessage());
+        }
+    }
     @Override
-    public void setResultColumnTypeByteSize(String columnName, String typeName, int size) { _query.getResultData().getColumn(columnName, true).getColumnType(typeName, true).setByteSize(size);}
+    public void setResultAttributeTypeByteSize(String attributeName, String typeName, int size) {
+        try {
+            _query.getResultData()
+                    .getResultKind()
+                    .addAttributeIfNeeded(attributeName)
+                    .getAttribute(attributeName)
+                    .addAttributeTypeIfNeeded(typeName)
+                    .getAttributeType(typeName)
+                    .setByteSize(size);
+        } catch (DataModelException e) {
+            logger.atError().setCause(e).log(e.getMessage());
+        }
+    }
     @Override
-    public void setColumnTypeRatio(String tableName, String columnName, String typeName, double ratio) { _query.getDatabaseData().getTable(tableName, true).getColumn(columnName, true).getColumnType(typeName, true).setRatio(ratio); }
+    public void setAttributeTypeRatio(String kindName, String attributeName, String typeName, double ratio) {
+        try {
+            _query.getDatabaseData()
+                    .addKindIfNeeded(kindName)
+                    .getKind(kindName)
+                    .addAttributeIfNeeded(attributeName)
+                    .getAttribute(attributeName)
+                    .addAttributeTypeIfNeeded(typeName)
+                    .getAttributeType(typeName)
+                    .setRatio(ratio);
+        } catch (DataModelException e) {
+            logger.atError().setCause(e).log(e.getMessage());
+        }
+    }
     @Override
-    public void setResultColumnTypeRatio(String columnName, String typeName, double ratio) { _query.getResultData().getColumn(columnName, true).getColumnType(typeName, true).setRatio(ratio); }
+    public void setResultAttributeTypeRatio(String attributeName, String typeName, double ratio) {
+        try {
+            _query.getResultData()
+                    .getResultKind()
+                    .addAttributeIfNeeded(attributeName)
+                    .getAttribute(attributeName)
+                    .addAttributeTypeIfNeeded(typeName)
+                    .getAttributeType(typeName)
+                    .setRatio(ratio);
+        } catch (DataModelException e) {
+            logger.atError().setCause(e).log(e.getMessage());
+        }
+    }
     @Override
-    public void addColumnType(String tableName, String columnName, String typeName) { _query.getDatabaseData().getTable(tableName, true).getColumn(columnName, true).addType(typeName); }
+    public void addAttributeType(String kindName, String attributeName, String typeName) {
+        try {
+            _query.getDatabaseData()
+                    .addKindIfNeeded(kindName)
+                    .getKind(kindName)
+                    .addAttributeIfNeeded(attributeName)
+                    .getAttribute(attributeName)
+                    .addAttributeTypeIfNeeded(typeName);
+        } catch (DataModelException e) {
+            logger.atError().setCause(e).log(e.getMessage());
+        }
+    }
     @Override
-    public int getColumnTypeByteSize(String tableName, String columnName, String typeName) { return _query.getDatabaseData().getTable(tableName, false).getColumn(columnName, false).getColumnType(typeName, false).getByteSize(); }
+    public int getAttributeTypeByteSize(String kindName, String attributeName, String typeName) throws DataModelException {
+        return _query.getDatabaseData()
+                .getKind(kindName)
+                .getAttribute(attributeName)
+                .getAttributeType(typeName)
+                .getByteSize();
+    }
 
     @Override
     public String toJson() throws DataModelException {
@@ -98,7 +255,7 @@ class QueryDataModel implements DataModel {
             mapper.setSerializationInclusion(JsonInclude.Include.NON_NULL);
             return mapper.writeValueAsString(_query);
         } catch (JsonProcessingException e) {
-            throw new DataModelException("Problem parsing DataModel to json", e);
+            throw new DataModelException("Problem with parsing DataModel instance to json format", e);
         }
     }
 }

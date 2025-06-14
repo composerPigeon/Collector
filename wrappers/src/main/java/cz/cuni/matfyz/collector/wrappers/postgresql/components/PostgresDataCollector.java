@@ -1,5 +1,6 @@
 package cz.cuni.matfyz.collector.wrappers.postgresql.components;
 
+import cz.cuni.matfyz.collector.model.DataModelException;
 import cz.cuni.matfyz.collector.wrappers.abstractwrapper.components.AbstractDataCollector;
 import cz.cuni.matfyz.collector.wrappers.abstractwrapper.components.AbstractQueryResultParser;
 import cz.cuni.matfyz.collector.wrappers.abstractwrapper.components.ExecutionContext;
@@ -101,8 +102,9 @@ public class PostgresDataCollector extends AbstractDataCollector<ResultSet, Stri
         if (res.next()) {
             double ratio = res.getDouble("n_distinct");
             int size = res.getInt("avg_width");
-            _model.setColumnDistinctRatio(tableName, colName, ratio);
-            _model.setColumnTypeByteSize(tableName, colName, typeName, size);
+            _model.setAttributeValueRatio(tableName, colName, ratio);
+            _model.setAttributeTypeByteSize(tableName, colName, typeName, size);
+            _model.setAttributeTypeRatio(tableName, colName, typeName, 1);
         }
 
     }
@@ -120,7 +122,7 @@ public class PostgresDataCollector extends AbstractDataCollector<ResultSet, Stri
             _collectNumericDataForCol(tableName, colName, type);
 
             boolean mandatory = result.getBoolean("attnotnull");
-            _model.setColumnMandatory(tableName, colName, mandatory);
+            _model.setAttributeMandatory(tableName, colName, mandatory);
         }
     }
 
@@ -163,7 +165,7 @@ public class PostgresDataCollector extends AbstractDataCollector<ResultSet, Stri
         CachedResult result = executeQuery(PostgresResources.getRowCountForTableQuery(tableName));
         if (result.next()) {
             long rowCount = result.getLong("reltuples");
-            _model.setTableRowCount(tableName, rowCount);
+            _model.setKindRowCount(tableName, rowCount);
         }
     }
 
@@ -176,7 +178,7 @@ public class PostgresDataCollector extends AbstractDataCollector<ResultSet, Stri
         CachedResult result = executeQuery(PostgresResources.getConstraintsCountForTableQuery(tableName));
         if (result.next()) {
             int count = result.getInt("relchecks");
-            _model.setTableConstraintCount(tableName, count);
+            _model.setKindConstraintCount(tableName, count);
         }
     }
 
@@ -190,7 +192,7 @@ public class PostgresDataCollector extends AbstractDataCollector<ResultSet, Stri
         CachedResult result = executeQuery(PostgresResources.getTableSizeInPagesQuery(tableName));
         if (result.next()) {
             long sizeInPages = result.getLong("relpages");
-            _model.setTableSizeInPages(tableName, sizeInPages);
+            _model.setKindSizeInPages(tableName, sizeInPages);
         }
     }
 
@@ -204,7 +206,7 @@ public class PostgresDataCollector extends AbstractDataCollector<ResultSet, Stri
         CachedResult result = executeQuery(PostgresResources.getTableSizeQuery(tableName));
         if (result.next()) {
             long size = result.getLong("pg_total_relation_size");
-            _model.setTableByteSize(tableName, size);
+            _model.setKindByteSize(tableName, size);
         }
     }
 
@@ -213,7 +215,7 @@ public class PostgresDataCollector extends AbstractDataCollector<ResultSet, Stri
      * @throws DataCollectException when some of the help queries fails
      */
     private void _collectTableData() throws DataCollectException {
-        for (String tableName : _model.getTableNames()) {
+        for (String tableName : _model.getKindNames()) {
             _collectTableRowCount(tableName);
             _collectTableConstraintCount(tableName);
             _collectTableSizeInPages(tableName);
@@ -234,7 +236,7 @@ public class PostgresDataCollector extends AbstractDataCollector<ResultSet, Stri
         CachedResult result = executeQuery(PostgresResources.getTableNameForIndexQuery(indexName));
         if (result.next()) {
             String tableName = result.getString("tablename");
-            _model.addTable(tableName);
+            _model.addKind(tableName);
         }
     }
 
@@ -305,7 +307,7 @@ public class PostgresDataCollector extends AbstractDataCollector<ResultSet, Stri
         CachedResult result = executeQuery(PostgresResources.getTableNameForColumnQuery(columnName, columnType));
         while (result.next()) {
             String tableName = result.getString("relname");
-            if (_model.getTableNames().contains(tableName)) {
+            if (_model.getKindNames().contains(tableName)) {
                 return tableName;
             }
         }
@@ -323,15 +325,19 @@ public class PostgresDataCollector extends AbstractDataCollector<ResultSet, Stri
 
         long sizeInBytes = 0;
         double colSize = 0;
-        for (String columnName : mainResult.getColumnNames()) {
+        for (String columnName : mainResult.getAttributeNames()) {
             colSize = 0;
-            for (String colType : mainResult.getColumnTypes(columnName)) {
-                String tableName = _getTableNameForColumn(columnName, colType);
-                int typeSize = _model.getColumnTypeByteSize(tableName, columnName, colType);
-                _model.setResultColumnTypeByteSize(columnName, colType, typeSize);
-                double ratio = mainResult.getColumnTypeRatio(columnName, colType);
-                _model.setResultColumnTypeRatio(columnName, colType, ratio);
-                colSize += typeSize * ratio;
+            for (String colType : mainResult.getAttributeTypes(columnName)) {
+                try {
+                    String tableName = _getTableNameForColumn(columnName, colType);
+                    int typeSize = _model.getAttributeTypeByteSize(tableName, columnName, colType);
+                    _model.setResultAttributeTypeByteSize(columnName, colType, typeSize);
+                    double ratio = mainResult.getAttributeTypeRatio(columnName, colType);
+                    _model.setResultAttributeTypeRatio(columnName, colType, ratio);
+                    colSize += typeSize * ratio;
+                } catch (DataModelException e) {
+                    throw getExceptionsFactory(PostgresExceptionsFactory.class).byteSizeForColumnTypeNotFoundInDataModel(columnName, colType);
+                }
             }
             sizeInBytes += Math.round(colSize);
         }
@@ -340,7 +346,7 @@ public class PostgresDataCollector extends AbstractDataCollector<ResultSet, Stri
 
         int pageSize = _model.getPageSize();
         if (pageSize > 0)
-            _model.setResultSizeInPages((int)Math.ceil((double) sizeInBytes / pageSize));
+            _model.setResultSizeInPages((int) Math.ceil((double) sizeInBytes / pageSize));
     }
 
     /**

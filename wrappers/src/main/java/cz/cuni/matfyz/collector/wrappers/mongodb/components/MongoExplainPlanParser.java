@@ -22,7 +22,7 @@ public class MongoExplainPlanParser extends AbstractExplainPlanParser<Document> 
         if (command.containsKey("find")) {
             String collectionName = command.getString("find");
             if (collectionName != null)
-                model.addTable(collectionName);
+                model.addKind(collectionName);
         }
 
         if (command.containsKey("aggregate")) {

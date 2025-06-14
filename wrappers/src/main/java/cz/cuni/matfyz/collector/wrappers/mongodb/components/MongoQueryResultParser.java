@@ -141,7 +141,7 @@ public class MongoQueryResultParser extends AbstractQueryResultParser<Document> 
             String fieldName = entry.getKey();
             String type = _parseType(entry.getValue());
             if (type != null)
-                builder.addColumnType(fieldName, type);
+                builder.addAttributeType(fieldName, type);
         }
     }
 

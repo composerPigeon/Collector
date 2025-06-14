@@ -13,7 +13,7 @@ import cz.cuni.matfyz.collector.wrappers.postgresql.components.PostgresQueryResu
 import java.sql.*;
 
 /**
- * Class which represents the wrapper operating over PostgreSQL database
+ * Class which represents the wrapper operating over PostgresSQL database
  */
 public class PostgresWrapper extends AbstractWrapper<ResultSet, String, String> {
     public PostgresWrapper(ConnectionData connectionData) {
@@ -60,6 +60,6 @@ public class PostgresWrapper extends AbstractWrapper<ResultSet, String, String> 
     }
 
     @Override
-    public void close() throws Exception {
+    public void close() {
     }
 }

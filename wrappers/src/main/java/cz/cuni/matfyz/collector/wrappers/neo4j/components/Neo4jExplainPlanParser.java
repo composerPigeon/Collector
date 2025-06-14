@@ -5,7 +5,6 @@ import cz.cuni.matfyz.collector.wrappers.abstractwrapper.components.AbstractExpl
 import cz.cuni.matfyz.collector.wrappers.exceptions.ParseException;
 import cz.cuni.matfyz.collector.wrappers.exceptions.WrapperExceptionsFactory;
 import org.neo4j.driver.summary.Plan;
-import org.neo4j.driver.summary.ProfiledPlan;
 import org.neo4j.driver.summary.ResultSummary;
 
 import java.util.concurrent.TimeUnit;
@@ -34,7 +33,7 @@ public class Neo4jExplainPlanParser extends AbstractExplainPlanParser<ResultSumm
     private void _parseNodeTableName(DataModel model, Plan operator) {
         String details = operator.arguments().get("Details").asString();
         String tableName = details.split(":")[1];
-        model.addTable(tableName);
+        model.addKind(tableName);
     }
 
     /**
@@ -70,7 +69,7 @@ public class Neo4jExplainPlanParser extends AbstractExplainPlanParser<ResultSumm
     private void _parseRelationTableName(DataModel model, Plan operator) {
         String details = operator.arguments().get("Details").asString();
         String tableName = _parseRelationDetailsForLabel(details);
-        model.addTable(tableName);
+        model.addKind(tableName);
     }
 
     /**

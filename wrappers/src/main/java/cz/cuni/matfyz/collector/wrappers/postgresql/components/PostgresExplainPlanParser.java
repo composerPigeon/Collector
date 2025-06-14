@@ -36,7 +36,7 @@ public class PostgresExplainPlanParser extends AbstractExplainPlanParser<String>
      */
     private void _parseTableName(Map<String, Object> node, DataModel model) {
         if (node.get("Relation Name") instanceof String tableName) {
-            model.addTable(tableName);
+            model.addKind(tableName);
         }
     }
 

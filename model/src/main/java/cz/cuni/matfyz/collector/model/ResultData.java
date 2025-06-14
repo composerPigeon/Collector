@@ -3,8 +3,6 @@ package cz.cuni.matfyz.collector.model;
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonProperty;
 
-import java.util.Map;
-
 /**
  * Class for saving statistical data about result
  */
@@ -14,33 +12,17 @@ public class ResultData {
     @JsonProperty("executionTime")
     private Double _executionTime;
 
-    @JsonProperty("resultTable")
-    private final TableData _resultTable;
+    @JsonProperty("resultKind")
+    private final KindData _resultKind;
 
     public ResultData() {
-        _resultTable = new TableData();
+        _resultKind = new KindData("resultKind");
         _executionTime = null;
-    }
-
-    // Table data setters
-    public void setByteSize(long size) {
-        _resultTable.setByteSize(size);
-    }
-
-    public void setSizeInPages(long sizeInPages) {
-        _resultTable.setSizeInPages(sizeInPages);
-    }
-
-    public void setRowCount(long count) {
-        _resultTable.setRowCount(count);
     }
 
     public void setExecutionTime(double time) {
         if (_executionTime == null) _executionTime = time;
     }
 
-    @JsonIgnore
-    public ColumnData getColumn(String columnName, boolean createIfNotExist) throws IllegalArgumentException { return _resultTable.getColumn(columnName, createIfNotExist); }
-
-    public TableData getResultTable() { return _resultTable; }
+    public KindData getResultKind() { return _resultKind; }
 }

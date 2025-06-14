@@ -22,12 +22,12 @@ public class DatabaseData {
     private Long _cacheSize;
 
     @JsonProperty("tables")
-    private final HashMap<String, TableData> _tables;
+    private final HashMap<String, KindData> _kinds;
     @JsonProperty("indexes")
     private final HashMap<String, IndexData> _indexes;
 
     public DatabaseData() {
-        _tables = new HashMap<>();
+        _kinds = new HashMap<>();
         _indexes = new HashMap<>();
 
         _databaseSize = null;
@@ -61,42 +61,42 @@ public class DatabaseData {
     }
 
     @JsonIgnore
-    public TableData getTable(String tableName, boolean createIfNotExist) throws IllegalArgumentException {
-        if (!_tables.containsKey(tableName) && createIfNotExist) {
-            _tables.put(tableName, new TableData());
-        } else if (!_tables.containsKey(tableName) && !createIfNotExist) {
-            throw new IllegalArgumentException("Table '" + tableName + "' does not exists in DataModel");
+    public KindData getKind(String kindName) throws DataModelException {
+        if (!_kinds.containsKey(kindName)) {
+            throw new DataModelException(String.format("Kind %s does not exist in DataModel instance.", kindName));
         }
-        return _tables.get(tableName);
+        return _kinds.get(kindName);
+    }
+
+    public DatabaseData addKindIfNeeded(String kindName) {
+        if (!_kinds.containsKey(kindName)) {
+            _kinds.put(kindName, new KindData(kindName));
+        }
+        return this;
     }
 
     @JsonIgnore
-    public IndexData getIndex(String inxName, boolean createIfNotExist) {
-        if (!_indexes.containsKey(inxName) && createIfNotExist) {
-            _indexes.put(inxName, new IndexData());
-        } else if (!_indexes.containsKey(inxName) && !createIfNotExist) {
-            throw new IllegalArgumentException("Index '" + inxName + "' does not exists in DataModel");
+    public IndexData getIndex(String inxName) throws DataModelException {
+        if (!_indexes.containsKey(inxName)) {
+            throw new DataModelException(String.format("Index %s does not exist in DataModel instance.", inxName));
         }
         return _indexes.get(inxName);
     }
 
-    @JsonIgnore
-    public Set<String> getTableNames() {
-        return _tables.keySet();
-    }
-    public void addTable(String tableName) {
-        if (!_tables.containsKey(tableName)) {
-            _tables.put(tableName, new TableData());
+    public DatabaseData addIndexIfNeeded(String inxName) {
+        if (!_indexes.containsKey(inxName)) {
+            _indexes.put(inxName, new IndexData());
         }
+        return this;
+    }
+
+    @JsonIgnore
+    public Set<String> getKindNames() {
+        return _kinds.keySet();
     }
 
     @JsonIgnore
     public Set<String> getIndexNames() {
         return _indexes.keySet();
-    }
-    public void addIndex(String inxName) {
-        if(!_indexes.containsKey(inxName)) {
-            _indexes.put(inxName, new IndexData());
-        }
     }
 }

@@ -15,7 +15,6 @@ import org.neo4j.driver.summary.ResultSummary;
 public class Neo4jConnection extends AbstractConnection<Result, String, ResultSummary> {
     private final Session _querySession;
     private final Session _planSession;
-    private final Driver _neo4jDriver;
 
     public Neo4jConnection(Driver neo4jDriver, String datasetName, WrapperExceptionsFactory exceptionsFactory) {
         super(exceptionsFactory);
@@ -25,7 +24,6 @@ public class Neo4jConnection extends AbstractConnection<Result, String, ResultSu
         _planSession = neo4jDriver.session(
                 SessionConfig.builder().withDatabase(datasetName).withDefaultAccessMode(AccessMode.READ).build()
         );
-        _neo4jDriver = neo4jDriver;
     }
 
     /**

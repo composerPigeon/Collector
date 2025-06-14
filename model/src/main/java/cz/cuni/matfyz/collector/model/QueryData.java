@@ -14,7 +14,7 @@ class QueryData {
     @JsonProperty("systemName")
     private final String _systemName;
 
-    /** Field containing name of dataset */
+    /** Field containing name of database */
     @JsonProperty("databaseName")
     private final String _databaseName;
 

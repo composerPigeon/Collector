@@ -13,7 +13,7 @@ dependencies {
     implementation 'com.fasterxml.jackson.core:jackson-databind:2.15.3'
 
     //neo4j native driver
-    implementation 'org.neo4j.driver:neo4j-java-driver:5.19.0'
+    implementation 'org.neo4j.driver:neo4j-java-driver:5.28.5'
 
     //mongodb native driver
     implementation 'org.mongodb:mongodb-driver-sync:4.11.1'

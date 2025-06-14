@@ -1,6 +1,5 @@
 package cz.cuni.matfyz.collector.wrappers.queryresult;
 
-import javax.xml.crypto.dsig.keyinfo.KeyValue;
 import java.util.*;
 
 /**
@@ -9,7 +8,7 @@ import java.util.*;
 public class ConsumedResult {
 
     /** Field containing all columnTypes for all columns of result */
-    private final Map<String, Map<String, Integer>> _columnTypes;
+    private final Map<String, Map<String, Integer>> _attributeTypes;
 
     /** Field holding byte size of result measured in bytes */
     private final long _byteSize;
@@ -17,43 +16,36 @@ public class ConsumedResult {
     /** Field containing record count from result */
     private final long _count;
 
-    private ConsumedResult(Map<String, Map<String, Integer>> columnTypes, long byteSize, long count) {
+    private ConsumedResult(Map<String, Map<String, Integer>> attributeTypes, long byteSize, long count) {
         _byteSize = byteSize;
         _count = count;
-        _columnTypes = columnTypes;
+        _attributeTypes = attributeTypes;
     }
 
     /**
      * Method for getting all column names present in result
      * @return set of the column names
      */
-    public Set<String> getColumnNames() {
-        return _columnTypes.keySet();
+    public Set<String> getAttributeNames() {
+        return _attributeTypes.keySet();
     }
 
     /**
      * Method for getting type for specific column
-     * @param colName to select column by columnName
+     * @param attributeName to select column by columnName
      * @return type of this column as string
      */
-    public Iterable<String> getColumnTypes(String colName) {
-        return _columnTypes.get(colName).keySet();
+    public Iterable<String> getAttributeTypes(String attributeName) {
+        return _attributeTypes.get(attributeName).keySet();
     }
 
-    public String getMajorType(String colName) {
-        var counts = _columnTypes.get(colName);
+    public String getMajorType(String attributeName) {
+        var counts = _attributeTypes.get(attributeName);
         return Collections.max(counts.entrySet(), Map.Entry.comparingByValue()).getKey();
     }
 
-    public String getOnlyType(String colName) {
-        String[] types = _columnTypes.get(colName).keySet().toArray(new String[]{});
-        if (types.length == 1)
-            return types[0];
-        throw new UnsupportedOperationException("There must be only type for column name: " + colName);
-    }
-
-    public double getColumnTypeRatio(String colName, String type) {
-        return (double) _columnTypes.get(colName).get(type) / (double)_count;
+    public double getAttributeTypeRatio(String attributeName, String type) {
+        return (double) _attributeTypes.get(attributeName).get(type) / (double)_count;
     }
 
     /**
@@ -77,33 +69,33 @@ public class ConsumedResult {
      */
     public static class Builder {
 
-        private final Map<String, Map<String, Integer>> _columnTypes;
+        private final Map<String, Map<String, Integer>> _attributeTypes;
         private long _byteSize;
         private long _count;
 
         public Builder() {
-            _columnTypes = new HashMap<>();
+            _attributeTypes = new HashMap<>();
             _count = 0;
             _byteSize = 0;
         }
 
-        private void addColumnType(Map<String, Integer> counts, String type) {
+        private void addAttributeType(Map<String, Integer> counts, String type) {
             counts.compute(type, (k, v) -> v == null ? 1 : v + 1);
         }
 
         /**
          * Method for adding type for specific column
-         * @param colName to specify column by columnName
+         * @param attributeName to specify column by columnName
          * @param type inputted type
          */
-        public void addColumnType(String colName, String type) {
-            if (_columnTypes.containsKey(colName)) {
-                var counts = _columnTypes.get(colName);
-                addColumnType(counts, type);
+        public void addAttributeType(String attributeName, String type) {
+            if (_attributeTypes.containsKey(attributeName)) {
+                var counts = _attributeTypes.get(attributeName);
+                addAttributeType(counts, type);
             } else {
                 var counts = new HashMap<String, Integer>();
-                addColumnType(counts, type);
-                _columnTypes.put(colName, counts);
+                addAttributeType(counts, type);
+                _attributeTypes.put(attributeName, counts);
             }
         }
 
@@ -128,7 +120,7 @@ public class ConsumedResult {
          */
         public ConsumedResult toResult() {
             return new ConsumedResult(
-                    _columnTypes,
+                    _attributeTypes,
                     _byteSize,
                     _count
             );

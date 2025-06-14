@@ -111,21 +111,21 @@ public class Neo4jQueryResultParser extends AbstractQueryResultParser<Result> {
                 for (Map.Entry<String, PropertyData> entry : _parseNodeToMap(nodeValue.asNode())) {
                     PropertyData propData = entry.getValue();
                     builder.addByteSize(Neo4jResources.DefaultSizes.getAvgColumnSizeByType(propData.getType()));
-                    builder.addColumnType(entry.getKey(), propData.getType());
+                    builder.addAttributeType(entry.getKey(), propData.getType());
                 }
             }
             else if (pair.value() instanceof RelationshipValue relationshipValue) {
                 for (Map.Entry<String, PropertyData> entry : _parseRelationToMap(relationshipValue.asRelationship())) {
                     PropertyData propData = entry.getValue();
                     builder.addByteSize(Neo4jResources.DefaultSizes.getAvgColumnSizeByType(propData.getType()));
-                    builder.addColumnType(entry.getKey(), propData.getType());
+                    builder.addAttributeType(entry.getKey(), propData.getType());
                 }
             }
             else {
                 PropertyData propData = PropertyData.fromValue(pair.value());
                 if (propData != null) {
                     builder.addByteSize(Neo4jResources.DefaultSizes.getAvgColumnSizeByType(propData.getType()));
-                    builder.addColumnType(pair.key(), propData.getType());
+                    builder.addAttributeType(pair.key(), propData.getType());
                 }
             }
         }

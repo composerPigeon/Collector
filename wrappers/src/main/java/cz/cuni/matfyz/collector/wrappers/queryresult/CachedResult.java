@@ -38,30 +38,30 @@ public class CachedResult {
 
     /**
      * Method for checking of this collection of records have column of this columnName
-     * @param colName inputted columnName
+     * @param attributeName inputted columnName
      * @return true if this column exists
      */
-    public boolean containsCol(String colName) {
-        return _records.get(_cursor).containsKey(colName);
+    public boolean containsAttribute(String attributeName) {
+        return _records.get(_cursor).containsKey(attributeName);
     }
 
     /**
      * Private method used for getting value of column from actual record which is pointed by _cursor
-     * @param colName inputted columnName
+     * @param attributeName inputted columnName
      * @return instance of Object which is selected value or null this value do not exist
      */
-    private Object _get(String colName) {
-        return _records.get(_cursor).getOrDefault(colName, null);
+    private Object _get(String attributeName) {
+        return _records.get(_cursor).getOrDefault(attributeName, null);
     }
 
     /**
      * Method which gets value from selected column as object and then tries to parse it or convert it to Integer and return it
-     * @param colName inputted columnName
+     * @param attributeName inputted columnName
      * @return int value
      * @throws ClassCastException when gathered value cannot be parsed or is null
      */
-    public int getInt(String colName) {
-        Object value = _get(colName);
+    public int getInt(String attributeName) {
+        Object value = _get(attributeName);
         if (value == null) {
             throw new ClassCastException("Cannot cast null to int");
         }
@@ -86,21 +86,21 @@ public class CachedResult {
 
     /**
      * Method which tries to return value from selected column as String
-     * @param colName inputted columnName
+     * @param attributeName inputted columnName
      * @return converted string value
      */
-    public String getString(String colName) {
-        return (String)_get(colName);
+    public String getString(String attributeName) {
+        return (String)_get(attributeName);
     }
 
     /**
      * Method which tries to get value as double from selected column
-     * @param colName inputted columnName to select column
+     * @param attributeName inputted columnName to select column
      * @return converted double value
      * @throws ClassCastException when value do not exist or can't be converted
      */
-    public double getDouble(String colName) {
-        Object value = _get(colName);
+    public double getDouble(String attributeName) {
+        Object value = _get(attributeName);
         if (value == null) {
             throw new ClassCastException("Cannot cast null to double");
         }
@@ -117,12 +117,12 @@ public class CachedResult {
 
     /**
      * Method which tries to get value from selected column as boolean
-     * @param colName inputted columnName to select column
+     * @param attributeName inputted columnName to select column
      * @return converted boolean value
      * @throws ClassCastException when value can't be parsed to boolean or value do not exist
      */
-    public boolean getBoolean(String colName) {
-        Object value = _get(colName);
+    public boolean getBoolean(String attributeName) {
+        Object value = _get(attributeName);
         if (value == null) {
             throw new ClassCastException("Cannot cast null to boolean");
         } else if (value instanceof Boolean booleanValue) {
@@ -136,12 +136,12 @@ public class CachedResult {
 
     /**
      * Method which tries to get value from selected column as long
-     * @param colName inputted columnName
+     * @param attributeName inputted columnName
      * @return converted value
      * @throws ClassCastException when value can't be parsed to long or value do not exist
      */
-    public long getLong(String colName) {
-        Object value = _get(colName);
+    public long getLong(String attributeName) {
+        Object value = _get(attributeName);
         if (value == null) {
             throw  new ClassCastException("Cannot cast null to long");
         } else if (value instanceof Long longValue) {
@@ -173,12 +173,12 @@ public class CachedResult {
     }
 
     /**
-     * Mathod which tries to get value from selected column as org.bson.Document
-     * @param colName inputted column
+     * Method which tries to get value from selected column as org.bson.Document
+     * @param attributeName inputted column
      * @return value as Document
      */
-    public Document getDocument(String colName) {
-        Object value = _get(colName);
+    public Document getDocument(String attributeName) {
+        Object value = _get(attributeName);
         if (value == null) {
             throw new ClassCastException("Cannot cast null to Document");
         } else if (value instanceof Map<?, ?> mapValue) {
@@ -206,14 +206,14 @@ public class CachedResult {
 
     /**
      * Method which get value as list of specified type by generic parameter
-     * @param columnName to select column
+     * @param attributeName to select column
      * @param clazz to select type
      * @return list of specified types
      * @param <T> generic parameter for type
      * @throws ClassCastException when list cannot be converted
      */
-    public <T> List<T> getList(String columnName, Class<T> clazz) {
-        Object value = _get(columnName);
+    public <T> List<T> getList(String attributeName, Class<T> clazz) {
+        Object value = _get(attributeName);
         if (value instanceof List<?> listValue) {
             return _convertList(listValue, clazz);
         }
@@ -248,12 +248,12 @@ public class CachedResult {
 
         /**
          * Method which will add new value into specified column to last record
-         * @param colName to specify column by columnName
+         * @param attributeName to specify attribute by name
          * @param value inputted value
          */
-        public void toLastRecordAddValue(String colName, Object value) {
+        public void toLastRecordAddValue(String attributeName, Object value) {
             int lastInx = _records.size() - 1;
-            _records.get(lastInx).put(colName, value);
+            _records.get(lastInx).put(attributeName, value);
         }
 
         /**
