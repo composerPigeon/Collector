@@ -60,7 +60,7 @@ public class ConsumedResult {
      * Getter for field _rowCount
      * @return row count of result
      */
-    public long getRowCount() {
+    public long getRecordCount() {
         return _count;
     }
 

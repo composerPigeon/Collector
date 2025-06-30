@@ -2,31 +2,29 @@ package cz.cuni.matfyz.collector.model;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
 
-import java.util.LinkedHashMap;
-import java.util.Map;
-
 /**
  * Class for saving statistical data about index
  */
 public class IndexData {
     /** Field holding index size in bytes */
     @JsonProperty("byteSize")
-    public Long _size;
+    public Long _byteSize;
     /** Field holding index size in pages */
     @JsonProperty("sizeInPages")
     public Long _sizeInPages;
     /** Field holding index row count */
-    @JsonProperty("rowCount")
-    public Long _rowCount;
+    @JsonProperty("recordCount")
+    public Long _recordCount;
 
     public IndexData() {
-        _size = null;
+        _byteSize = null;
         _sizeInPages = null;
-        _rowCount = null;
+        _recordCount = null;
     }
 
     public void setByteSize(long size) {
-        if (_size == null) {_size = size;}
+        if (_byteSize == null) {
+            _byteSize = size;}
     }
 
     public void setSizeInPages(long sizeInPages) {
@@ -34,6 +32,7 @@ public class IndexData {
     }
 
     public void setRowCount(long count) {
-        if (_rowCount == null) {_rowCount = count;}
+        if (_recordCount == null) {
+            _recordCount = count;}
     }
 }

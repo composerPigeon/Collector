@@ -58,7 +58,7 @@ public class PostgresDataCollector extends AbstractDataCollector<ResultSet, Stri
      * @throws DataCollectException when help query fails
      */
     private void _collectDatabaseDataSizes() throws DataCollectException {
-        CachedResult result = executeQuery(PostgresResources.getDatasetSizeQuery(_databaseName));
+        CachedResult result = executeQuery(PostgresResources.getDatabaseSizeQuery(_databaseName));
         if (result.next()) {
             long dataSetSize = result.getLong("pg_database_size");
             _model.setDatabaseByteSize(dataSetSize);
@@ -162,10 +162,10 @@ public class PostgresDataCollector extends AbstractDataCollector<ResultSet, Stri
      * @throws DataCollectException when help query fails
      */
     private void _collectTableRowCount(String tableName) throws DataCollectException {
-        CachedResult result = executeQuery(PostgresResources.getRowCountForTableQuery(tableName));
+        CachedResult result = executeQuery(PostgresResources.getRelationRecordCountQuery(tableName));
         if (result.next()) {
             long rowCount = result.getLong("reltuples");
-            _model.setKindRowCount(tableName, rowCount);
+            _model.setKindRecordCount(tableName, rowCount);
         }
     }
 
@@ -189,7 +189,7 @@ public class PostgresDataCollector extends AbstractDataCollector<ResultSet, Stri
      * @throws DataCollectException when help query fails
      */
     private void _collectTableSizeInPages(String tableName) throws DataCollectException {
-        CachedResult result = executeQuery(PostgresResources.getTableSizeInPagesQuery(tableName));
+        CachedResult result = executeQuery(PostgresResources.getRelationSizeInPagesQuery(tableName));
         if (result.next()) {
             long sizeInPages = result.getLong("relpages");
             _model.setKindSizeInPages(tableName, sizeInPages);
@@ -203,7 +203,7 @@ public class PostgresDataCollector extends AbstractDataCollector<ResultSet, Stri
      * @throws DataCollectException when help query fails
      */
     private void _collectTableSize(String tableName) throws DataCollectException {
-        CachedResult result = executeQuery(PostgresResources.getTableSizeQuery(tableName));
+        CachedResult result = executeQuery(PostgresResources.getRelationSizeQuery(tableName));
         if (result.next()) {
             long size = result.getLong("pg_total_relation_size");
             _model.setKindByteSize(tableName, size);
@@ -247,10 +247,10 @@ public class PostgresDataCollector extends AbstractDataCollector<ResultSet, Stri
      * @throws DataCollectException when help query fails
      */
     private void _collectIndexRowCount(String indexName) throws DataCollectException {
-        CachedResult result = executeQuery(PostgresResources.getRowCountForTableQuery(indexName));
+        CachedResult result = executeQuery(PostgresResources.getRelationRecordCountQuery(indexName));
         if (result.next()) {
             long rowCount = result.getLong("reltuples");
-            _model.setIndexRowCount(indexName, rowCount);
+            _model.setIndexRecordCount(indexName, rowCount);
         }
     }
 
@@ -261,7 +261,7 @@ public class PostgresDataCollector extends AbstractDataCollector<ResultSet, Stri
      * @throws DataCollectException when help query fails
      */
     private void _collectIndexSizeInPages(String indexName) throws DataCollectException {
-        CachedResult result = executeQuery(PostgresResources.getTableSizeInPagesQuery(indexName));
+        CachedResult result = executeQuery(PostgresResources.getRelationSizeInPagesQuery(indexName));
         if (result.next()) {
             long sizeInPages = result.getLong("relpages");
             _model.setIndexSizeInPages(indexName, sizeInPages);
@@ -275,7 +275,7 @@ public class PostgresDataCollector extends AbstractDataCollector<ResultSet, Stri
      * @throws DataCollectException when help query fails
      */
     private void _collectIndexSize(String indexName) throws DataCollectException {
-        CachedResult result = executeQuery(PostgresResources.getTableSizeQuery(indexName));
+        CachedResult result = executeQuery(PostgresResources.getRelationSizeQuery(indexName));
         if (result.next()) {
             long size = result.getLong("pg_total_relation_size");
             _model.setIndexByteSize(indexName, size);
@@ -320,8 +320,8 @@ public class PostgresDataCollector extends AbstractDataCollector<ResultSet, Stri
      * @throws DataCollectException when no table for some column was found
      */
     private void _collectResultData(ConsumedResult mainResult) throws DataCollectException {
-        long rowCount = mainResult.getRowCount();
-        _model.setResultRowCount(rowCount);
+        long rowCount = mainResult.getRecordCount();
+        _model.setResultRecordCount(rowCount);
 
         long sizeInBytes = 0;
         double colSize = 0;

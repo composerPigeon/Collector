@@ -189,8 +189,8 @@ public class Neo4jDataCollector extends AbstractDataCollector<Result, String, Re
     private PropertiesSizeData _fetchNodePropertiesSize(String fetchQuery) throws DataCollectException {
         ConsumedResult result = executeQueryAndConsume(fetchQuery);
         return new PropertiesSizeData(
-                result.getRowCount() * Neo4jResources.DefaultSizes.NODE_SIZE + result.getByteSize(),
-                result.getRowCount()
+                result.getRecordCount() * Neo4jResources.DefaultSizes.NODE_SIZE + result.getByteSize(),
+                result.getRecordCount()
         );
     }
 
@@ -203,8 +203,8 @@ public class Neo4jDataCollector extends AbstractDataCollector<Result, String, Re
     private PropertiesSizeData _fetchEdgePropertiesSize(String fetchQuery) throws DataCollectException {
         ConsumedResult result = executeQueryAndConsume(fetchQuery);
         return new PropertiesSizeData(
-                result.getRowCount() * Neo4jResources.DefaultSizes.EDGE_SIZE + result.getByteSize(),
-                result.getRowCount()
+                result.getRecordCount() * Neo4jResources.DefaultSizes.EDGE_SIZE + result.getByteSize(),
+                result.getRecordCount()
         );
     }
 
@@ -230,13 +230,13 @@ public class Neo4jDataCollector extends AbstractDataCollector<Result, String, Re
     private void _collectNodesOrEdgesSizes(String label, boolean isNode) throws DataCollectException {
         PropertiesSizeData sizes = isNode ? _fetchNodePropertiesSize(Neo4jResources.getNodesOfSpecificLabelQuery(label)) : _fetchEdgePropertiesSize(Neo4jResources.getEdgesOfSpecificLabelQuery(label));
         long size = sizes.getByteSize();
-        long rowCount = sizes.getCount();
+        long recordCount = sizes.getCount();
 
         _model.setKindByteSize(label, size);
         _model.setKindSizeInPages(label, (int) Math.ceil(
                 (double) size / Neo4jResources.DefaultSizes.PAGE_SIZE
         ));
-        _model.setKindRowCount(label, rowCount);
+        _model.setKindRecordCount(label, recordCount);
     }
 
     /**
@@ -267,29 +267,21 @@ public class Neo4jDataCollector extends AbstractDataCollector<Result, String, Re
     }
 
     /**
-     * Method which gets labels over which is this index build
-     * @param indexNames specify index by its name
-     */
-    private void _collectLabelFor(String[] indexNames) {
-        _model.addKind(indexNames[1]);
-    }
-
-    /**
      * Method which is responsible for saving index sizes specified by index name over entities
-     * @param indexName identifier of index
-     * @param indexNames identifier split to array for usage of concrete tokens
+     * @param indexRecord identifier of index
      * @param isNode indicates whether the entity is node or edge
      * @throws DataCollectException when some of the help queries will fail
      */
-    private void _collectIndexSizes(String indexName, String[] indexNames, boolean isNode) throws DataCollectException {
-        PropertiesSizeData sizes = isNode ? _fetchNodePropertiesSize(Neo4jResources.getNodeAndPropertyQuery(indexNames[1], indexNames[2])) :
-                _fetchEdgePropertiesSize(Neo4jResources.getEdgeAndPropertyQuery(indexNames[1], indexNames[2]));
+    private void _collectIndexSizes(IndexParseRecord indexRecord, boolean isNode) throws DataCollectException {
+        PropertiesSizeData sizes = isNode ?
+                _fetchNodePropertiesSize(Neo4jResources.getNodesWithProjectionQuery(indexRecord.getLabel(), indexRecord.getProperties())):
+                _fetchEdgePropertiesSize(Neo4jResources.getEdgesWithProjectionQuery(indexRecord.getLabel(), indexRecord.getProperties()));
         long size = (long) Math.ceil((double) (sizes.getByteSize()) / 3);
-        long rowCount = sizes.getCount();
+        long recordCount = sizes.getCount();
 
-        _model.setIndexRowCount(indexName, rowCount);
-        _model.setIndexByteSize(indexName, size);
-        _model.setIndexSizeInPages(indexName,
+        _model.setIndexRecordCount(indexRecord.getIndexName(), recordCount);
+        _model.setIndexByteSize(indexRecord.getIndexName(), size);
+        _model.setIndexSizeInPages(indexRecord.getIndexName(),
                 (int) Math.ceil((double) size / Neo4jResources.DefaultSizes.PAGE_SIZE)
         );
     }
@@ -300,11 +292,11 @@ public class Neo4jDataCollector extends AbstractDataCollector<Result, String, Re
      */
     private void _collectIndexData() throws DataCollectException {
         for (String inxName : _model.getIndexNames()) {
-            String[] names = inxName.split(":");
+            IndexParseRecord indexRecord = new IndexParseRecord(inxName);
 
-            boolean isNode = _isNodeLabel(names[1]);
-            _collectLabelFor(names);
-            _collectIndexSizes(inxName, names, isNode);
+            _model.addKind(indexRecord.getLabel());
+            boolean isNode = _isNodeLabel(indexRecord.getLabel());
+            _collectIndexSizes(indexRecord, isNode);
         }
     }
 
@@ -316,8 +308,8 @@ public class Neo4jDataCollector extends AbstractDataCollector<Result, String, Re
         long size = result.getByteSize();
         _model.setResultByteSize(size);
 
-        long count = result.getRowCount();
-        _model.setResultRowCount(count);
+        long count = result.getRecordCount();
+        _model.setResultRecordCount(count);
 
         long sizeInPages = (long) Math.ceil((double) size / Neo4jResources.DefaultSizes.PAGE_SIZE);
         _model.setResultSizeInPages(sizeInPages);

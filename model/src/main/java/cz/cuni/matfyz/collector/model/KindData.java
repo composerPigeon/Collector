@@ -22,12 +22,12 @@ public class KindData {
     private Long _sizeInPages;
 
     /** Field containing row count of table */
-    @JsonProperty("rowCount")
-    private Long _rowCount;
+    @JsonProperty("recordCount")
+    private Long _recordCount;
 
     /** Field containing number of constraints defined over table */
     @JsonProperty("constraintCount")
-    private Long _constraintCount;
+    private Integer _constraintCount;
 
     @JsonProperty("attributes")
     private final HashMap<String, AttributeData> _attributes;
@@ -36,7 +36,7 @@ public class KindData {
         _attributes = new HashMap<>();
         _byteSize = null;
         _sizeInPages = null;
-        _rowCount = null;
+        _recordCount = null;
         _constraintCount = null;
         _kindName = kindName;
     }
@@ -52,12 +52,12 @@ public class KindData {
             _sizeInPages = sizeInPages;
     }
 
-    public void setRowCount(long count) {
-        if (_rowCount == null)
-            _rowCount = count;
+    public void setRecordCount(long count) {
+        if (_recordCount == null)
+            _recordCount = count;
     }
 
-    public void setConstraintCount(long count) {
+    public void setConstraintCount(int count) {
         if (_constraintCount == null) {
             _constraintCount = count;
         }

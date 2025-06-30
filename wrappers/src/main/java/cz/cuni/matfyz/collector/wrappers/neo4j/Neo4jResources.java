@@ -14,13 +14,13 @@ public class Neo4jResources {
 
     public static String getEdgesOfSpecificLabelQuery(String edgeLabel) { return "match ()-[e:" + edgeLabel + "]->() return e;"; }
     public static String getIndexDataQuery(String indexType, String label, String property) {
-        return "show indexes yield name, type, labelsOrTypes, properties where type = \"" + indexType + "\" and \"" + label + "\" in labelsOrTypes and \"" + property + "\" in properties;";
+        return "show indexes yield name, type, labelsOrTypes, properties, populationPercent where type = \"" + indexType + "\" and \"" + label + "\" in labelsOrTypes and \"" + property + "\" in properties;";
     }
-    public static String getNodeAndPropertyQuery(String nodeLabel, String propertyName) {
-        return "match (n:" + nodeLabel + ") return n." + propertyName  + ";";
+    public static String getNodesWithProjectionQuery(String nodeLabel, String[] properties) {
+        return "match (n:" + nodeLabel + ") return n." + String.join(", n.", properties) + ";";
     }
-    public static String getEdgeAndPropertyQuery(String edgeLabel, String propertyName) {
-        return "match ()-[e:" + edgeLabel + "]->() return e." + propertyName  + ";";
+    public static String getEdgesWithProjectionQuery(String edgeLabel, String[] properties) {
+        return "match ()-[e:" + edgeLabel + "]->() return e." + String.join(", e.", properties) + ";";
     }
     public static String getConstraintCountForLabelQuery(String label) {
         return "show constraints yield labelsOrTypes where \"" + label + "\" in labelsOrTypes return count(*) as count;";

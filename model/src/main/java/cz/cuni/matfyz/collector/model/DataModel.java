@@ -10,7 +10,7 @@ public interface DataModel {
     public void setResultExecutionTime(double time);
     public void setResultByteSize(long size);
     public void setResultSizeInPages(long size);
-    public void setResultRowCount(long count);
+    public void setResultRecordCount(long count);
 
     public void setDatabaseByteSize(long size);
     public void setDatabaseSizeInPages(long size);
@@ -20,14 +20,14 @@ public interface DataModel {
 
     public void setKindByteSize(String kindName, long size);
     public void setKindSizeInPages(String kindName, long size);
-    public void setKindRowCount(String kindName, long count);
+    public void setKindRecordCount(String kindName, long count);
     public void setKindConstraintCount(String kindName, int count);
     public void addKind(String kindName);
     public Set<String> getKindNames();
 
     public void setIndexByteSize(String indexName, long size);
     public void setIndexSizeInPages(String indexName, long size);
-    public void setIndexRowCount(String indexName, long count);
+    public void setIndexRecordCount(String indexName, long count);
     public void addIndex(String indexName);
     public Set<String> getIndexNames();
 

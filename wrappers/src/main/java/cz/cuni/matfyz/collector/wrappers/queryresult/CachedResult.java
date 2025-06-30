@@ -224,7 +224,7 @@ public class CachedResult {
      * Method for getting number of records inside result
      * @return record count
      */
-    public int getRowCount() {
+    public int getRecordCount() {
         return _records.size();
     }
 

@@ -25,7 +25,7 @@ public class MongoResources {
     public static Document getCollectionStatsCommand(String collectionName) {
         return new Document("collStats", collectionName);
     }
-    public static Document getIndexRowCountCommand(String collectionName, String indexName) {
+    public static Document getIndexRecordCountCommand(String collectionName, String indexName) {
         Document countCommand = new Document();
         countCommand.put("count", collectionName);
         countCommand.put("hint", indexName);
@@ -105,7 +105,10 @@ public class MongoResources {
         return command;
     }
     public static Document getDatasetStatsCommand() {
-        return new Document("dbStats", 1);
+        Document command = new Document();
+        command.put("dbStats", 1);
+        command.put("scale", 1);
+        return command;
     }
 
     public static Document getServerStatsCommand() {

@@ -56,7 +56,8 @@ public class MongoDataCollector extends AbstractDataCollector<Document, Document
         CachedResult stats = executeQuery(MongoResources.getDatasetStatsCommand());
 
         if (stats.next()) {
-            long size = stats.getLong("storageSize");
+            long size = stats.getLong("totalSize");
+
             _model.setDatabaseByteSize(size);
             long sizeInPages = (long) Math.ceil((double)size / _model.getPageSize());
             _model.setDatabaseSizeInPages(sizeInPages);
@@ -210,8 +211,8 @@ public class MongoDataCollector extends AbstractDataCollector<Document, Document
             long sizeInPages = (long) Math.ceil((double)size / _model.getPageSize());
             _model.setKindSizeInPages(collectionName, sizeInPages);
 
-            long rowCount = stats.getLong("count");
-            _model.setKindRowCount(collectionName, rowCount);
+            long recordCount = stats.getLong("count");
+            _model.setKindRecordCount(collectionName, recordCount);
         }
 
         _collectColumnData(collectionName);
@@ -225,12 +226,12 @@ public class MongoDataCollector extends AbstractDataCollector<Document, Document
      * @param indexName used index
      * @throws DataCollectException when some QueryExecutionException occur during running help query
      */
-    private void _collectIndexRowCount(String collectionName, String indexName) throws DataCollectException {
-        CachedResult result = executeQuery(MongoResources.getIndexRowCountCommand(collectionName, indexName));
+    private void _collectIndexRecordCount(String collectionName, String indexName) throws DataCollectException {
+        CachedResult result = executeQuery(MongoResources.getIndexRecordCountCommand(collectionName, indexName));
 
         if (result.next()) {
             long count = result.getLong("n");
-            _model.setIndexRowCount(indexName, count);
+            _model.setIndexRecordCount(indexName, count);
         }
     }
 
@@ -257,7 +258,7 @@ public class MongoDataCollector extends AbstractDataCollector<Document, Document
     private void _collectIndexesData(String collectionName) throws DataCollectException {
         for (String indexName : _model.getIndexNames()) {
             _collectIndexSizesData(collectionName, indexName);
-            _collectIndexRowCount(collectionName, indexName);
+            _collectIndexRecordCount(collectionName, indexName);
         }
     }
 
@@ -300,8 +301,8 @@ public class MongoDataCollector extends AbstractDataCollector<Document, Document
     private void _collectResultData(ConsumedResult result) {
         long size = result.getByteSize();
         _model.setResultByteSize(size);
-        long count = result.getRowCount();
-        _model.setResultRowCount(count);
+        long count = result.getRecordCount();
+        _model.setResultRecordCount(count);
 
         long sizeInPages = (long)Math.ceil((double) size / _model.getPageSize());
         _model.setResultSizeInPages(sizeInPages);

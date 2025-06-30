@@ -50,10 +50,6 @@ public class AttributeData {
         return _types.values().stream().map(AttributeType::getByteSize).max(Integer::compareTo).orElse(0);
     }
 
-    private String getAttributeTypeIdentifier(String typeName) {
-        return _kindName + "." + _attributeName + "." + typeName;
-    }
-
     @JsonIgnore
     public AttributeType getAttributeType(String typeName) throws DataModelException{
         if (!_types.containsKey(typeName)) {
@@ -62,7 +58,7 @@ public class AttributeData {
         return _types.get(typeName);
     }
 
-    public AttributeData addAttributeTypeIfNeeded(String typeName) {
+    public AttributeData addAttributeTypeIfAbsent(String typeName) {
         if (!_types.containsKey(typeName)) {
             _types.put(typeName, new AttributeType());
         }

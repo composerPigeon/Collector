@@ -68,7 +68,7 @@ public class DatabaseData {
         return _kinds.get(kindName);
     }
 
-    public DatabaseData addKindIfNeeded(String kindName) {
+    public DatabaseData addKindIfAbsent(String kindName) {
         if (!_kinds.containsKey(kindName)) {
             _kinds.put(kindName, new KindData(kindName));
         }
@@ -83,7 +83,7 @@ public class DatabaseData {
         return _indexes.get(inxName);
     }
 
-    public DatabaseData addIndexIfNeeded(String inxName) {
+    public DatabaseData addIndexIfAbsent(String inxName) {
         if (!_indexes.containsKey(inxName)) {
             _indexes.put(inxName, new IndexData());
         }

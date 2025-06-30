@@ -7,6 +7,8 @@ import cz.cuni.matfyz.collector.wrappers.exceptions.WrapperExceptionsFactory;
 import org.neo4j.driver.summary.Plan;
 import org.neo4j.driver.summary.ResultSummary;
 
+import java.util.ArrayList;
+import java.util.List;
 import java.util.concurrent.TimeUnit;
 
 public class Neo4jExplainPlanParser extends AbstractExplainPlanParser<ResultSummary> {
@@ -77,25 +79,21 @@ public class Neo4jExplainPlanParser extends AbstractExplainPlanParser<ResultSumm
      * @param identifier index identifier created from information such as label, property name and type
      * @return string array of tokens from index
      */
-    private String[] _parseIndexIdentifier(String identifier) {
-        StringBuilder label = new StringBuilder();
-        StringBuilder prop = new StringBuilder();
-        boolean afterParenthesis = false;
+    private void _parseIndexIdentifier(String identifier, IndexParseRecord.Builder builder) {
+        StringBuilder buffer = new StringBuilder();
         for (char ch : identifier.toCharArray()) {
             if (ch == '(') {
-                afterParenthesis = true;
-            } else if (afterParenthesis) {
-                if (ch == ')') {
-                    break;
-                } else {
-                    prop.append(ch);
-                }
+                builder.setLabel(buffer.toString());
+                buffer.setLength(0);
+            } else if (ch == ',') {
+                builder.addProperty(buffer.toString());
+                buffer.setLength(0);
+            } else if (ch == ')') {
+                break;
             } else {
-                label.append(ch);
+                buffer.append(ch);
             }
         }
-
-        return new String[] { label.toString(), prop.toString() };
     }
 
     /**
@@ -104,11 +102,12 @@ public class Neo4jExplainPlanParser extends AbstractExplainPlanParser<ResultSumm
      * @param operator explain tree node
      */
     private void _parseIndexName(DataModel model, Plan operator) {
+        IndexParseRecord.Builder inxBuilder = new IndexParseRecord.Builder();
         String[] details = operator.arguments().get("Details").asString().split(" ");
-        String indexType = details[0];
-        String[] indexIdentifiers = _parseIndexIdentifier(details[2].split(":")[1]);
+        inxBuilder.setIndexType(details[0]);
+        _parseIndexIdentifier(details[2].split(":")[1], inxBuilder);
 
-        model.addIndex(indexType + ':' + indexIdentifiers[0] + ':' + indexIdentifiers[1]);
+        model.addIndex(inxBuilder.build().getIndexName());
     }
 
     /**

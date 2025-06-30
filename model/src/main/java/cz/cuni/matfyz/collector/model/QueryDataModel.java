@@ -28,7 +28,7 @@ class QueryDataModel implements DataModel {
     public void setResultSizeInPages(long size) { _query.getResultData().getResultKind().setSizeInPages(size); }
 
     @Override
-    public void setResultRowCount(long count) { _query.getResultData().getResultKind().setRowCount(count); }
+    public void setResultRecordCount(long count) { _query.getResultData().getResultKind().setRecordCount(count); }
 
     //DatasetData
     @Override
@@ -47,7 +47,7 @@ class QueryDataModel implements DataModel {
     public void setKindByteSize(String kindName, long size) {
         try {
             _query.getDatabaseData()
-                    .addKindIfNeeded(kindName)
+                    .addKindIfAbsent(kindName)
                     .getKind(kindName)
                     .setByteSize(size);
         } catch (DataModelException e) {
@@ -58,7 +58,7 @@ class QueryDataModel implements DataModel {
     public void setKindSizeInPages(String kindName, long size) {
         try {
             _query.getDatabaseData()
-                    .addKindIfNeeded(kindName)
+                    .addKindIfAbsent(kindName)
                     .getKind(kindName)
                     .setSizeInPages(size);
         } catch (DataModelException e) {
@@ -66,12 +66,12 @@ class QueryDataModel implements DataModel {
         }
     }
     @Override
-    public void setKindRowCount(String kindName, long count) {
+    public void setKindRecordCount(String kindName, long count) {
         try {
             _query.getDatabaseData()
-                    .addKindIfNeeded(kindName)
+                    .addKindIfAbsent(kindName)
                     .getKind(kindName)
-                    .setRowCount(count);
+                    .setRecordCount(count);
         } catch (DataModelException e) {
             logger.atError().setCause(e).log(e.getMessage());
         }
@@ -80,7 +80,7 @@ class QueryDataModel implements DataModel {
     public void setKindConstraintCount(String kindName, int count) {
         try {
             _query.getDatabaseData()
-                    .addKindIfNeeded(kindName)
+                    .addKindIfAbsent(kindName)
                     .getKind(kindName)
                     .setConstraintCount(count);
         } catch (DataModelException e) {
@@ -88,7 +88,7 @@ class QueryDataModel implements DataModel {
         }
     }
     @Override
-    public void addKind(String tableName) { _query.getDatabaseData().addKindIfNeeded(tableName); }
+    public void addKind(String tableName) { _query.getDatabaseData().addKindIfAbsent(tableName); }
     @Override
     public Set<String> getKindNames() { return _query.getDatabaseData().getKindNames(); }
 
@@ -97,7 +97,7 @@ class QueryDataModel implements DataModel {
     public void setIndexByteSize(String indexName, long size) {
         try {
             _query.getDatabaseData()
-                    .addIndexIfNeeded(indexName)
+                    .addIndexIfAbsent(indexName)
                     .getIndex(indexName)
                     .setByteSize(size);
         } catch (DataModelException e) {
@@ -108,7 +108,7 @@ class QueryDataModel implements DataModel {
     public void setIndexSizeInPages(String indexName, long size) {
         try {
             _query.getDatabaseData()
-                    .addIndexIfNeeded(indexName)
+                    .addIndexIfAbsent(indexName)
                     .getIndex(indexName)
                     .setSizeInPages(size);
         } catch (DataModelException e) {
@@ -116,10 +116,10 @@ class QueryDataModel implements DataModel {
         }
     }
     @Override
-    public void setIndexRowCount(String indexName, long count) {
+    public void setIndexRecordCount(String indexName, long count) {
         try {
             _query.getDatabaseData()
-                    .addIndexIfNeeded(indexName)
+                    .addIndexIfAbsent(indexName)
                     .getIndex(indexName)
                     .setRowCount(count);
         } catch (DataModelException e) {
@@ -127,7 +127,7 @@ class QueryDataModel implements DataModel {
         }
     }
     @Override
-    public void addIndex(String indexName) { _query.getDatabaseData().addIndexIfNeeded(indexName); }
+    public void addIndex(String indexName) { _query.getDatabaseData().addIndexIfAbsent(indexName); }
     @Override
     public Set<String> getIndexNames() { return _query.getDatabaseData().getIndexNames(); }
 
@@ -136,7 +136,7 @@ class QueryDataModel implements DataModel {
     public void setAttributeMandatory(String kindName, String attributeName, boolean mandatory) {
         try {
             _query.getDatabaseData()
-                    .addKindIfNeeded(kindName)
+                    .addKindIfAbsent(kindName)
                     .getKind(kindName)
                     .addAttributeIfNeeded(attributeName)
                     .getAttribute(attributeName)
@@ -149,7 +149,7 @@ class QueryDataModel implements DataModel {
     public void setAttributeValueRatio(String kindName, String attributeName, double ratio) {
         try {
             _query.getDatabaseData()
-                    .addKindIfNeeded(kindName)
+                    .addKindIfAbsent(kindName)
                     .getKind(kindName)
                     .addAttributeIfNeeded(attributeName)
                     .getAttribute(attributeName)
@@ -171,11 +171,11 @@ class QueryDataModel implements DataModel {
     public void setAttributeTypeByteSize(String kindName, String attributeName, String typeName, int size) {
         try {
             _query.getDatabaseData()
-                    .addKindIfNeeded(kindName)
+                    .addKindIfAbsent(kindName)
                     .getKind(kindName)
                     .addAttributeIfNeeded(attributeName)
                     .getAttribute(attributeName)
-                    .addAttributeTypeIfNeeded(typeName)
+                    .addAttributeTypeIfAbsent(typeName)
                     .getAttributeType(typeName)
                     .setByteSize(size);
         } catch (DataModelException e) {
@@ -189,7 +189,7 @@ class QueryDataModel implements DataModel {
                     .getResultKind()
                     .addAttributeIfNeeded(attributeName)
                     .getAttribute(attributeName)
-                    .addAttributeTypeIfNeeded(typeName)
+                    .addAttributeTypeIfAbsent(typeName)
                     .getAttributeType(typeName)
                     .setByteSize(size);
         } catch (DataModelException e) {
@@ -200,11 +200,11 @@ class QueryDataModel implements DataModel {
     public void setAttributeTypeRatio(String kindName, String attributeName, String typeName, double ratio) {
         try {
             _query.getDatabaseData()
-                    .addKindIfNeeded(kindName)
+                    .addKindIfAbsent(kindName)
                     .getKind(kindName)
                     .addAttributeIfNeeded(attributeName)
                     .getAttribute(attributeName)
-                    .addAttributeTypeIfNeeded(typeName)
+                    .addAttributeTypeIfAbsent(typeName)
                     .getAttributeType(typeName)
                     .setRatio(ratio);
         } catch (DataModelException e) {
@@ -218,7 +218,7 @@ class QueryDataModel implements DataModel {
                     .getResultKind()
                     .addAttributeIfNeeded(attributeName)
                     .getAttribute(attributeName)
-                    .addAttributeTypeIfNeeded(typeName)
+                    .addAttributeTypeIfAbsent(typeName)
                     .getAttributeType(typeName)
                     .setRatio(ratio);
         } catch (DataModelException e) {
@@ -229,11 +229,11 @@ class QueryDataModel implements DataModel {
     public void addAttributeType(String kindName, String attributeName, String typeName) {
         try {
             _query.getDatabaseData()
-                    .addKindIfNeeded(kindName)
+                    .addKindIfAbsent(kindName)
                     .getKind(kindName)
                     .addAttributeIfNeeded(attributeName)
                     .getAttribute(attributeName)
-                    .addAttributeTypeIfNeeded(typeName);
+                    .addAttributeTypeIfAbsent(typeName);
         } catch (DataModelException e) {
             logger.atError().setCause(e).log(e.getMessage());
         }

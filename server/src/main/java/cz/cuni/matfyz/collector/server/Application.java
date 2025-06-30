@@ -2,6 +2,8 @@ package cz.cuni.matfyz.collector.server;
 import java.util.Arrays;
 
 import cz.cuni.matfyz.collector.wrappers.abstractwrapper.AbstractWrapper;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.boot.CommandLineRunner;
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
@@ -19,16 +21,18 @@ import org.springframework.scheduling.annotation.EnableScheduling;
 @EnableScheduling
 public class Application {
 
+    private static final Logger _logger = LoggerFactory.getLogger(Application.class);
+
     public static void main(String[] args) {
         Environment env = SpringApplication.run(Application.class, args).getEnvironment();
-        System.out.println("Server is running on port: " + env.getProperty("local.server.port"));
+        _logger.info("Server is running on port: {}", env.getProperty("local.server.port"));
     }
 
     @Bean
     public CommandLineRunner commandLineRunner(ApplicationContext ctx) {
         return args -> {
 
-            System.out.println("Let's inspect the beans provided by Spring Boot:");
+            _logger.info("Let's inspect the beans provided by Spring Boot:");
 
             String[] beanNames = ctx.getBeanDefinitionNames();
             Arrays.sort(beanNames);
