@@ -4,7 +4,6 @@ import cz.cuni.matfyz.collector.wrappers.abstractwrapper.AbstractWrapper;
 import cz.cuni.matfyz.collector.wrappers.exceptions.DataCollectException;
 import cz.cuni.matfyz.collector.wrappers.exceptions.ParseException;
 import cz.cuni.matfyz.collector.wrappers.exceptions.WrapperExceptionsFactory;
-import cz.cuni.matfyz.collector.wrappers.exceptions.WrapperUnsupportedOperationException;
 import cz.cuni.matfyz.collector.wrappers.mongodb.queryparser.CommandBuilder;
 
 public class

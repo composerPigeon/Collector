@@ -36,12 +36,16 @@ public abstract class PostgresResources {
         return "select attname from pg_stats where tablename = '" + tableName + "';";
     }
 
-    public static String getColDataQuery(String tableName, String colName) {
-        return "select n_distinct, avg_width from pg_stats where tablename = '" + tableName + "' and attname = '" + colName + "';";
+    public static String getColByteSizeQuery(String tableName, String colName) {
+        return "select avg_width from pg_stats where tablename = '" + tableName + "' and attname = '" + colName + "';";
     }
 
     public static String getColTypeAndMandatoryQuery(String tableName, String colName) {
         return "select t.typname, a.attnotnull from pg_class as c inner join pg_attribute as a on a.attrelid = c.oid inner join pg_type as t on a.atttypid = t.oid where a.attname = '" + colName + "' and c.relkind = 'r' and c.relname = '" + tableName + "';";
+    }
+
+    public static String getColDistinctValuesCountQuery(String tableName, String colName) {
+        return "select count(distinct " + colName + ") as count from " + tableName;
     }
 
     public static String getTableNameForIndexQuery(String indexName) {

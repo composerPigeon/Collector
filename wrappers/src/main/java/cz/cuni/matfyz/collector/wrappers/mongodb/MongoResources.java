@@ -98,6 +98,20 @@ public class MongoResources {
         return command;
     }
 
+    public static Document getFieldDistinctValuesCountQuery(String collectionName, String fieldName) {
+        Document command = new Document();
+        command.put("aggregate", collectionName);
+        command.put("cursor", new Document());
+
+        List<Document> pipeline = new LinkedList<>();
+        pipeline.add(new Document("$group", new Document("_id", "$" + fieldName)));
+        pipeline.add(new Document("$count", "count"));
+
+        command.put("pipeline", pipeline);
+
+        return command;
+    }
+
     public static Document getNextBatchOfCursorCommand(long cursor, String collectionName) {
         Document command = new Document();
         command.put("getMore", cursor);

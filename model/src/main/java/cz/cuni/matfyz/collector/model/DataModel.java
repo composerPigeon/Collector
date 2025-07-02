@@ -32,7 +32,7 @@ public interface DataModel {
     public Set<String> getIndexNames();
 
     public void setAttributeMandatory(String kindName, String attributeName, boolean mandatory);
-    public void setAttributeValueRatio(String kindName, String attributeName, double ratio);
+    public void setAttributeDistinctValuesCount(String kindName, String attributeName, long count);
     public int getAttributeMaxByteSize(String kindName, String attributeName) throws DataModelException;
 
     public void setAttributeTypeByteSize(String kindName, String attributeName, String typeName, int size);

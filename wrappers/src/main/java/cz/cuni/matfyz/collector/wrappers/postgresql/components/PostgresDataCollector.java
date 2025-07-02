@@ -98,13 +98,18 @@ public class PostgresDataCollector extends AbstractDataCollector<ResultSet, Stri
      * @throws DataCollectException when help query fails
      */
     private void _collectNumericDataForCol(String tableName, String colName, String typeName) throws DataCollectException {
-        CachedResult res = executeQuery(PostgresResources.getColDataQuery(tableName, colName));
+        CachedResult res = executeQuery(PostgresResources.getColByteSizeQuery(tableName, colName));
         if (res.next()) {
-            double ratio = res.getDouble("n_distinct");
             int size = res.getInt("avg_width");
-            _model.setAttributeValueRatio(tableName, colName, ratio);
             _model.setAttributeTypeByteSize(tableName, colName, typeName, size);
             _model.setAttributeTypeRatio(tableName, colName, typeName, 1);
+        }
+
+        res = executeQuery(PostgresResources.getColDistinctValuesCountQuery(tableName, colName));
+
+        if (res.next()) {
+            long distinctValuesCount = res.getLong("count");
+            _model.setAttributeDistinctValuesCount(tableName, colName, distinctValuesCount);
         }
 
     }

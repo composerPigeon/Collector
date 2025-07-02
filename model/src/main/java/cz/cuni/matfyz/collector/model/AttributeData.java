@@ -14,11 +14,8 @@ public class AttributeData {
     @JsonIgnore
     private final String _kindName;
 
-    /**
-     * Field holding information about statistical distribution of values. In PostgreSQL it holds ratio of distinct values.
-     */
-    @JsonProperty("ratio")
-    private Double _valuesRatio;
+    @JsonProperty("distinctValuesCount")
+    private Long _distinctValuesCount;
 
     /**
      * Field holding dominant data type of column.
@@ -35,7 +32,7 @@ public class AttributeData {
     public AttributeData(String attributeName, String kindName) {
         _attributeName = attributeName;
         _kindName = kindName;
-        _valuesRatio = null;
+        _distinctValuesCount = null;
         _mandatory = null;
         _types = new HashMap<>();
     }
@@ -70,8 +67,9 @@ public class AttributeData {
             _mandatory = value;
     }
 
-    public void setDistinctRatio(double ratio) {
-        if (_valuesRatio == null) {
-            _valuesRatio = ratio;}
+    public void setCountOfDistinctValues(long count) {
+        if (_distinctValuesCount == null) {
+            _distinctValuesCount = count;
+        }
     }
 }

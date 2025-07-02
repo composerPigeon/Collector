@@ -76,7 +76,7 @@ public class MongoDataCollector extends AbstractDataCollector<Document, Document
      * @param columnType data type of column
      * @throws DataCollectException when some QueryExecutionException occur during running help query
      */
-    private void _collectStringObjectColumnByteSize(String collectionName, String columnName, String columnType) throws DataCollectException {
+    private void _collectStringObjectFieldByteSize(String collectionName, String columnName, String columnType) throws DataCollectException {
         CachedResult result = executeQuery(MongoResources.getAvgObjectStringSizeCommand(collectionName, columnName, columnType));
         if (result.next()) {
             int avgByteSize = (int)Math.round(result.getDouble("avg"));
@@ -90,7 +90,7 @@ public class MongoDataCollector extends AbstractDataCollector<Document, Document
      * @param columnName used column name
      * @param columnType data type of column
      */
-    private void _collectNumberColumnByteSize(String collectionName, String columnName, String columnType) {
+    private void _collectNumberFieldByteSize(String collectionName, String columnName, String columnType) {
         Integer size = MongoResources.DefaultSizes.getAvgColumnSizeByType(columnType);
         if (size != null) {
             _model.setAttributeTypeByteSize(collectionName, columnName, columnType, size);
@@ -100,26 +100,26 @@ public class MongoDataCollector extends AbstractDataCollector<Document, Document
     /**
      * Method which saves average field byte size
      * @param collectionName collection which is used for query
-     * @param columnName used column name
-     * @param columnType data type of column
+     * @param fieldName used column name
+     * @param fieldType data type of column
      * @throws DataCollectException when some QueryExecutionException occur during running help query
      */
-    private void _collectColumnByteSize(String collectionName, String columnName, String columnType) throws DataCollectException {
-        if ("string".equals(columnType) || "object".equals(columnType) || "binData".equals(columnType)) {
-            _collectStringObjectColumnByteSize(collectionName, columnName, columnType);
+    private void _collectFieldByteSize(String collectionName, String fieldName, String fieldType) throws DataCollectException {
+        if ("string".equals(fieldType) || "object".equals(fieldType) || "binData".equals(fieldType)) {
+            _collectStringObjectFieldByteSize(collectionName, fieldName, fieldType);
         } else
-            _collectNumberColumnByteSize(collectionName, columnName, columnType);
+            _collectNumberFieldByteSize(collectionName, fieldName, fieldType);
     }
 
     /**
      * Method which checks if field is required inside collection or no
      * @param options part of query result from which we analyze the fact
-     * @param columnName which field we are interested
+     * @param fieldName which field we are interested
      * @return true if field is required
      */
 
-    private boolean _isRequiredField(Document options, String columnName) {
-        if ("_id".equals(columnName))
+    private boolean _isRequiredField(Document options, String fieldName) {
+        if ("_id".equals(fieldName))
             return true;
 
         if (options.containsKey("validator")) {
@@ -128,28 +128,37 @@ public class MongoDataCollector extends AbstractDataCollector<Document, Document
                 Document schema = validator.get("$jsonSchema", Document.class);
                 if (schema.containsKey("required")) {
                     List<String> fields = schema.getList("required", String.class);
-                    return fields.contains(columnName);
+                    return fields.contains(fieldName);
                 }
             }
         }
         return false;
     }
 
+    private void _collectFieldDistinctValuesCount(String collectionName, String fieldName) throws DataCollectException {
+        CachedResult result = executeQuery(MongoResources.getFieldDistinctValuesCountQuery(collectionName, fieldName));
+
+        if (result.next()) {
+            long count = result.getLong("count");
+            _model.setAttributeDistinctValuesCount(collectionName, fieldName, count);
+        }
+    }
+
     /**
      * Method which saves fact if field is mandatory
      * @param collectionName collection which is used for query
-     * @param columnName used column name
+     * @param fieldName used column name
      * @throws DataCollectException when some QueryExecutionException occur during running help query
      */
-    private void _collectColumnMandatory(String collectionName, String columnName) throws DataCollectException {
+    private void _collectFieldMandatory(String collectionName, String fieldName) throws DataCollectException {
         CachedResult result = executeQuery(MongoResources.getCollectionInfoCommand(collectionName));
         if (result.next()) {
             if (result.containsAttribute("options")) {
-                boolean isRequired = _isRequiredField(result.getDocument("options"), columnName);
-                _model.setAttributeMandatory(collectionName, columnName, isRequired);
+                boolean isRequired = _isRequiredField(result.getDocument("options"), fieldName);
+                _model.setAttributeMandatory(collectionName, fieldName, isRequired);
             } else {
-                boolean isRequired = "_id".equals(columnName);
-                _model.setAttributeMandatory(collectionName, columnName, isRequired);
+                boolean isRequired = "_id".equals(fieldName);
+                _model.setAttributeMandatory(collectionName, fieldName, isRequired);
             }
         }
     }
@@ -157,11 +166,11 @@ public class MongoDataCollector extends AbstractDataCollector<Document, Document
     /**
      * Method which saves fields data type
      * @param collectionName collection which is used for query
-     * @param columnName used column name
+     * @param fieldName used column name
      * @throws DataCollectException when some QueryExecutionException occur during running help query
      */
-    private void _collectColumnType(String collectionName, String columnName) throws DataCollectException {
-        CachedResult result = executeQuery(MongoResources.getFieldTypeCommand(collectionName, columnName));
+    private void _collectFieldType(String collectionName, String fieldName) throws DataCollectException {
+        CachedResult result = executeQuery(MongoResources.getFieldTypeCommand(collectionName, fieldName));
         List<Map.Entry<String, Integer>> types = new ArrayList<>();
         int maxCount = 0;
 
@@ -173,7 +182,17 @@ public class MongoDataCollector extends AbstractDataCollector<Document, Document
         }
 
         for (var entry : types) {
-            _collectColumnByteSize(collectionName, columnName, entry.getKey());
+            _collectFieldByteSize(collectionName, fieldName, entry.getKey());
+        }
+
+        if (maxCount > 0) {
+            for (var entry : types) {
+                _model.setAttributeTypeRatio(
+                        collectionName,
+                        fieldName,
+                        entry.getKey(),
+                        (double)entry.getValue() / maxCount);
+            }
         }
     }
 
@@ -182,15 +201,16 @@ public class MongoDataCollector extends AbstractDataCollector<Document, Document
      * @param collectionName collection used for query
      * @throws DataCollectException when some QueryExecutionException occur during running help query
      */
-    private void _collectColumnData(String collectionName) throws DataCollectException {
+    private void _collectFieldData(String collectionName) throws DataCollectException {
         CachedResult result = executeQuery(MongoResources.getFieldsInCollectionCommand(collectionName));
 
         if (result.next()) {
             List<String> fieldNames = result.getList("allKeys", String.class);
 
             for (String fieldName : fieldNames) {
-                _collectColumnType(collectionName, fieldName);
-                _collectColumnMandatory(collectionName, fieldName);
+                _collectFieldType(collectionName, fieldName);
+                _collectFieldMandatory(collectionName, fieldName);
+                _collectFieldDistinctValuesCount(collectionName, fieldName);
             }
         }
     }
@@ -202,7 +222,7 @@ public class MongoDataCollector extends AbstractDataCollector<Document, Document
      * @param collectionName collection used in query
      * @throws DataCollectException some QueryExecutionException occur during running help query
      */
-    private void _collectTableData(String collectionName) throws DataCollectException {
+    private void _collectCollectionData(String collectionName) throws DataCollectException {
         CachedResult stats = executeQuery(MongoResources.getCollectionStatsCommand(collectionName));
 
         if (stats.next()) {
@@ -215,7 +235,7 @@ public class MongoDataCollector extends AbstractDataCollector<Document, Document
             _model.setKindRecordCount(collectionName, recordCount);
         }
 
-        _collectColumnData(collectionName);
+        _collectFieldData(collectionName);
     }
 
     // Save Index Data
@@ -320,7 +340,7 @@ public class MongoDataCollector extends AbstractDataCollector<Document, Document
         _collectPageSize();
         _collectDatabaseData();
         _collectIndexesData(collName);
-        _collectTableData(collName);
+        _collectCollectionData(collName);
         _collectResultData(result);
     }
 }

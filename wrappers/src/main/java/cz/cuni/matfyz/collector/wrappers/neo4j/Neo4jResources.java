@@ -45,6 +45,9 @@ public class Neo4jResources {
     public static String getEdgePropertyTypeAndMandatoryQuery(String label, String propertyName) {
         return "call apoc.meta.relTypeProperties({rels: [\"" + label + "\"]}) yield propertyName, propertyTypes, mandatory where propertyName = \"" + propertyName + "\" return propertyName, propertyTypes, mandatory;\n";
     }
+    public static String getCountOfDistinctValuesForNodesQuery(String label, String propertyName) {
+        return "call apoc.schema.properties.distinct(\"" + label + "\", \"" + propertyName+ "\") YIELD value RETURN size(value) AS count;";
+    }
     public static String getIsNodeLabelQuery(String label) {
         return "return apoc.meta.nodes.count([\"" + label + "\"]) > 0 as isNodeLabel;";
     }

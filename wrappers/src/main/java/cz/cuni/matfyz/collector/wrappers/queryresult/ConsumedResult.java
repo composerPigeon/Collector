@@ -39,11 +39,6 @@ public class ConsumedResult {
         return _attributeTypes.get(attributeName).keySet();
     }
 
-    public String getMajorType(String attributeName) {
-        var counts = _attributeTypes.get(attributeName);
-        return Collections.max(counts.entrySet(), Map.Entry.comparingByValue()).getKey();
-    }
-
     public double getAttributeTypeRatio(String attributeName, String type) {
         return (double) _attributeTypes.get(attributeName).get(type) / (double)_count;
     }
@@ -63,7 +58,6 @@ public class ConsumedResult {
     public long getRecordCount() {
         return _count;
     }
-
     /**
      * Class representing Builder for ConsumedResult
      */

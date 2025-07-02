@@ -12,8 +12,7 @@ import org.neo4j.driver.Result;
 import org.neo4j.driver.summary.ResultSummary;
 
 import java.math.BigDecimal;
-import java.util.ArrayList;
-import java.util.List;
+import java.util.*;
 
 /**
  * Class responsible for collecting all statistical data from neo4j
@@ -127,24 +126,34 @@ public class Neo4jDataCollector extends AbstractDataCollector<Result, String, Re
 
     /**
      * Method responsible for saving all column data
-     * @param label is label of node or edge from neo4j graph
+     * @param labelSizeData is data fetched from iterating through all entities of specific label
      * @param property is field for which data we are interested in
-     * @param isNode boolean which indicates if we are parsing node property or edge property
      * @throws DataCollectException when some of the help queries fail
      */
-    private void _collectSpecificPropertyData(String label, String property, boolean isNode) throws DataCollectException {
-        CachedResult result = isNode
-                ? executeQuery(Neo4jResources.getNodePropertyTypeAndMandatoryQuery(label, property))
-                : executeQuery(Neo4jResources.getEdgePropertyTypeAndMandatoryQuery(label, property));
+    private void _collectSpecificPropertyData(String property, LabelSizeData labelSizeData) throws DataCollectException {
+        CachedResult result = labelSizeData.isNode()
+                ? executeQuery(Neo4jResources.getNodePropertyTypeAndMandatoryQuery(labelSizeData.getLabel(), property))
+                : executeQuery(Neo4jResources.getEdgePropertyTypeAndMandatoryQuery(labelSizeData.getLabel(), property));
         if (result.next()) {
             boolean mandatory = result.getBoolean("mandatory");
-            _model.setAttributeMandatory(label, property, mandatory);
+            _model.setAttributeMandatory(labelSizeData.getLabel(), property, mandatory);
 
             for (String type : result.getList("propertyTypes", String.class)) {
                 int columnSize = Neo4jResources.DefaultSizes.getAvgColumnSizeByType(type);
-                _model.setAttributeTypeByteSize(label, property, type, columnSize);
+                _model.setAttributeTypeByteSize(labelSizeData.getLabel(), property, type, columnSize);
+                _model.setAttributeTypeRatio(labelSizeData.getLabel(), property, type, labelSizeData.getPropertyTypeRatio(property, type));
             }
         }
+
+        if (labelSizeData.isNode()) {
+            result = executeQuery(Neo4jResources.getCountOfDistinctValuesForNodesQuery(labelSizeData.getLabel(), property));
+
+            if (result.next()) {
+                long count = result.getLong("count");
+                _model.setAttributeDistinctValuesCount(labelSizeData.getLabel(), property, count);
+            }
+        }
+
     }
 
     /**
@@ -167,45 +176,13 @@ public class Neo4jDataCollector extends AbstractDataCollector<Result, String, Re
 
     /**
      * Method responsible for saving all column data for entities of specific label
-     * @param tableName is label of entities
-     * @param isNode indicates if entity is node or edge
+     * @param labelSizeData is data fetched from iterating through all entities of specific label
      * @throws DataCollectException when some of the help queries fails
      */
-    private void _collectPropertyData(String tableName, boolean isNode) throws DataCollectException {
-        List<String> properties = isNode ? _getPropertyNames(Neo4jResources.getNodePropertiesForLabelQuery(tableName)) :
-                _getPropertyNames(Neo4jResources.getEdgePropertiesForLabelQuery(tableName));
-
-        for (String columnName : properties) {
-            _collectSpecificPropertyData(tableName, columnName, isNode);
+    private void _collectPropertyData(LabelSizeData labelSizeData) throws DataCollectException {
+        for (String propertyName : labelSizeData.getPropertyNames()) {
+            _collectSpecificPropertyData(propertyName, labelSizeData);
         }
-    }
-
-    /**
-     * Method which is responsible for calculating sizes of nodes of specific label
-     * @param fetchQuery defines on which nodes we are interested
-     * @return array of size 2, where first number is byteSize of nodes in the collection and second one is their count
-     * @throws DataCollectException when help query fails
-     */
-    private PropertiesSizeData _fetchNodePropertiesSize(String fetchQuery) throws DataCollectException {
-        ConsumedResult result = executeQueryAndConsume(fetchQuery);
-        return new PropertiesSizeData(
-                result.getRecordCount() * Neo4jResources.DefaultSizes.NODE_SIZE + result.getByteSize(),
-                result.getRecordCount()
-        );
-    }
-
-    /**
-     * Method which is responsible for calculating sizes of edges of specific label
-     * @param fetchQuery defines on which edges we are interested
-     * @return array of size 2, where first number is byteSize of edges in the collection and second one is their count
-     * @throws DataCollectException when help query fails
-     */
-    private PropertiesSizeData _fetchEdgePropertiesSize(String fetchQuery) throws DataCollectException {
-        ConsumedResult result = executeQueryAndConsume(fetchQuery);
-        return new PropertiesSizeData(
-                result.getRecordCount() * Neo4jResources.DefaultSizes.EDGE_SIZE + result.getByteSize(),
-                result.getRecordCount()
-        );
     }
 
     /**
@@ -227,8 +204,8 @@ public class Neo4jDataCollector extends AbstractDataCollector<Result, String, Re
      * @param isNode indicates if we are interested in nodes or edges
      * @throws DataCollectException when some of the help queries fails
      */
-    private void _collectNodesOrEdgesSizes(String label, boolean isNode) throws DataCollectException {
-        PropertiesSizeData sizes = isNode ? _fetchNodePropertiesSize(Neo4jResources.getNodesOfSpecificLabelQuery(label)) : _fetchEdgePropertiesSize(Neo4jResources.getEdgesOfSpecificLabelQuery(label));
+    private LabelSizeData _collectNodesOrEdgesSizes(String label, boolean isNode) throws DataCollectException {
+        LabelSizeData sizes = LabelSizeData.fetchEntitiesSizesData(label, isNode, this::executeQueryAndConsume);
         long size = sizes.getByteSize();
         long recordCount = sizes.getCount();
 
@@ -237,6 +214,8 @@ public class Neo4jDataCollector extends AbstractDataCollector<Result, String, Re
                 (double) size / Neo4jResources.DefaultSizes.PAGE_SIZE
         ));
         _model.setKindRecordCount(label, recordCount);
+
+        return sizes;
     }
 
     /**
@@ -261,8 +240,8 @@ public class Neo4jDataCollector extends AbstractDataCollector<Result, String, Re
         for (String label : _model.getKindNames()) {
             boolean isNode = _isNodeLabel(label);
             _collectNodesOrEdgesConstraintCount(label);
-            _collectNodesOrEdgesSizes(label, isNode);
-            _collectPropertyData(label, isNode);
+            LabelSizeData labelSizeData = _collectNodesOrEdgesSizes(label, isNode);
+            _collectPropertyData(labelSizeData);
         }
     }
 
@@ -273,9 +252,12 @@ public class Neo4jDataCollector extends AbstractDataCollector<Result, String, Re
      * @throws DataCollectException when some of the help queries will fail
      */
     private void _collectIndexSizes(IndexParseRecord indexRecord, boolean isNode) throws DataCollectException {
-        PropertiesSizeData sizes = isNode ?
-                _fetchNodePropertiesSize(Neo4jResources.getNodesWithProjectionQuery(indexRecord.getLabel(), indexRecord.getProperties())):
-                _fetchEdgePropertiesSize(Neo4jResources.getEdgesWithProjectionQuery(indexRecord.getLabel(), indexRecord.getProperties()));
+        LabelSizeData sizes = LabelSizeData.fetchIndexSizesData(
+                indexRecord.getLabel(),
+                isNode,
+                indexRecord.getProperties(),
+                this::executeQueryAndConsume
+        );
         long size = (long) Math.ceil((double) (sizes.getByteSize()) / 3);
         long recordCount = sizes.getCount();
 
@@ -336,14 +318,51 @@ public class Neo4jDataCollector extends AbstractDataCollector<Result, String, Re
         _collectResultData(result);
     }
 
-    private static class PropertiesSizeData {
+    private static class LabelSizeData {
+        private final String _label;
+        private final boolean _isNode;
         private final long _byteSize;
         private final long _count;
+        private final Map<String, Map<String, Double>> _properties;
 
-        public PropertiesSizeData(long byteSize, long count) {
-            _byteSize = byteSize;
-            _count = count;
+        public static LabelSizeData fetchEntitiesSizesData(String label, boolean isNode, ExecuteQueryAndConsume executeQueryAndConsume) throws DataCollectException {
+             ConsumedResult result = executeQueryAndConsume.apply(isNode
+                     ? Neo4jResources.getNodesOfSpecificLabelQuery(label)
+                     : Neo4jResources.getEdgesOfSpecificLabelQuery(label)
+             );
+
+             return new LabelSizeData(label, isNode, result);
         }
+
+        public static LabelSizeData fetchIndexSizesData(String label, boolean isNode, String[] properties, ExecuteQueryAndConsume executeQueryAndConsume) throws DataCollectException {
+            ConsumedResult result = executeQueryAndConsume.apply(isNode
+                    ? Neo4jResources.getNodesWithProjectionQuery(label, properties)
+                    : Neo4jResources.getEdgesWithProjectionQuery(label, properties)
+            );
+
+            return new LabelSizeData(label, isNode, result);
+        }
+
+        private LabelSizeData(String label, boolean isNode, ConsumedResult result) {
+            _label = label;
+            _isNode = isNode;
+            _count = result.getRecordCount();
+            _properties = new HashMap<>();
+
+            int recordSize = isNode ? Neo4jResources.DefaultSizes.NODE_SIZE : Neo4jResources.DefaultSizes.EDGE_SIZE;
+            _byteSize = result.getRecordCount() * recordSize + result.getByteSize();
+
+            for (String property : result.getAttributeNames()) {
+                _properties.put(property, new HashMap<>());
+                for (String type : result.getAttributeTypes(property)) {
+                    _properties.get(property).put(type, result.getAttributeTypeRatio(property, type));
+                }
+            }
+        }
+
+        public String getLabel() {return _label;}
+
+        public boolean isNode() {return _isNode;}
 
         public long getByteSize() {
             return _byteSize;
@@ -352,5 +371,18 @@ public class Neo4jDataCollector extends AbstractDataCollector<Result, String, Re
         public long getCount() {
             return _count;
         }
+
+        public Set<String> getPropertyNames() {
+            return _properties.keySet();
+        }
+
+        public double getPropertyTypeRatio(String property, String type) {
+            return _properties.get(property).get(type);
+        }
+    }
+
+    @FunctionalInterface
+    private interface ExecuteQueryAndConsume {
+        ConsumedResult apply(String query) throws DataCollectException;
     }
 }

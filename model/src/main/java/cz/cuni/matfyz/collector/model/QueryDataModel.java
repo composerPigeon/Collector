@@ -146,14 +146,14 @@ class QueryDataModel implements DataModel {
         }
     }
     @Override
-    public void setAttributeValueRatio(String kindName, String attributeName, double ratio) {
+    public void setAttributeDistinctValuesCount(String kindName, String attributeName, long count) {
         try {
             _query.getDatabaseData()
                     .addKindIfAbsent(kindName)
                     .getKind(kindName)
                     .addAttributeIfNeeded(attributeName)
                     .getAttribute(attributeName)
-                    .setDistinctRatio(ratio);
+                    .setCountOfDistinctValues(count);
         } catch (DataModelException e) {
             logger.atError().setCause(e).log(e.getMessage());
         }
