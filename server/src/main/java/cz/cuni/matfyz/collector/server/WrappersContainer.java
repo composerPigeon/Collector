@@ -2,15 +2,12 @@ package cz.cuni.matfyz.collector.server;
 
 import cz.cuni.matfyz.collector.model.DataModel;
 import cz.cuni.matfyz.collector.server.configurationproperties.Instance;
+import cz.cuni.matfyz.collector.server.configurationproperties.SystemType;
 import cz.cuni.matfyz.collector.server.configurationproperties.WrappersProperties;
-import cz.cuni.matfyz.collector.wrappers.abstractwrapper.AbstractWrapper;
 import cz.cuni.matfyz.collector.wrappers.abstractwrapper.Wrapper;
 import cz.cuni.matfyz.collector.wrappers.exceptions.WrapperException;
-import cz.cuni.matfyz.collector.wrappers.mongodb.MongoResources;
 import cz.cuni.matfyz.collector.wrappers.mongodb.MongoWrapper;
-import cz.cuni.matfyz.collector.wrappers.neo4j.Neo4jResources;
 import cz.cuni.matfyz.collector.wrappers.neo4j.Neo4jWrapper;
-import cz.cuni.matfyz.collector.wrappers.postgresql.PostgresResources;
 import cz.cuni.matfyz.collector.wrappers.postgresql.PostgresWrapper;
 
 import jakarta.annotation.PostConstruct;
@@ -30,69 +27,45 @@ public class WrappersContainer {
 
     private Map<String, Wrapper> _wrappers;
 
-    /**
-     * Method for initializing all wrappers from properties
-     */
+    private Map<String, Instance> _instances;
+
+    @Autowired
+    private WrapperInitializers _initializers;
+
     @PostConstruct
-    public void init() {
+    public void initialize() {
+        _registerInitializers();
+
+        _instances = new HashMap<>();
         _wrappers = new HashMap<>();
+
         for (Instance instance : _properties.getWrappers()) {
-            switch (instance.getSystemType()) {
-                case PostgreSQL -> _wrappers.put(instance.getInstanceName(), new PostgresWrapper(
-                        new AbstractWrapper.ConnectionData(
-                                instance.getHostName(),
-                                instance.getPort(),
-                                PostgresResources.SYSTEM_NAME,
-                                instance.getDatabaseName(),
-                                instance.getCredentials().getUserName(),
-                                instance.getCredentials().getPassword()
-                        )
-                ));
-                case Neo4j -> _wrappers.put(instance.getInstanceName(), new Neo4jWrapper(
-                        new AbstractWrapper.ConnectionData(
-                                instance.getHostName(),
-                                instance.getPort(),
-                                Neo4jResources.SYSTEM_NAME,
-                                instance.getDatabaseName(),
-                                instance.getCredentials().getUserName(),
-                                instance.getCredentials().getPassword()
-                        )
-                ));
-                case MongoDB -> _wrappers.put(instance.getInstanceName(), new MongoWrapper(
-                        new AbstractWrapper.ConnectionData(
-                                instance.getHostName(),
-                                instance.getPort(),
-                                MongoResources.SYSTEM_NAME,
-                                instance.getDatabaseName(),
-                                instance.getCredentials().getUserName(),
-                                instance.getCredentials().getPassword()
-                        )
-                ));
-            }
+            _instances.put(instance.getInstanceName(), instance);
         }
+
+        _properties = null;
+    }
+
+
+    private void _registerInitializers() {
+        _initializers.register(SystemType.MongoDB, MongoWrapper::new);
+        _initializers.register(SystemType.Neo4j, Neo4jWrapper::new);
+        _initializers.register(SystemType.PostgreSQL, PostgresWrapper::new);
     }
 
     /**
      * Method for listing all wrappers
      * @return lit of maps, where each map contain selected infos about wrapper
      */
-    public List<Map<String, Object>> list() {
-        List<Map<String, Object>> list = new ArrayList<>();
-
-        for (var entry : _wrappers.entrySet()) {
-            Map<String, Object> map = new LinkedHashMap<>();
-            map.put("instanceName", entry.getKey());
-            if (entry.getValue() instanceof MongoWrapper)
-                map.put("type", "MongoDB");
-            else if (entry.getValue() instanceof Neo4jWrapper)
-                map.put("type", "Neo4j");
-            else if (entry.getValue() instanceof PostgresWrapper)
-                map.put("type", "PostgreSQL");
-            list.add(map);
+    public List<Instance.ID> listInstances() {
+        List<Instance.ID> list = new ArrayList<>();
+        for (var instance : _instances.values()) {
+            list.add(instance.getID());
         }
-
         return list;
     }
+
+
 
     /**
      * Method for checking if instance of instanceName exists
@@ -100,7 +73,15 @@ public class WrappersContainer {
      * @return true if instance of instanceName exist
      */
     public boolean contains(String instanceName) {
-        return _wrappers.containsKey(instanceName);
+        return _instances.containsKey(instanceName);
+    }
+
+    private Wrapper _get(String instanceName) {
+        if (!_wrappers.containsKey(instanceName) && _instances.containsKey(instanceName)) {
+            Instance instance = _instances.get(instanceName);
+            _wrappers.put(instance.getInstanceName(), _initializers.initialize(instance.getSystemType(), instance));
+        }
+        return _wrappers.get(instanceName);
     }
 
     /**
@@ -111,6 +92,6 @@ public class WrappersContainer {
      * @throws WrapperException when some WrapperException occur during process
      */
     public DataModel executeQuery(String instanceName, String query) throws WrapperException {
-        return _wrappers.get(instanceName).executeQuery(query);
+        return _get(instanceName).executeQuery(query);
     }
 }

@@ -1,6 +1,7 @@
 package cz.cuni.matfyz.collector.wrappers.abstractwrapper.components;
 
 import cz.cuni.matfyz.collector.model.DataModel;
+import cz.cuni.matfyz.collector.wrappers.abstractwrapper.AbstractWrapper;
 import cz.cuni.matfyz.collector.wrappers.exceptions.*;
 import cz.cuni.matfyz.collector.wrappers.queryresult.CachedResult;
 import cz.cuni.matfyz.collector.wrappers.queryresult.ConsumedResult;
@@ -12,30 +13,31 @@ import cz.cuni.matfyz.collector.wrappers.queryresult.ConsumedResult;
  * @param <TQuery>
  */
 public abstract class AbstractDataCollector<TResult, TQuery, TPlan> extends AbstractComponent {
-    private final AbstractConnection<TResult, TQuery, TPlan> _connection;
     private final AbstractQueryResultParser<TResult> _resultParser;
-
-    protected final String _databaseName;
-    protected final DataModel _model;
+    private final AbstractWrapper.ExecutionContext<TResult, TQuery, TPlan> _context;
 
 
     public AbstractDataCollector(
-            String databaseName,
-            ExecutionContext<TResult, TQuery, TPlan> context,
+            AbstractWrapper.ExecutionContext<TResult, TQuery, TPlan> context,
             AbstractQueryResultParser<TResult> resultParser
-    ) throws ConnectionException {
-        super(context.getExceptionsFactory());
-        _databaseName = databaseName;
-        _model = context.getModel();
-        _connection = context.getConnection();
+    ) {        super(context.getExceptionsFactory());
+        _context = context;
         _resultParser = resultParser;
     }
 
     public abstract void collectData(ConsumedResult result) throws DataCollectException;
 
+    private AbstractConnection<TResult, TQuery, TPlan> _getConnection() throws DataCollectException {
+        try {
+            return _context.getConnection();
+        } catch (ConnectionException e) {
+            throw getExceptionsFactory().dataCollectionFailed(e);
+        }
+    }
+
     protected CachedResult executeQuery(TQuery query) throws DataCollectException {
         try {
-            return _resultParser.parseResultAndCache(_connection.executeQuery(query));
+            return _resultParser.parseResultAndCache(_getConnection().executeQuery(query));
         } catch (QueryExecutionException | ParseException e) {
             throw getExceptionsFactory().dataCollectionFailed(e);
         }
@@ -43,9 +45,17 @@ public abstract class AbstractDataCollector<TResult, TQuery, TPlan> extends Abst
 
     protected ConsumedResult executeQueryAndConsume(TQuery query) throws DataCollectException {
         try {
-            return _resultParser.parseResultAndConsume(_connection.executeQuery(query));
+            return _resultParser.parseResultAndConsume(_getConnection().executeQuery(query));
         } catch (QueryExecutionException | ParseException e) {
             throw getExceptionsFactory().dataCollectionFailed(e);
         }
+    }
+
+    protected DataModel getModel() {
+        return _context.getModel();
+    }
+
+    protected String getDatabaseName() {
+        return _context.getDatabaseName();
     }
 }

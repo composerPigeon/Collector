@@ -8,3 +8,4 @@ public enum SystemType {
     PostgreSQL,
     MongoDB
 }
+

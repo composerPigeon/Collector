@@ -1,6 +1,7 @@
 package cz.cuni.matfyz.collector.server.executions;
 
 import cz.cuni.matfyz.collector.model.DataModel;
+import cz.cuni.matfyz.collector.persistor.ExecutionResult;
 import cz.cuni.matfyz.collector.persistor.PersistorException;
 import cz.cuni.matfyz.collector.server.PersistorContainer;
 import cz.cuni.matfyz.collector.server.exceptions.ErrorMessages;
@@ -78,7 +79,7 @@ public class ExecutionsManager implements AutoCloseable {
      * @return json representation of DataModel or error message
      * @throws ExecutionManagerException when some PersistorException occur during the process
      */
-    public String getExecutionResult(String uuid) throws ExecutionManagerException {
+    public ExecutionResult getExecutionResult(String uuid) throws ExecutionManagerException {
         try {
             return _persistor.getExecutionResult(uuid);
         } catch (PersistorException e) {

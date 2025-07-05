@@ -1,8 +1,8 @@
 package cz.cuni.matfyz.collector.wrappers.mongodb.components;
 
+import cz.cuni.matfyz.collector.wrappers.abstractwrapper.AbstractWrapper;
 import cz.cuni.matfyz.collector.wrappers.abstractwrapper.components.AbstractDataCollector;
 import cz.cuni.matfyz.collector.wrappers.abstractwrapper.components.AbstractQueryResultParser;
-import cz.cuni.matfyz.collector.wrappers.abstractwrapper.components.ExecutionContext;
 import cz.cuni.matfyz.collector.wrappers.exceptions.ConnectionException;
 import cz.cuni.matfyz.collector.wrappers.mongodb.MongoExceptionsFactory;
 import cz.cuni.matfyz.collector.wrappers.mongodb.MongoResources;
@@ -19,11 +19,10 @@ import java.util.*;
 public class MongoDataCollector extends AbstractDataCollector<Document, Document, Document> {
 
     public MongoDataCollector(
-            ExecutionContext<Document, Document, Document> context,
-            AbstractQueryResultParser<Document> resultParser,
-            String databaseName
+            AbstractWrapper.ExecutionContext<Document, Document, Document> context,
+            AbstractQueryResultParser<Document> resultParser
     ) throws ConnectionException {
-        super(databaseName, context, resultParser);
+        super(context, resultParser);
     }
 
     // Save Dataset data
@@ -32,7 +31,7 @@ public class MongoDataCollector extends AbstractDataCollector<Document, Document
      * Method which will save page size
      */
     private void _collectPageSize() {
-        _model.setPageSize(MongoResources.DefaultSizes.PAGE_SIZE);
+        getModel().setPageSize(MongoResources.DefaultSizes.PAGE_SIZE);
     }
 
     /**
@@ -44,7 +43,7 @@ public class MongoDataCollector extends AbstractDataCollector<Document, Document
 
         if (stats.next()) {
             long size = stats.getDocument("wiredTiger").get("cache", Document.class).getLong("maximum bytes configured");
-            _model.setDatabaseCacheSize(size);
+            getModel().setDatabaseCacheSize(size);
         }
     }
 
@@ -58,9 +57,9 @@ public class MongoDataCollector extends AbstractDataCollector<Document, Document
         if (stats.next()) {
             long size = stats.getLong("totalSize");
 
-            _model.setDatabaseByteSize(size);
-            long sizeInPages = (long) Math.ceil((double)size / _model.getPageSize());
-            _model.setDatabaseSizeInPages(sizeInPages);
+            getModel().setDatabaseByteSize(size);
+            long sizeInPages = (long) Math.ceil((double)size / getModel().getPageSize());
+            getModel().setDatabaseSizeInPages(sizeInPages);
         }
         _collectCacheDatabaseSize();
     }
@@ -80,7 +79,7 @@ public class MongoDataCollector extends AbstractDataCollector<Document, Document
         CachedResult result = executeQuery(MongoResources.getAvgObjectStringSizeCommand(collectionName, columnName, columnType));
         if (result.next()) {
             int avgByteSize = (int)Math.round(result.getDouble("avg"));
-            _model.setAttributeTypeByteSize(collectionName, columnName, columnType, avgByteSize);
+            getModel().setAttributeTypeByteSize(collectionName, columnName, columnType, avgByteSize);
         }
     }
 
@@ -93,7 +92,7 @@ public class MongoDataCollector extends AbstractDataCollector<Document, Document
     private void _collectNumberFieldByteSize(String collectionName, String columnName, String columnType) {
         Integer size = MongoResources.DefaultSizes.getAvgColumnSizeByType(columnType);
         if (size != null) {
-            _model.setAttributeTypeByteSize(collectionName, columnName, columnType, size);
+            getModel().setAttributeTypeByteSize(collectionName, columnName, columnType, size);
         }
     }
 
@@ -140,7 +139,7 @@ public class MongoDataCollector extends AbstractDataCollector<Document, Document
 
         if (result.next()) {
             long count = result.getLong("count");
-            _model.setAttributeDistinctValuesCount(collectionName, fieldName, count);
+            getModel().setAttributeDistinctValuesCount(collectionName, fieldName, count);
         }
     }
 
@@ -155,10 +154,10 @@ public class MongoDataCollector extends AbstractDataCollector<Document, Document
         if (result.next()) {
             if (result.containsAttribute("options")) {
                 boolean isRequired = _isRequiredField(result.getDocument("options"), fieldName);
-                _model.setAttributeMandatory(collectionName, fieldName, isRequired);
+                getModel().setAttributeMandatory(collectionName, fieldName, isRequired);
             } else {
                 boolean isRequired = "_id".equals(fieldName);
-                _model.setAttributeMandatory(collectionName, fieldName, isRequired);
+                getModel().setAttributeMandatory(collectionName, fieldName, isRequired);
             }
         }
     }
@@ -187,7 +186,7 @@ public class MongoDataCollector extends AbstractDataCollector<Document, Document
 
         if (maxCount > 0) {
             for (var entry : types) {
-                _model.setAttributeTypeRatio(
+                getModel().setAttributeTypeRatio(
                         collectionName,
                         fieldName,
                         entry.getKey(),
@@ -227,12 +226,12 @@ public class MongoDataCollector extends AbstractDataCollector<Document, Document
 
         if (stats.next()) {
             long size = stats.getLong("storageSize");
-            _model.setKindByteSize(collectionName, size);
-            long sizeInPages = (long) Math.ceil((double)size / _model.getPageSize());
-            _model.setKindSizeInPages(collectionName, sizeInPages);
+            getModel().setKindByteSize(collectionName, size);
+            long sizeInPages = (long) Math.ceil((double)size / getModel().getPageSize());
+            getModel().setKindSizeInPages(collectionName, sizeInPages);
 
             long recordCount = stats.getLong("count");
-            _model.setKindRecordCount(collectionName, recordCount);
+            getModel().setKindRecordCount(collectionName, recordCount);
         }
 
         _collectFieldData(collectionName);
@@ -251,7 +250,7 @@ public class MongoDataCollector extends AbstractDataCollector<Document, Document
 
         if (result.next()) {
             long count = result.getLong("n");
-            _model.setIndexRecordCount(indexName, count);
+            getModel().setIndexRecordCount(indexName, count);
         }
     }
 
@@ -265,8 +264,8 @@ public class MongoDataCollector extends AbstractDataCollector<Document, Document
         CachedResult stats = executeQuery(MongoResources.getCollectionStatsCommand(collectionName));
         if (stats.next()) {
             int size = stats.getDocument("indexSizes").getInteger(indexName);
-            _model.setIndexByteSize(indexName, size);
-            _model.setIndexSizeInPages(indexName, (long)Math.ceil((double)size / _model.getPageSize()));
+            getModel().setIndexByteSize(indexName, size);
+            getModel().setIndexSizeInPages(indexName, (long)Math.ceil((double)size / getModel().getPageSize()));
         }
     }
 
@@ -276,7 +275,7 @@ public class MongoDataCollector extends AbstractDataCollector<Document, Document
      * @throws DataCollectException when some QueryExecutionException occur during running help queries
      */
     private void _collectIndexesData(String collectionName) throws DataCollectException {
-        for (String indexName : _model.getIndexNames()) {
+        for (String indexName : getModel().getIndexNames()) {
             _collectIndexSizesData(collectionName, indexName);
             _collectIndexRecordCount(collectionName, indexName);
         }
@@ -288,7 +287,7 @@ public class MongoDataCollector extends AbstractDataCollector<Document, Document
      * @throws DataCollectException when no such collection was parsed from query
      */
     private String _getCollectionName() throws DataCollectException {
-        for (String collectionName : _model.getKindNames()) {
+        for (String collectionName : getModel().getKindNames()) {
             return collectionName;
         }
         throw getExceptionsFactory(MongoExceptionsFactory.class).collectionNotParsed();
@@ -306,9 +305,9 @@ public class MongoDataCollector extends AbstractDataCollector<Document, Document
                 if (colType != null) {
                     Integer size = MongoResources.DefaultSizes.getAvgColumnSizeByType(colType);
                     if (size != null)
-                        _model.setResultAttributeTypeByteSize(colName, colType, size);
+                        getModel().setResultAttributeTypeByteSize(colName, colType, size);
                     double ratio = result.getAttributeTypeRatio(colName, colType);
-                    _model.setResultAttributeTypeRatio(colName, colType, ratio);
+                    getModel().setResultAttributeTypeRatio(colName, colType, ratio);
                 }
             }
         }
@@ -320,12 +319,12 @@ public class MongoDataCollector extends AbstractDataCollector<Document, Document
      */
     private void _collectResultData(ConsumedResult result) {
         long size = result.getByteSize();
-        _model.setResultByteSize(size);
+        getModel().setResultByteSize(size);
         long count = result.getRecordCount();
-        _model.setResultRecordCount(count);
+        getModel().setResultRecordCount(count);
 
-        long sizeInPages = (long)Math.ceil((double) size / _model.getPageSize());
-        _model.setResultSizeInPages(sizeInPages);
+        long sizeInPages = (long)Math.ceil((double) size / getModel().getPageSize());
+        getModel().setResultSizeInPages(sizeInPages);
 
         _collectResultAttributeData(result);
     }

@@ -1,15 +1,13 @@
 package cz.cuni.matfyz.collector.server.configurationproperties;
 
+import cz.cuni.matfyz.collector.wrappers.abstractwrapper.AbstractWrapper;
 import org.springframework.boot.context.properties.bind.ConstructorBinding;
 
 /**
  * Class representing all information about connecting to instances defined in application.properties. It is used to initialize wrappers.
  */
 public class Instance {
-    /** Field holding database type based on which wrapper implementation will be picked up */
-    private final SystemType _systemType;
-    /** Field holding instance name specified by user */
-    private final String _instanceName;
+    private final ID _instanceID;
     /** Field holding hostName to connect to database */
     private final String _hostName;
     /** Field holding port to connect to database */
@@ -20,32 +18,35 @@ public class Instance {
 
     @ConstructorBinding
     public Instance(SystemType systemType, String instanceName, String hostName, int port, String databaseName, Credentials credentials) {
-        _systemType = systemType;
-        _instanceName = instanceName;
+        _instanceID = new ID(systemType, instanceName);
         _hostName = hostName;
         _port = port;
         _databaseName = databaseName;
         _credentials = credentials;
     }
 
-    public SystemType getSystemType() {
-        return _systemType;
-    }
     public String getInstanceName() {
-        return _instanceName;
-    }
-    public String getHostName() {
-        return _hostName;
-    }
-    public int getPort() {
-        return _port;
+        return _instanceID.instanceName();
     }
 
-    public String getDatabaseName() {
-        return _databaseName;
+    public SystemType getSystemType() {
+        return _instanceID.systemType();
     }
 
-    public Credentials getCredentials() {
-        return _credentials;
+    public ID getID() {
+        return _instanceID;
     }
+
+    public AbstractWrapper.ConnectionData getConnectionData() {
+        return new AbstractWrapper.ConnectionData(
+                _hostName,
+                _port,
+                _instanceID.systemType.name(),
+                _databaseName,
+                _credentials.userName(),
+                _credentials.password()
+        );
+    }
+
+    public record ID(SystemType systemType, String instanceName) {}
 }

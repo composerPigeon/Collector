@@ -51,14 +51,14 @@ public class MongoWrapper extends AbstractWrapper<Document, Document, Document> 
     }
 
     @Override
-    protected Document parseInputQuery(String query, ExecutionContext<Document, Document, Document> context) throws ParseException {
-        return _queryParser.parseQueryToCommand(query);
+    protected Document parseInputQuery(ExecutionContext<Document, Document, Document> context) throws ParseException {
+        return _queryParser.parseQueryToCommand(context.getInputQuery());
     }
 
     @Override
     protected AbstractDataCollector<Document, Document, Document> createDataCollector(ExecutionContext<Document, Document, Document> context) throws DataCollectException {
         try {
-            return new MongoDataCollector(context, _resultParser, _connectionData.databaseName());
+            return new MongoDataCollector(context, _resultParser);
         } catch (ConnectionException e) {
             throw getExceptionsFactory().dataCollectorNotInitialized(e);
         }

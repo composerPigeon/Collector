@@ -17,12 +17,12 @@ import org.slf4j.Logger;
  * Class representing Scheduler that will execute all waiting executions from queue
  */
 @Component
-public class QueryScheduler {
+public class ExecutionsScheduler {
     @Autowired
     private WrappersContainer _wrappers;
     @Autowired
     private ExecutionsManager _manager;
-    private final Logger _logger = LoggerFactory.getLogger(QueryScheduler.class);
+    private final Logger _logger = LoggerFactory.getLogger(ExecutionsScheduler.class);
 
     /**
      * Scheduled method for executing all waiting executions from queue
@@ -40,7 +40,7 @@ public class QueryScheduler {
                         _logger.atError().log(ErrorMessages.nonExistentWrapper(execution.uuid(), execution.instanceName()));
                         _manager.saveError(execution.uuid(), ErrorMessages.nonExistentWrapper(execution.uuid(), execution.instanceName()));
                     }
-                    System.out.println("Execution " + execution.uuid() + " was successfully executed");
+                    _logger.atInfo().log("Execution " + execution.uuid() + " was successfully executed");
                 } catch (WrapperException | ExecutionManagerException e) {
                     _logger.atError().setCause(e).log(e.getMessage());
                     _manager.saveError(execution.uuid(), e.getMessage());

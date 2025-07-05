@@ -44,7 +44,7 @@ public class ExecutionsQueue implements AutoCloseable {
      * @throws QueueExecutionsException when some org.h2.Driver is not found
      */
     @PostConstruct
-    public void init() throws QueueExecutionsException {
+    public void initializeDatabase() throws QueueExecutionsException {
         try {
             String connectionString = "jdbc:h2:mem:test";
             String userName = "";

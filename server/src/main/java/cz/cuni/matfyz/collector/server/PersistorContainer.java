@@ -2,6 +2,7 @@ package cz.cuni.matfyz.collector.server;
 
 import cz.cuni.matfyz.collector.model.DataModel;
 import cz.cuni.matfyz.collector.persistor.AbstractPersistor;
+import cz.cuni.matfyz.collector.persistor.ExecutionResult;
 import cz.cuni.matfyz.collector.persistor.MongoPersistor;
 import cz.cuni.matfyz.collector.persistor.PersistorException;
 import cz.cuni.matfyz.collector.server.configurationproperties.PersistorProperties;
@@ -27,19 +28,19 @@ public class PersistorContainer {
                 _properties.getHostName(),
                 _properties.getPort(),
                 _properties.getDatabaseName(),
-                _properties.getCredentials().getUserName(),
-                _properties.getCredentials().getPassword()
+                _properties.getCredentials().userName(),
+                _properties.getCredentials().password()
         );
     }
 
     /**
-     * Method for saving execution result into peristor
+     * Method for saving execution result into persistor
      * @param uuid execution identifier
      * @param model instance of DataModel with collected stats
      * @throws PersistorException when PersistorException occur in process
      */
     public void saveExecutionResult(String uuid, DataModel model) throws PersistorException {
-        _persistor.saveExecution(uuid, model);
+        _persistor.saveExecutionResult(uuid, model);
     }
 
     /**
@@ -56,9 +57,9 @@ public class PersistorContainer {
      * Method for getting result of execution
      * @param uuid execution identifier
      * @return json of DataModel or error message if some error during evaluation occurred
-     * @throws PersistorException when PeristorException occur in process
+     * @throws PersistorException when PersistorException occur in process
      */
-    public String getExecutionResult(String uuid)  throws PersistorException {
+    public ExecutionResult getExecutionResult(String uuid)  throws PersistorException {
         return _persistor.getExecutionResult(uuid);
     }
 
@@ -66,10 +67,10 @@ public class PersistorContainer {
      * Method for getting execution state
      * @param uuid execution identifier
      * @return execution state
-     * @throws PersistorException when PeristorException occur in process
+     * @throws PersistorException when PersistorException occur in process
      */
     public ExecutionState getExecutionState(String uuid) throws PersistorException {
-        if (_persistor.getExecutionStatus(uuid))
+        if (_persistor.containsExecution(uuid))
             return ExecutionState.Processed;
         else
             return ExecutionState.NotFound;

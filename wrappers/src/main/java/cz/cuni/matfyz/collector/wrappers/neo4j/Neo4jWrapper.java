@@ -3,7 +3,6 @@ package cz.cuni.matfyz.collector.wrappers.neo4j;
 import cz.cuni.matfyz.collector.wrappers.abstractwrapper.AbstractWrapper;
 import cz.cuni.matfyz.collector.wrappers.abstractwrapper.components.AbstractExplainPlanParser;
 import cz.cuni.matfyz.collector.wrappers.abstractwrapper.components.AbstractQueryResultParser;
-import cz.cuni.matfyz.collector.wrappers.abstractwrapper.components.ExecutionContext;
 import cz.cuni.matfyz.collector.wrappers.exceptions.ConnectionException;
 import cz.cuni.matfyz.collector.wrappers.exceptions.DataCollectException;
 import cz.cuni.matfyz.collector.wrappers.neo4j.components.Neo4jConnection;
@@ -45,14 +44,14 @@ public class Neo4jWrapper extends AbstractWrapper<Result, String, ResultSummary>
     }
 
     @Override
-    protected String parseInputQuery(String query, ExecutionContext<Result, String, ResultSummary> context) {
-        return query;
+    protected String parseInputQuery(ExecutionContext<Result, String, ResultSummary> context) {
+        return context.getInputQuery();
     }
 
     @Override
     protected Neo4jDataCollector createDataCollector(ExecutionContext<Result, String, ResultSummary> context) throws DataCollectException {
         try {
-            return new Neo4jDataCollector(context, _resultParser, _connectionData.databaseName());
+            return new Neo4jDataCollector(context, _resultParser);
         } catch (ConnectionException e) {
             throw getExceptionsFactory().dataCollectorNotInitialized(e);
         }

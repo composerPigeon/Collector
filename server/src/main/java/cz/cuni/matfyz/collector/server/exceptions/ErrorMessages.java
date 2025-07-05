@@ -50,4 +50,8 @@ public abstract class ErrorMessages {
     public static String nonExistentWrapper(String uuid, String instanceName) {
         return "Execution '" + uuid + "' is trying to execute query through non-existent instance '" + instanceName + "'.";
     }
+
+    public static String nonExistentExecution(String uuid) {
+        return "Execution '" + uuid + "' does not exist.";
+    }
 }

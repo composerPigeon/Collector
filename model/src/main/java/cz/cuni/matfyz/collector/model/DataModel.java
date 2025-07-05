@@ -1,5 +1,6 @@
 package cz.cuni.matfyz.collector.model;
 
+import java.util.Map;
 import java.util.Set;
 
 public interface DataModel {
@@ -44,4 +45,5 @@ public interface DataModel {
     public int getAttributeTypeByteSize(String kindName, String attributeName, String typeName) throws DataModelException;
 
     public String toJson() throws DataModelException;
+    public Map fromJson(String json) throws DataModelException;
 }

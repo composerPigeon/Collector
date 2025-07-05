@@ -8,17 +8,18 @@ import cz.cuni.matfyz.collector.model.DataModel;
 import cz.cuni.matfyz.collector.model.DataModelException;
 import org.bson.Document;
 
+import java.util.Map;
+
 /**
  * Implementation of Abstract persistor using Mongo native driver
  */
 public class MongoPersistor extends AbstractPersistor {
 
-    public MongoClient _client;
-    public MongoDatabase _database;
+    private final MongoDatabase _database;
 
-    public MongoPersistor(String hostName, int port, String datasetName, String userName, String password) {
-        _client = MongoClients.create(_buildConnectionLink(hostName, port, userName, password));
-        _database = _client.getDatabase(datasetName);
+    public MongoPersistor(String hostName, int port, String databaseName, String userName, String password) {
+        MongoClient _client = MongoClients.create(_buildConnectionLink(hostName, port, userName, password));
+        _database = _client.getDatabase(databaseName);
     }
 
     /**
@@ -43,7 +44,7 @@ public class MongoPersistor extends AbstractPersistor {
      * @throws PersistorException when MongoException occur during process
      */
     @Override
-    public void saveExecution(String uuid, DataModel model) throws PersistorException {
+    public void saveExecutionResult(String uuid, DataModel model) throws PersistorException {
         try {
             Document document = new Document();
             document.put("_id", uuid);
@@ -76,17 +77,19 @@ public class MongoPersistor extends AbstractPersistor {
      * Method for getting execution result from mongodb
      * @param uuid id of execution
      * @return model or error message or null if execution do not exist
-     * @throws PersistorException
      */
     @Override
-    public String getExecutionResult(String uuid) throws PersistorException {
+    public ExecutionResult getExecutionResult(String uuid) throws PersistorException {
         try {
             var result = _database.getCollection("executions").find(new Document("_id", uuid));
             for (var document : result) {
-                if (document.containsKey("model"))
-                    return document.get("model", Document.class).toJson();
-                else
-                    return document.getString("error");
+                if (document.containsKey("model")) {
+                    Map<String, Object> value = document.get("model", Document.class);
+                    return ExecutionResult.success(value);
+                } else {
+                    var errorMessage = document.getString("error");
+                    return ExecutionResult.error(errorMessage);
+                }
             }
             return null;
         } catch (MongoException e) {
@@ -102,9 +105,9 @@ public class MongoPersistor extends AbstractPersistor {
      * @throws PersistorException
      */
     @Override
-    public boolean getExecutionStatus(String uuid) throws PersistorException {
-        try (var resultIter = _database.getCollection("executions").find(new Document("_id", uuid)).iterator()) {
-            return resultIter.hasNext();
+    public boolean containsExecution(String uuid) throws PersistorException {
+        try (var result = _database.getCollection("executions").find(new Document("_id", uuid)).iterator()) {
+            return result.hasNext();
         } catch (MongoException e) {
             throw new PersistorException(e);
         }
