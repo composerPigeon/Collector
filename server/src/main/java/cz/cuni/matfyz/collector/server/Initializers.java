@@ -2,15 +2,19 @@ package cz.cuni.matfyz.collector.server;
 
 import cz.cuni.matfyz.collector.persistor.AbstractPersistor;
 import cz.cuni.matfyz.collector.persistor.MongoPersistor;
+import cz.cuni.matfyz.collector.persistor.PersistorException;
 import cz.cuni.matfyz.collector.server.configurationproperties.Instance;
 import cz.cuni.matfyz.collector.server.configurationproperties.PersistorProperties;
 import cz.cuni.matfyz.collector.server.configurationproperties.SystemType;
+import cz.cuni.matfyz.collector.server.exceptions.ErrorMessages;
 import cz.cuni.matfyz.collector.wrappers.abstractwrapper.AbstractWrapper;
 import cz.cuni.matfyz.collector.wrappers.abstractwrapper.Wrapper;
+import cz.cuni.matfyz.collector.wrappers.exceptions.WrapperException;
 import cz.cuni.matfyz.collector.wrappers.mongodb.MongoWrapper;
 import cz.cuni.matfyz.collector.wrappers.neo4j.Neo4jWrapper;
 import cz.cuni.matfyz.collector.wrappers.postgresql.PostgresWrapper;
 import jakarta.annotation.PostConstruct;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
 import java.util.HashMap;
@@ -21,10 +25,13 @@ import java.util.function.Function;
 public class Initializers {
     private final Map<SystemType, Function<AbstractWrapper.ConnectionData, Wrapper>> _wrapperInitializers;
     private final Map<SystemType, Function<AbstractPersistor.ConnectionData, AbstractPersistor>> _persistorInitializers;
+    private final ErrorMessages _errors;
 
-    public Initializers() {
+    @Autowired
+    public Initializers(ErrorMessages errorMessages) {
         _wrapperInitializers = new HashMap<>();
         _persistorInitializers = new HashMap<>();
+        _errors = errorMessages;
     }
 
     public void registerWrapper(SystemType type, Function<AbstractWrapper.ConnectionData, Wrapper> initializer) {
@@ -35,16 +42,16 @@ public class Initializers {
         _persistorInitializers.put(type, initializer);
     }
 
-    public Wrapper initializeWrapper(SystemType type, Instance instance) {
+    public Wrapper initializeWrapper(SystemType type, Instance instance) throws WrapperException {
         if (!_wrapperInitializers.containsKey(type)) {
-            throw new IllegalArgumentException("No initializer for wrapper of type " + type);
+            throw new WrapperException(_errors.missingWrapperInitializer(type));
         }
         return _wrapperInitializers.get(type).apply(instance.getConnectionData());
     }
 
-    public AbstractPersistor initializePersistor(SystemType type, PersistorProperties properties) {
+    public AbstractPersistor initializePersistor(SystemType type, PersistorProperties properties) throws PersistorException {
         if (!_persistorInitializers.containsKey(type)) {
-            throw new IllegalArgumentException("No initializer for persistor of type " + type);
+            throw new PersistorException(_errors.missingPersistorInitializer(type));
         }
         return _persistorInitializers.get(type).apply(properties.getConnectionData());
     }

@@ -1,7 +1,7 @@
 package cz.cuni.matfyz.collector.persistor;
 
 /**
- * Exception for rethrowing errors occured during interaction of persistor
+ * Exception for rethrowing errors occurred during interaction of persistor
  */
 public class PersistorException extends Exception {
     public PersistorException(Throwable cause) { super(cause);}

@@ -5,17 +5,17 @@ import java.util.Map;
 
 public class ExecutionResult {
     private final boolean _isSuccessful;
-    private final Map<String, Object> _model;
+    private final Map<String, Object> _result;
     private final String _errorMessage;
 
-    private ExecutionResult(Map<String, Object> model) {
+    private ExecutionResult(Map<String, Object> result) {
         _isSuccessful = true;
-        _model = model;
+        _result = result;
         _errorMessage = null;
     }
 
-    public static ExecutionResult success(Map<String, Object> model) {
-        return new ExecutionResult(model);
+    public static ExecutionResult success(Map<String, Object> result) {
+        return new ExecutionResult(result);
     }
 
     public static ExecutionResult error(String errorMessage) {
@@ -24,7 +24,7 @@ public class ExecutionResult {
 
     private ExecutionResult(String errorMessage) {
         _isSuccessful = false;
-        _model = null;
+        _result = null;
         _errorMessage = errorMessage;
     }
 
@@ -32,8 +32,8 @@ public class ExecutionResult {
         return _isSuccessful;
     }
 
-    public Map<String, Object> getValue() {
-        return _model;
+    public Map<String, Object> getResult() {
+        return _result;
     }
 
     public String getErrorMessage() {

@@ -15,11 +15,13 @@ import java.util.UUID;
 @Component
 public class ExecutionsQueue implements AutoCloseable {
     private final Connection _connection;
+    private final ErrorMessages _errors;
 
-    public ExecutionsQueue() throws QueueExecutionsException {
+    public ExecutionsQueue(ErrorMessages errorMessages) throws QueueExecutionsException {
         _connection = new ConnectionBuilder()
                 .setConnectionString("jdbc:h2:mem:test")
                 .build();
+        _errors = errorMessages;
     }
 
     /**
@@ -27,9 +29,9 @@ public class ExecutionsQueue implements AutoCloseable {
      * @param instanceName instance name on which query should be executed
      * @param query query to be executed
      * @return execution id of newly inserted query
-     * @throws QueueExecutionsException when some SQLException occur during process
+     * @throws SQLException when some error occur during process
      */
-    public String createExecution(String instanceName, String query) throws QueueExecutionsException {
+    public String createExecution(String instanceName, String query) throws SQLException {
         String insertQuery = "INSERT INTO executions(uuid, added, isrunning, instance, query) VALUES (?, ?, ?, ?, ?);";
         try (PreparedStatement statement = _connection.prepareStatement(insertQuery)) {
             String uuid = UUID.randomUUID().toString();
@@ -41,18 +43,15 @@ public class ExecutionsQueue implements AutoCloseable {
             statement.executeUpdate();
             return uuid;
         }
-        catch (SQLException e) {
-            throw new QueueExecutionsException(e);
-        }
     }
 
     /**
      * Method for getting execution state from queue
      * @param uuid execution id
      * @return execution state gathered from queue
-     * @throws QueueExecutionsException when some SQLException occur during process
+     * @throws SQLException when some SQLException occur during process
      */
-    public ExecutionState getExecutionState(String uuid) throws QueueExecutionsException {
+    public ExecutionState getExecutionState(String uuid) throws SQLException {
         try (Statement statement = _connection.createStatement()) {
             ResultSet resultSet = statement.executeQuery("SELECT isrunning FROM executions WHERE uuid = '" + uuid + "' ;");
 
@@ -63,33 +62,27 @@ public class ExecutionsQueue implements AutoCloseable {
                 else
                     return ExecutionState.Waiting;
             }
-
-            resultSet.close();
             return ExecutionState.NotFound;
-        } catch (SQLException e) {
-            throw new QueueExecutionsException(e);
         }
     }
 
     /**
      * Method for setting execution to running state
      * @param uuid execution identifier
-     * @throws QueueExecutionsException when some SQLException occur during process
+     * @throws SQLException when some SQLException occur during process
      */
-    public void setRunning(String uuid) throws QueueExecutionsException {
+    public void setRunning(String uuid) throws SQLException {
         try (Statement statement = _connection.createStatement()) {
             statement.executeUpdate("UPDATE executions SET isrunning = true WHERE uuid = '" + uuid + "' ;");
-        } catch (SQLException e) {
-            throw new QueueExecutionsException(e);
         }
     }
 
     /**
      * Method for getting list of waiting executions from queue to be executed by scheduler
      * @return list of executions
-     * @throws QueueExecutionsException when some SQLException occur during process
+     * @throws SQLException when some SQLException occur during process
      */
-    public List<Execution> getWaitingExecutions() throws QueueExecutionsException {
+    public List<Execution> getWaitingExecutions() throws SQLException {
         try (Statement statement = _connection.createStatement()) {
             ResultSet result = statement.executeQuery("SELECT * FROM executions WHERE isrunning = false ORDER BY added ASC;");
             List<Execution> executions = new ArrayList<>();
@@ -104,23 +97,18 @@ public class ExecutionsQueue implements AutoCloseable {
                 ));
             }
 
-            result.close();
             return executions;
-        } catch (SQLException e) {
-            throw new QueueExecutionsException(e);
         }
     }
 
     /**
-     * Method for removing execution from queu after it's query result was saved
+     * Method for removing execution from queue after it's query result was saved
      * @param uuid execution identifier
-     * @throws QueueExecutionsException when some SQLException occur during process
+     * @throws SQLException when some SQLException occur during process
      */
-    public void removeExecution(String uuid) throws QueueExecutionsException {
+    public void removeExecution(String uuid) throws SQLException {
         try (Statement statement = _connection.createStatement()){
             statement.executeUpdate("DELETE FROM executions WHERE uuid = '" + uuid + "' ;");
-        } catch (SQLException e) {
-            throw new QueueExecutionsException(e);
         }
     }
 
@@ -129,7 +117,7 @@ public class ExecutionsQueue implements AutoCloseable {
         _connection.close();
     }
 
-    private static class ConnectionBuilder {
+    private class ConnectionBuilder {
         private Connection _connection;
         private String _connectionString;
         private String _userName;
@@ -186,12 +174,12 @@ public class ExecutionsQueue implements AutoCloseable {
                 return _connection;
             } catch (ClassNotFoundException e) {
                 throw new QueueExecutionsException(
-                        ErrorMessages.driverForQueueNotFound(),
+                        _errors.driverForQueueNotFound(),
                         e
                 );
             } catch (SQLException e) {
                 throw new QueueExecutionsException(
-                        ErrorMessages.queueFailedToInitialize(),
+                        _errors.queueFailedToInitialize(),
                         e
                 );
             }

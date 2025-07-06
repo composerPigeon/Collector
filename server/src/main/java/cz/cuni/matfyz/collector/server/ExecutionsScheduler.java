@@ -18,11 +18,22 @@ import org.slf4j.Logger;
  */
 @Component
 public class ExecutionsScheduler {
+
+    private final WrappersContainer _wrappers;
+
+    private final ExecutionsManager _manager;
+
+    private final Logger _logger;
+
+    private final ErrorMessages _errors;
+
     @Autowired
-    private WrappersContainer _wrappers;
-    @Autowired
-    private ExecutionsManager _manager;
-    private final Logger _logger = LoggerFactory.getLogger(ExecutionsScheduler.class);
+    public ExecutionsScheduler(WrappersContainer wrappers, ExecutionsManager manager, ErrorMessages errorMessages) {
+        _wrappers = wrappers;
+        _manager = manager;
+        _logger = LoggerFactory.getLogger(ExecutionsScheduler.class);
+        _errors = errorMessages;
+    }
 
     /**
      * Scheduled method for executing all waiting executions from queue
@@ -37,8 +48,8 @@ public class ExecutionsScheduler {
                         DataModel result = _wrappers.executeQuery(execution.instanceName(), execution.query());
                         _manager.saveResult(execution.uuid(), result);
                     } else {
-                        _logger.atError().log(ErrorMessages.nonExistentWrapper(execution.uuid(), execution.instanceName()));
-                        _manager.saveError(execution.uuid(), ErrorMessages.nonExistentWrapper(execution.uuid(), execution.instanceName()));
+                        _logger.atError().log(_errors.nonExistentWrapper(execution.uuid(), execution.instanceName()));
+                        _manager.saveError(execution.uuid(), _errors.nonExistentWrapper(execution.uuid(), execution.instanceName()));
                     }
                     _logger.atInfo().log("Execution " + execution.uuid() + " was successfully executed");
                 } catch (WrapperException | ExecutionManagerException e) {
@@ -46,13 +57,13 @@ public class ExecutionsScheduler {
                     _manager.saveError(execution.uuid(), e.getMessage());
                 } catch (Exception e) {
                     _logger.atError().setCause(e).log(e.getMessage());
-                    _manager.saveError(execution.uuid(), ErrorMessages.unexpectedErrorMsg());
+                    _manager.saveError(execution.uuid(), _errors.unexpectedErrorMsg());
                 }
             }
         } catch (ExecutionManagerException e) {
             _logger.atError().setCause(e).log(e.getMessage());
         } catch (Exception e) {
-            _logger.atError().setCause(e).log("Error during executing waiting executions from queue.");
+            _logger.atError().setCause(e).log(_errors.unexpectedErrorMsg());
         }
     }
 }

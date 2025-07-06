@@ -6,7 +6,7 @@ import cz.cuni.matfyz.collector.wrappers.exceptions.*;
 
 import java.util.function.Consumer;
 
-public abstract class AbstractWrapper<TResult, TQuery, TPlan> extends AbstractComponent implements Wrapper, AutoCloseable {
+public abstract class AbstractWrapper<TResult, TQuery, TPlan> extends AbstractComponent implements Wrapper {
 
     protected final ConnectionData _connectionData;
 

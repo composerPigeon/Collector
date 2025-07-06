@@ -2,9 +2,6 @@ package cz.cuni.matfyz.collector.model;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonProperty;
-
-import java.util.*;
-
 /**
  * Main class holding gathered statistical data which can be eventually transformed to json for persistent storage
  */

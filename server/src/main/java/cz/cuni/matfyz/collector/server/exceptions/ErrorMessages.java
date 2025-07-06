@@ -1,71 +1,69 @@
 package cz.cuni.matfyz.collector.server.exceptions;
 
 import cz.cuni.matfyz.collector.server.configurationproperties.SystemType;
+import org.springframework.stereotype.Component;
 
 /**
  * Class with all error messages that are used on server to report errors to user
  */
-public abstract class ErrorMessages {
+@Component
+public class ErrorMessages {
 
-    public static String setExecutionRunningErrorMsg(String uuid) {
-        return "Error setting execution '" + uuid + "' as running.";
+    public String setExecutionRunningErrorMsg(String uuid, Throwable cause) {
+        return "Can't set execution '" + uuid + "' as running because: " + cause.getMessage();
     }
-    public static String queueInsertExecutionErrorMsg(String instanceName, String query) {
-        return "Insert of Execution(instanceName: " + instanceName + ", query: " + query + ") to queue failed.";
+    public String queueInsertExecutionErrorMsg(String instanceName, String query, Throwable cause) {
+        return "Insert of Execution(instanceName: " + instanceName + ", query: " + query + ") to queue failed because: " + cause.getMessage();
     }
-    public static String findExecutionStateErrorMsg(String uuid) {
-        return "Error finding execution '" + uuid + "' state in queue.";
+    public String findExecutionStateErrorMsg(String uuid, Throwable cause) {
+        return "Can't find execution '" + uuid + "' state in queue because: " + cause.getMessage();
     }
-    public static String getExecutionResultErrorMsg(String uuid) {
-        return "Error getting execution '" + uuid + "' result from persistor.";
+    public String getExecutionResultErrorMsg(String uuid, Throwable cause) {
+        return "Can't get execution '" + uuid + "' result from persistor because: " + cause.getMessage();
     }
-    public static String getExecutionsFromQueueErrorMsg() {
-        return "Error getting waiting executions from queue.";
+    public String getExecutionsFromQueueErrorMsg(Throwable cause) {
+        return "Can't get waiting executions from queue because: " + cause.getMessage();
     }
-    public static String removeExecutionErrorMsg(String uuid) {
-        return "Error removing execution '" + uuid + "' from queue.";
-    }
-
-    public static String saveExecutionResultErrorMsg(String uuid) {
-        return "Error saving execution '" + uuid + "' result.";
+    public String removeExecutionErrorMsg(String uuid, Throwable cause) {
+        return "Can't remove execution '" + uuid + "' from queue because: " + cause.getMessage();
     }
 
-    public static String saveExecutionErrorErrorMsg(String uuid) {
-        return "Error saving execution '" + uuid + "' error.";
+    public String saveExecutionResultErrorMsg(String uuid, Throwable cause) {
+        return "Can't save execution '" + uuid + "' result because: " + cause.getMessage();
     }
-    public static String unexpectedErrorMsg() {
+
+    public String saveExecutionErrorErrorMsg(String uuid, Throwable cause) {
+        return "Can't save execution '" + uuid + "' error message because: " + cause.getMessage();
+    }
+    public String unexpectedErrorMsg() {
         return "Unexpected error occurred.";
     }
 
-    public static String unexpectedErrorDuringExecutionErrorMsg(String uuid) {
-        return "Unexpected error occurred while processing of execution '" + uuid + "'.";
-    }
-
-    public static String badCreateRequestErrorMsg() {
+    public String badCreateRequestErrorMsg() {
         return "Server expect POST's request body to be in json format. Json object has to contain fields 'instance' and 'query'.";
     }
 
-    public static String serializeWrappersErrorMsg() {
-        return "Error serializing wrappers.";
-    }
-
-    public static String nonExistentWrapper(String uuid, String instanceName) {
+    public String nonExistentWrapper(String uuid, String instanceName) {
         return "Execution '" + uuid + "' is trying to execute query through non-existent instance '" + instanceName + "'.";
     }
 
-    public static String nonExistentExecution(String uuid) {
+    public String nonExistentExecution(String uuid) {
         return "Execution '" + uuid + "' does not exist.";
     }
 
-    public static String driverForQueueNotFound() {
+    public String driverForQueueNotFound() {
         return "Execution queue cannot be initialized because driver 'org.h2.Driver' was not found.";
     }
 
-    public static String queueFailedToInitialize() {
+    public String queueFailedToInitialize() {
         return "Execution queue cannot be initialized because it failed to connect to database.";
     }
 
-    public static String missingWrapperInitializer(SystemType type) {
+    public String missingWrapperInitializer(SystemType type) {
         return "Wrapper initializer for system type '" + type + "' is missing.";
+    }
+
+    public String missingPersistorInitializer(SystemType type) {
+        return "Persistor initializer for system type '" + type + "' is missing.";
     }
 }

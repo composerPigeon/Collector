@@ -4,7 +4,6 @@ import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 
-import java.util.Map;
 import java.util.Set;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -257,17 +256,6 @@ class QueryDataModel implements DataModel {
             return mapper.writeValueAsString(_query);
         } catch (JsonProcessingException e) {
             throw new DataModelException("Problem with parsing DataModel instance to json format", e);
-        }
-    }
-
-    @Override
-    public Map fromJson(String json) throws DataModelException {
-        try {
-            ObjectMapper mapper = new ObjectMapper();
-
-            return mapper.readValue(json, Map.class);
-        } catch (JsonProcessingException e) {
-            throw new DataModelException("Problem with parsing json to DataModel instance", e);
         }
     }
 }

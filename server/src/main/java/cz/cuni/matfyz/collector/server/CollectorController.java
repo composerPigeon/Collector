@@ -29,11 +29,14 @@ public class CollectorController {
 
     private final Logger _logger;
 
+    private final ErrorMessages _errors;
+
     @Autowired
-    public CollectorController(ExecutionsManager manager, WrappersContainer wrappers) {
+    public CollectorController(ExecutionsManager manager, WrappersContainer wrappers, ErrorMessages errorMessages) {
         _manager = manager;
         _wrappers = wrappers;
         _logger = LoggerFactory.getLogger(CollectorController.class);
+        _errors = errorMessages;
     }
 
     /**
@@ -50,10 +53,10 @@ public class CollectorController {
                 var id = _manager.createExecution(instanceName, query);
                 return Map.of("executionId", id);
             } else {
-                _logger.atError().log(ErrorMessages.badCreateRequestErrorMsg());
+                _logger.atError().log(_errors.badCreateRequestErrorMsg());
                 throw new ResponseStatusException(
                         HttpStatus.BAD_REQUEST,
-                        ErrorMessages.badCreateRequestErrorMsg()
+                        _errors.badCreateRequestErrorMsg()
                 );
             }
         } catch (ExecutionManagerException e) {
@@ -68,7 +71,7 @@ public class CollectorController {
             _logger.atError().setCause(e).log(e.getMessage());
             throw new ResponseStatusException(
                     HttpStatus.INTERNAL_SERVER_ERROR,
-                    ErrorMessages.unexpectedErrorMsg()
+                    _errors.unexpectedErrorMsg()
             );
         }
     }
@@ -82,7 +85,7 @@ public class CollectorController {
             if (state == ExecutionState.NotFound) {
                 throw new ResponseStatusException(
                         HttpStatus.NOT_FOUND,
-                        ErrorMessages.nonExistentExecution(executionId)
+                        _errors.nonExistentExecution(executionId)
                 );
             }
 
@@ -100,7 +103,7 @@ public class CollectorController {
             _logger.atError().setCause(e).log(e.getMessage());
             throw new ResponseStatusException(
                     HttpStatus.INTERNAL_SERVER_ERROR,
-                    ErrorMessages.unexpectedErrorMsg()
+                    _errors.unexpectedErrorMsg()
             );
         }
     }
@@ -118,10 +121,10 @@ public class CollectorController {
             if (result == null) {
                 throw new ResponseStatusException(
                         HttpStatus.NOT_FOUND,
-                        ErrorMessages.nonExistentExecution(executionId)
+                        _errors.nonExistentExecution(executionId)
                 );
             } else if (result.isSuccessful()) {
-                json.put("model", result.getValue());
+                json.put("model", result.getResult());
             } else {
                 json.put("error", result.getErrorMessage());
             }
@@ -137,7 +140,7 @@ public class CollectorController {
             _logger.atError().setCause(e).log(e.getMessage());
             throw new ResponseStatusException(
                     HttpStatus.INTERNAL_SERVER_ERROR,
-                    ErrorMessages.unexpectedErrorMsg()
+                    _errors.unexpectedErrorMsg()
             );
         }
     }
@@ -156,7 +159,7 @@ public class CollectorController {
             _logger.atError().setCause(e).log(e.getMessage());
             throw new ResponseStatusException(
                     HttpStatus.INTERNAL_SERVER_ERROR,
-                    ErrorMessages.unexpectedErrorMsg()
+                    _errors.unexpectedErrorMsg()
             );
         }
     }

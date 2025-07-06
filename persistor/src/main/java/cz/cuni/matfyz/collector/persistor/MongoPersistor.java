@@ -62,7 +62,7 @@ public class MongoPersistor extends AbstractPersistor {
     }
 
     /**
-     *  Method for saving execution error if occured to mongodb
+     *  Method for saving execution error if occurred to mongodb
      * @param uuid id of execution
      * @param errMsg error message
      * @throws PersistorException when MongoException occur during process
@@ -108,7 +108,7 @@ public class MongoPersistor extends AbstractPersistor {
      * Method for getting execution state
      * @param uuid id of execution
      * @return true if execution is present in mongodb and false otherwise
-     * @throws PersistorException
+     * @throws PersistorException when problem occurs
      */
     @Override
     public boolean containsExecution(String uuid) throws PersistorException {

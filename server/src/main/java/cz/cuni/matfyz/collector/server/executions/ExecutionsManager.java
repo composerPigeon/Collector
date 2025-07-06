@@ -3,17 +3,16 @@ package cz.cuni.matfyz.collector.server.executions;
 import cz.cuni.matfyz.collector.model.DataModel;
 import cz.cuni.matfyz.collector.persistor.AbstractPersistor;
 import cz.cuni.matfyz.collector.persistor.ExecutionResult;
-import cz.cuni.matfyz.collector.persistor.MongoPersistor;
 import cz.cuni.matfyz.collector.persistor.PersistorException;
 import cz.cuni.matfyz.collector.server.Initializers;
 import cz.cuni.matfyz.collector.server.configurationproperties.PersistorProperties;
 import cz.cuni.matfyz.collector.server.configurationproperties.SystemType;
 import cz.cuni.matfyz.collector.server.exceptions.ErrorMessages;
 import cz.cuni.matfyz.collector.server.exceptions.ExecutionManagerException;
-import cz.cuni.matfyz.collector.server.exceptions.QueueExecutionsException;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
+import java.sql.SQLException;
 import java.util.List;
 
 /**
@@ -23,11 +22,13 @@ import java.util.List;
 public class ExecutionsManager implements AutoCloseable {
     private final AbstractPersistor _persistor;
     private final ExecutionsQueue _queue;
+    private final ErrorMessages _errors;
 
     @Autowired
-    public ExecutionsManager(Initializers initializers, PersistorProperties properties, ExecutionsQueue queue) {
+    public ExecutionsManager(Initializers initializers, PersistorProperties properties, ExecutionsQueue queue, ErrorMessages errorMessages) throws PersistorException {
         _persistor = initializers.initializePersistor(SystemType.MongoDB, properties);
         _queue = queue;
+        _errors = errorMessages;
     }
 
     /**
@@ -40,8 +41,8 @@ public class ExecutionsManager implements AutoCloseable {
     public String createExecution(String instanceName, String query) throws ExecutionManagerException {
         try {
             return _queue.createExecution(instanceName, query);
-        } catch (QueueExecutionsException e) {
-            String errMsg = ErrorMessages.queueInsertExecutionErrorMsg(instanceName, query);
+        } catch (SQLException e) {
+            String errMsg = _errors.queueInsertExecutionErrorMsg(instanceName, query, e);
             throw new ExecutionManagerException(errMsg, e);
         }
     }
@@ -60,8 +61,8 @@ public class ExecutionsManager implements AutoCloseable {
                     result = ExecutionState.Processed;
             }
             return result;
-        } catch (QueueExecutionsException | PersistorException e) {
-            String errMsg = ErrorMessages.findExecutionStateErrorMsg(uuid);
+        } catch (SQLException | PersistorException e) {
+            String errMsg = _errors.findExecutionStateErrorMsg(uuid, e);
             throw new ExecutionManagerException(errMsg, e);
         }
 
@@ -75,8 +76,8 @@ public class ExecutionsManager implements AutoCloseable {
     public void setExecutionRunning(String uuid) throws ExecutionManagerException {
         try {
             _queue.setRunning(uuid);
-        } catch (QueueExecutionsException e) {
-            String errMsg = ErrorMessages.setExecutionRunningErrorMsg(uuid);
+        } catch (SQLException e) {
+            String errMsg = _errors.setExecutionRunningErrorMsg(uuid, e);
             throw new ExecutionManagerException(errMsg, e);
         }
     }
@@ -91,7 +92,7 @@ public class ExecutionsManager implements AutoCloseable {
         try {
             return _persistor.getExecutionResult(uuid);
         } catch (PersistorException e) {
-            String errMsg = ErrorMessages.getExecutionResultErrorMsg(uuid);
+            String errMsg = _errors.getExecutionResultErrorMsg(uuid, e);
             throw new ExecutionManagerException(errMsg, e);
         }
 
@@ -105,8 +106,8 @@ public class ExecutionsManager implements AutoCloseable {
     public List<Execution> getWaitingExecutionsFromQueue() throws ExecutionManagerException {
         try {
             return _queue.getWaitingExecutions();
-        } catch (QueueExecutionsException e) {
-            String errMsg = ErrorMessages.getExecutionsFromQueueErrorMsg();
+        } catch (SQLException    e) {
+            String errMsg = _errors.getExecutionsFromQueueErrorMsg(e);
             throw new ExecutionManagerException(errMsg, e);
         }
 
@@ -120,8 +121,8 @@ public class ExecutionsManager implements AutoCloseable {
     public void removeExecutionFromQueue(String uuid) throws ExecutionManagerException {
         try {
             _queue.removeExecution(uuid);
-        } catch (QueueExecutionsException e) {
-            String errMsg = ErrorMessages.removeExecutionErrorMsg(uuid);
+        } catch (SQLException e) {
+            String errMsg = _errors.removeExecutionErrorMsg(uuid, e);
             throw new ExecutionManagerException(errMsg, e);
         }
 
@@ -138,7 +139,7 @@ public class ExecutionsManager implements AutoCloseable {
             _persistor.saveExecutionResult(uuid, model);
             removeExecutionFromQueue(uuid);
         } catch (PersistorException e) {
-            String errMsg = ErrorMessages.saveExecutionResultErrorMsg(uuid);
+            String errMsg = _errors.saveExecutionResultErrorMsg(uuid, e);
             throw new ExecutionManagerException(errMsg, e);
         }
 
@@ -155,12 +156,13 @@ public class ExecutionsManager implements AutoCloseable {
             _persistor.saveExecutionError(uuid, errorMsg);
             removeExecutionFromQueue(uuid);
         } catch (PersistorException e) {
-            String errMsg = ErrorMessages.saveExecutionErrorErrorMsg(uuid);
+            String errMsg = _errors.saveExecutionErrorErrorMsg(uuid, e);
             throw new ExecutionManagerException(errMsg, e);
         }
     }
 
     public void close() throws Exception {
+        _persistor.close();
         _queue.close();
     }
 }

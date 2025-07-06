@@ -48,5 +48,53 @@ public class Instance {
         );
     }
 
-    public record ID(SystemType systemType, String instanceName) {}
+    public boolean equals(Instance other) {
+        return _instanceID.equals(other._instanceID);
+    }
+
+    public boolean equals(ID other) {
+        return _instanceID.equals(other);
+    }
+
+    public boolean equals(String other) {
+        return _instanceID.equals(other);
+    }
+
+    @Override
+    public boolean equals(Object o) {
+        if (o instanceof Instance other) {
+            return equals(other);
+        } else if (o instanceof ID other) {
+            return equals(other);
+        } else if (o instanceof String other) {
+            return equals(other);
+        }
+        return false;
+    }
+
+    @Override
+    public int hashCode() {
+        return _instanceID.instanceName().hashCode();
+    }
+
+    public record ID(SystemType systemType, String instanceName) {
+
+        public boolean equals(ID other) {
+            return instanceName.equals(other.instanceName);
+        }
+
+        public boolean equals(String other) {
+            return instanceName.equals(other);
+        }
+
+        @Override
+        public boolean equals(Object o) {
+            if (o instanceof ID other) {
+                return equals(other);
+            } else if (o instanceof String other) {
+                return equals(other);
+            }
+            return false;
+        }
+    }
 }
