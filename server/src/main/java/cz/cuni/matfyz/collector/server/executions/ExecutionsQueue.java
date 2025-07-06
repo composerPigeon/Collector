@@ -1,7 +1,7 @@
 package cz.cuni.matfyz.collector.server.executions;
 
+import cz.cuni.matfyz.collector.server.exceptions.ErrorMessages;
 import cz.cuni.matfyz.collector.server.exceptions.QueueExecutionsException;
-import jakarta.annotation.PostConstruct;
 import org.springframework.stereotype.Component;
 
 import java.sql.*;
@@ -14,52 +14,12 @@ import java.util.UUID;
  */
 @Component
 public class ExecutionsQueue implements AutoCloseable {
-    private Connection _connection;
+    private final Connection _connection;
 
-    /**
-     * Init method that initialize database in such way, that it will create executions table inside the database
-     * @throws QueueExecutionsException when some SQLException during table initialization occur
-     */
-    private void _initDatabase() throws QueueExecutionsException {
-        try (Statement statement =  _connection.createStatement()) {
-            String createTableQuery = """
-                    CREATE TABLE IF NOT EXISTS executions (
-                        uuid VARCHAR(36),
-                        added TIMESTAMP NOT NULL,
-                        isrunning BOOLEAN NOT NULL,
-                        instance VARCHAR(20) NOT NULL,
-                        query VARCHAR(150) NOT NULL,
-                        PRIMARY KEY (uuid)
-                    )
-                    """;
-
-            statement.executeUpdate(createTableQuery);
-        } catch (SQLException e) {
-            throw new QueueExecutionsException(e);
-        }
-    }
-
-    /**
-     * Init method that initialize database
-     * @throws QueueExecutionsException when some org.h2.Driver is not found
-     */
-    @PostConstruct
-    public void initializeDatabase() throws QueueExecutionsException {
-        try {
-            String connectionString = "jdbc:h2:mem:test";
-            String userName = "";
-            String password = "";
-
-            Class.forName ("org.h2.Driver");
-            _connection = DriverManager.getConnection(connectionString, userName, password);
-            _initDatabase();
-        } catch (ClassNotFoundException e) {
-            String errMsg = "H2 driver 'org.h2.Driver' is missing.";
-            throw new QueueExecutionsException(errMsg, e);
-        } catch (SQLException e) {
-            throw new QueueExecutionsException("Error initialising of H2 connection", e);
-        }
-
+    public ExecutionsQueue() throws QueueExecutionsException {
+        _connection = new ConnectionBuilder()
+                .setConnectionString("jdbc:h2:mem:test")
+                .build();
     }
 
     /**
@@ -129,7 +89,7 @@ public class ExecutionsQueue implements AutoCloseable {
      * @return list of executions
      * @throws QueueExecutionsException when some SQLException occur during process
      */
-    public List<Execution> getExecutions() throws QueueExecutionsException {
+    public List<Execution> getWaitingExecutions() throws QueueExecutionsException {
         try (Statement statement = _connection.createStatement()) {
             ResultSet result = statement.executeQuery("SELECT * FROM executions WHERE isrunning = false ORDER BY added ASC;");
             List<Execution> executions = new ArrayList<>();
@@ -167,5 +127,75 @@ public class ExecutionsQueue implements AutoCloseable {
     @Override
     public void close() throws Exception {
         _connection.close();
+    }
+
+    private static class ConnectionBuilder {
+        private Connection _connection;
+        private String _connectionString;
+        private String _userName;
+        private String _password;
+
+        public ConnectionBuilder() {
+            _userName = "";
+            _password = "";
+            _connectionString = "";
+            _connection = null;
+        }
+
+        public ConnectionBuilder setConnectionString(String connectionString) {
+            _connectionString = connectionString;
+            return this;
+        }
+
+        public ConnectionBuilder setUserName(String userName) {
+            _userName = userName;
+            return this;
+        }
+
+        public ConnectionBuilder setPassword(String password) {
+            _password = password;
+            return this;
+        }
+
+        private void _initializeConnection() throws SQLException, ClassNotFoundException {
+            Class.forName ("org.h2.Driver");
+            _connection = DriverManager.getConnection(_connectionString, _userName, _password);
+        }
+
+        private void _createExecutionTable() throws SQLException {
+            String createTableQuery = """
+                CREATE TABLE IF NOT EXISTS executions (
+                    uuid VARCHAR(36),
+                    added TIMESTAMP NOT NULL,
+                    isrunning BOOLEAN NOT NULL,
+                    instance VARCHAR(20) NOT NULL,
+                    query VARCHAR(150) NOT NULL,
+                    PRIMARY KEY (uuid)
+                )
+                """;
+
+            try (Statement statement =  _connection.createStatement()) {
+                statement.executeUpdate(createTableQuery);
+            }
+        }
+
+        public Connection build() throws QueueExecutionsException {
+            try {
+                _initializeConnection();
+                _createExecutionTable();
+                return _connection;
+            } catch (ClassNotFoundException e) {
+                throw new QueueExecutionsException(
+                        ErrorMessages.driverForQueueNotFound(),
+                        e
+                );
+            } catch (SQLException e) {
+                throw new QueueExecutionsException(
+                        ErrorMessages.queueFailedToInitialize(),
+                        e
+                );
+            }
+        }
+
     }
 }

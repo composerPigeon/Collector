@@ -19,7 +19,15 @@ public class WrappersProperties {
         _wrappers = wrappers;
     }
 
-    public List<Instance> getWrappers() {
+    public List<Instance> getInstances() {
         return _wrappers;
+    }
+
+    public boolean contains(String instanceName) {
+        return _wrappers.stream().anyMatch(instance -> instance.getInstanceName().equals(instanceName));
+    }
+
+    public Instance getByName(String instanceName) {
+        return _wrappers.stream().filter(instance -> instance.getInstanceName().equals(instanceName)).findFirst().orElse(null);
     }
 }

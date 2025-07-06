@@ -23,13 +23,18 @@ import java.util.Map;
 @RestController
 public class CollectorController {
 
-    @Autowired
-    private ExecutionsManager _manager;
+    private final ExecutionsManager _manager;
+
+    private final WrappersContainer _wrappers;
+
+    private final Logger _logger;
 
     @Autowired
-    private WrappersContainer _wrappers;
-
-    private final Logger _logger = LoggerFactory.getLogger(CollectorController.class);
+    public CollectorController(ExecutionsManager manager, WrappersContainer wrappers) {
+        _manager = manager;
+        _wrappers = wrappers;
+        _logger = LoggerFactory.getLogger(CollectorController.class);
+    }
 
     /**
      * Endpoint for creating new execution

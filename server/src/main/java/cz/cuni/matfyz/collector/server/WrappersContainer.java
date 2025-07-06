@@ -22,35 +22,16 @@ import java.util.*;
 @Component
 public class WrappersContainer {
 
-    @Autowired
-    private WrappersProperties _properties;
+    private final Map<String, Wrapper> _wrappers;
 
-    private Map<String, Wrapper> _wrappers;
+    private final WrappersProperties _properties;
 
-    private Map<String, Instance> _instances;
+    private final Initializers _initializers;
 
-    @Autowired
-    private WrapperInitializers _initializers;
-
-    @PostConstruct
-    public void initialize() {
-        _registerInitializers();
-
-        _instances = new HashMap<>();
+    public WrappersContainer(Initializers initializers, WrappersProperties properties) {
+        _initializers = initializers;
+        _properties = properties;
         _wrappers = new HashMap<>();
-
-        for (Instance instance : _properties.getWrappers()) {
-            _instances.put(instance.getInstanceName(), instance);
-        }
-
-        _properties = null;
-    }
-
-
-    private void _registerInitializers() {
-        _initializers.register(SystemType.MongoDB, MongoWrapper::new);
-        _initializers.register(SystemType.Neo4j, Neo4jWrapper::new);
-        _initializers.register(SystemType.PostgreSQL, PostgresWrapper::new);
     }
 
     /**
@@ -59,7 +40,7 @@ public class WrappersContainer {
      */
     public List<Instance.ID> listInstances() {
         List<Instance.ID> list = new ArrayList<>();
-        for (var instance : _instances.values()) {
+        for (var instance : _properties.getInstances()) {
             list.add(instance.getID());
         }
         return list;
@@ -73,13 +54,13 @@ public class WrappersContainer {
      * @return true if instance of instanceName exist
      */
     public boolean contains(String instanceName) {
-        return _instances.containsKey(instanceName);
+        return _properties.contains(instanceName);
     }
 
     private Wrapper _get(String instanceName) {
-        if (!_wrappers.containsKey(instanceName) && _instances.containsKey(instanceName)) {
-            Instance instance = _instances.get(instanceName);
-            _wrappers.put(instance.getInstanceName(), _initializers.initialize(instance.getSystemType(), instance));
+        if (!_wrappers.containsKey(instanceName) && _properties.contains(instanceName)) {
+            Instance instance = _properties.getByName(instanceName);
+            _wrappers.put(instance.getInstanceName(), _initializers.initializeWrapper(instance.getSystemType(), instance));
         }
         return _wrappers.get(instanceName);
     }

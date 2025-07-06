@@ -30,7 +30,7 @@ public class ExecutionsScheduler {
     @Scheduled(fixedRate = 5000)
     public void execute() {
         try {
-            for (Execution execution : _manager.getExecutionsFromQueue()) {
+            for (Execution execution : _manager.getWaitingExecutionsFromQueue()) {
                 try {
                     if (_wrappers.contains(execution.instanceName())) {
                         _manager.setExecutionRunning(execution.uuid());

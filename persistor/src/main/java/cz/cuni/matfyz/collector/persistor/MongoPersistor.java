@@ -14,12 +14,18 @@ import java.util.Map;
  * Implementation of Abstract persistor using Mongo native driver
  */
 public class MongoPersistor extends AbstractPersistor {
-
+    private final MongoClient _client;
     private final MongoDatabase _database;
 
-    public MongoPersistor(String hostName, int port, String databaseName, String userName, String password) {
-        MongoClient _client = MongoClients.create(_buildConnectionLink(hostName, port, userName, password));
-        _database = _client.getDatabase(databaseName);
+    public MongoPersistor(AbstractPersistor.ConnectionData connectionData) {
+        super(connectionData);
+        _client = MongoClients.create(_buildConnectionLink(
+                connectionData.host(),
+                connectionData.port(),
+                connectionData.user(),
+                connectionData.password()
+        ));
+        _database = _client.getDatabase(connectionData.databaseName());
     }
 
     /**
@@ -111,5 +117,10 @@ public class MongoPersistor extends AbstractPersistor {
         } catch (MongoException e) {
             throw new PersistorException(e);
         }
+    }
+
+    @Override
+    public void close() {
+        _client.close();
     }
 }

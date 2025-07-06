@@ -1,5 +1,6 @@
 package cz.cuni.matfyz.collector.server.configurationproperties;
 
+import cz.cuni.matfyz.collector.persistor.AbstractPersistor;
 import org.springframework.boot.context.properties.ConfigurationProperties;
 import org.springframework.boot.context.properties.ConfigurationPropertiesScan;
 import org.springframework.boot.context.properties.bind.ConstructorBinding;
@@ -26,16 +27,7 @@ public class PersistorProperties {
         _credentials = credentials;
     }
 
-    public String getHostName() {
-        return _hostName;
-    }
-    public int getPort() {
-        return _port;
-    }
-    public String getDatabaseName() {
-        return _databaseName;
-    }
-    public Credentials getCredentials() {
-        return _credentials;
+    public AbstractPersistor.ConnectionData getConnectionData() {
+        return new AbstractPersistor.ConnectionData(_hostName, _port, _databaseName, _credentials.userName(), _credentials.password());
     }
 }

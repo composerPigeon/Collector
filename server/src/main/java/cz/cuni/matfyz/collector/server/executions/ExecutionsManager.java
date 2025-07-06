@@ -1,9 +1,13 @@
 package cz.cuni.matfyz.collector.server.executions;
 
 import cz.cuni.matfyz.collector.model.DataModel;
+import cz.cuni.matfyz.collector.persistor.AbstractPersistor;
 import cz.cuni.matfyz.collector.persistor.ExecutionResult;
+import cz.cuni.matfyz.collector.persistor.MongoPersistor;
 import cz.cuni.matfyz.collector.persistor.PersistorException;
-import cz.cuni.matfyz.collector.server.PersistorContainer;
+import cz.cuni.matfyz.collector.server.Initializers;
+import cz.cuni.matfyz.collector.server.configurationproperties.PersistorProperties;
+import cz.cuni.matfyz.collector.server.configurationproperties.SystemType;
 import cz.cuni.matfyz.collector.server.exceptions.ErrorMessages;
 import cz.cuni.matfyz.collector.server.exceptions.ExecutionManagerException;
 import cz.cuni.matfyz.collector.server.exceptions.QueueExecutionsException;
@@ -17,14 +21,17 @@ import java.util.List;
  */
 @Component
 public class ExecutionsManager implements AutoCloseable {
-    @Autowired
-    private PersistorContainer _persistor;
+    private final AbstractPersistor _persistor;
+    private final ExecutionsQueue _queue;
 
     @Autowired
-    private ExecutionsQueue _queue;
+    public ExecutionsManager(Initializers initializers, PersistorProperties properties, ExecutionsQueue queue) {
+        _persistor = initializers.initializePersistor(SystemType.MongoDB, properties);
+        _queue = queue;
+    }
 
     /**
-     * Mehod that creates execution and insert it into ExecutionsQueue
+     * Method that creates execution and insert it into ExecutionsQueue
      * @param instanceName instance identifier on query should be executed when scheduler will schedule this query execution
      * @param query query to bo execute on specified instance
      * @return generated uuid for newly created execution
@@ -49,7 +56,8 @@ public class ExecutionsManager implements AutoCloseable {
         try {
             ExecutionState result = _queue.getExecutionState(uuid);
             if (result == ExecutionState.NotFound) {
-                result = _persistor.getExecutionState(uuid);
+                if (_persistor.containsExecution(uuid))
+                    result = ExecutionState.Processed;
             }
             return result;
         } catch (QueueExecutionsException | PersistorException e) {
@@ -94,9 +102,9 @@ public class ExecutionsManager implements AutoCloseable {
      * @return list of waiting executions to be executed by scheduler
      * @throws ExecutionManagerException when some QueueExecutionsException occur during the process
      */
-    public List<Execution> getExecutionsFromQueue() throws ExecutionManagerException {
+    public List<Execution> getWaitingExecutionsFromQueue() throws ExecutionManagerException {
         try {
-            return _queue.getExecutions();
+            return _queue.getWaitingExecutions();
         } catch (QueueExecutionsException e) {
             String errMsg = ErrorMessages.getExecutionsFromQueueErrorMsg();
             throw new ExecutionManagerException(errMsg, e);

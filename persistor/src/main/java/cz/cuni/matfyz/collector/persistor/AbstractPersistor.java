@@ -3,7 +3,13 @@ package cz.cuni.matfyz.collector.persistor;
 import cz.cuni.matfyz.collector.model.DataModel;
 
 /** Class representing abstract connection to some implementation of Persistor */
-public abstract class AbstractPersistor {
+public abstract class AbstractPersistor implements AutoCloseable {
+    protected final ConnectionData _connectionData;
+
+    public AbstractPersistor(ConnectionData connectionData) {
+        _connectionData = connectionData;
+    }
+
     /**
      * Method for saving execution result into persistor
      * @param uuid id of execution
@@ -35,4 +41,6 @@ public abstract class AbstractPersistor {
      * @throws PersistorException when some error occurred during this procedure
      */
     public abstract boolean containsExecution(String uuid) throws PersistorException;
+
+    public record ConnectionData(String host, int port, String databaseName, String user, String password) {}
 }

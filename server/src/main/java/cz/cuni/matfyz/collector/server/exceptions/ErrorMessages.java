@@ -1,5 +1,7 @@
 package cz.cuni.matfyz.collector.server.exceptions;
 
+import cz.cuni.matfyz.collector.server.configurationproperties.SystemType;
+
 /**
  * Class with all error messages that are used on server to report errors to user
  */
@@ -53,5 +55,17 @@ public abstract class ErrorMessages {
 
     public static String nonExistentExecution(String uuid) {
         return "Execution '" + uuid + "' does not exist.";
+    }
+
+    public static String driverForQueueNotFound() {
+        return "Execution queue cannot be initialized because driver 'org.h2.Driver' was not found.";
+    }
+
+    public static String queueFailedToInitialize() {
+        return "Execution queue cannot be initialized because it failed to connect to database.";
+    }
+
+    public static String missingWrapperInitializer(SystemType type) {
+        return "Wrapper initializer for system type '" + type + "' is missing.";
     }
 }
