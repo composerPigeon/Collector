@@ -118,7 +118,7 @@ public class ExecutionsManager implements AutoCloseable {
      * @param uuid execution identifier
      * @throws ExecutionManagerException when some QueueExecutionsException occur during the process
      */
-    public void removeExecutionFromQueue(String uuid) throws ExecutionManagerException {
+    private void _removeExecutionFromQueue(String uuid) throws ExecutionManagerException {
         try {
             _queue.removeExecution(uuid);
         } catch (SQLException e) {
@@ -137,7 +137,7 @@ public class ExecutionsManager implements AutoCloseable {
     public void saveResult(String uuid, DataModel model) throws ExecutionManagerException {
         try {
             _persistor.saveExecutionResult(uuid, model);
-            removeExecutionFromQueue(uuid);
+            _removeExecutionFromQueue(uuid);
         } catch (PersistorException e) {
             String errMsg = _errors.saveExecutionResultErrorMsg(uuid, e);
             throw new ExecutionManagerException(errMsg, e);
@@ -154,7 +154,7 @@ public class ExecutionsManager implements AutoCloseable {
     public void saveError(String uuid, String errorMsg) throws ExecutionManagerException {
         try {
             _persistor.saveExecutionError(uuid, errorMsg);
-            removeExecutionFromQueue(uuid);
+            _removeExecutionFromQueue(uuid);
         } catch (PersistorException e) {
             String errMsg = _errors.saveExecutionErrorErrorMsg(uuid, e);
             throw new ExecutionManagerException(errMsg, e);

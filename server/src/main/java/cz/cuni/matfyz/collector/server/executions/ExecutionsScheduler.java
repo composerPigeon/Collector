@@ -1,10 +1,9 @@
-package cz.cuni.matfyz.collector.server;
+package cz.cuni.matfyz.collector.server.executions;
 
 import cz.cuni.matfyz.collector.model.DataModel;
+import cz.cuni.matfyz.collector.server.WrappersContainer;
 import cz.cuni.matfyz.collector.server.exceptions.ErrorMessages;
 import cz.cuni.matfyz.collector.server.exceptions.ExecutionManagerException;
-import cz.cuni.matfyz.collector.server.executions.Execution;
-import cz.cuni.matfyz.collector.server.executions.ExecutionsManager;
 import cz.cuni.matfyz.collector.wrappers.exceptions.WrapperException;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -39,7 +38,7 @@ public class ExecutionsScheduler {
      * Scheduled method for executing all waiting executions from queue
      */
     @Scheduled(fixedRate = 5000)
-    public void execute() {
+    public void runExecutions() {
         try {
             for (Execution execution : _manager.getWaitingExecutionsFromQueue()) {
                 try {
