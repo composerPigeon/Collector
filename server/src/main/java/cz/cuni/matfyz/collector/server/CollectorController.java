@@ -1,7 +1,8 @@
 package cz.cuni.matfyz.collector.server;
 
 import cz.cuni.matfyz.collector.persistor.ExecutionResult;
-import cz.cuni.matfyz.collector.server.configurationproperties.Instance;
+import cz.cuni.matfyz.collector.server.configurationproperties.AbstractInstance;
+import cz.cuni.matfyz.collector.server.configurationproperties.WrapperInstance;
 import cz.cuni.matfyz.collector.server.exceptions.ErrorMessages;
 import cz.cuni.matfyz.collector.server.exceptions.ExecutionManagerException;
 import cz.cuni.matfyz.collector.server.executions.ExecutionState;
@@ -150,9 +151,9 @@ public class CollectorController {
      * @return json list of objects, which contain field 'type' and 'instanceName'
      */
     @GetMapping("/instances/list")
-    public Map<String, List<Instance.ID>> getWrappers() {
+    public Map<String, List<AbstractInstance.Identifier>> getWrappers() {
         try {
-            Map<String, List<Instance.ID>> result = new HashMap<>();
+            Map<String, List<AbstractInstance.Identifier>> result = new HashMap<>();
             result.put("instances", _wrappers.listInstances());
             return result;
         } catch (Exception e) {

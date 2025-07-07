@@ -5,8 +5,7 @@ import cz.cuni.matfyz.collector.persistor.AbstractPersistor;
 import cz.cuni.matfyz.collector.persistor.ExecutionResult;
 import cz.cuni.matfyz.collector.persistor.PersistorException;
 import cz.cuni.matfyz.collector.server.Initializers;
-import cz.cuni.matfyz.collector.server.configurationproperties.PersistorProperties;
-import cz.cuni.matfyz.collector.server.configurationproperties.SystemType;
+import cz.cuni.matfyz.collector.server.configurationproperties.PersistorInstance;
 import cz.cuni.matfyz.collector.server.exceptions.ErrorMessages;
 import cz.cuni.matfyz.collector.server.exceptions.ExecutionManagerException;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -25,8 +24,8 @@ public class ExecutionsManager implements AutoCloseable {
     private final ErrorMessages _errors;
 
     @Autowired
-    public ExecutionsManager(Initializers initializers, PersistorProperties properties, ExecutionsQueue queue, ErrorMessages errorMessages) throws PersistorException {
-        _persistor = initializers.initializePersistor(SystemType.MongoDB, properties);
+    public ExecutionsManager(Initializers initializers, PersistorInstance properties, ExecutionsQueue queue, ErrorMessages errorMessages) throws PersistorException {
+        _persistor = initializers.initializePersistor(properties.getSystemType(), properties);
         _queue = queue;
         _errors = errorMessages;
     }

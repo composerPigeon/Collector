@@ -4,22 +4,31 @@ import org.springframework.boot.context.properties.ConfigurationProperties;
 import org.springframework.boot.context.properties.ConfigurationPropertiesScan;
 import org.springframework.boot.context.properties.bind.ConstructorBinding;
 
-import java.util.Set;
+import java.util.HashMap;
+import java.util.List;
 
 /**
  * Class that initialize all instances into list
  */
 @ConfigurationProperties
 @ConfigurationPropertiesScan
-public class WrappersProperties {
-    private final Set<Instance> _wrappers;
+public class WrapperInstanceList {
+    private final List<WrapperInstance> _wrappers;
 
     @ConstructorBinding
-    public WrappersProperties(Set<Instance> wrappers) {
+    public WrapperInstanceList(List<WrapperInstance> wrappers) {
         _wrappers = wrappers;
+
+        var map = new HashMap<String, WrapperInstance>();
+        for (WrapperInstance instance : _wrappers) {
+            if (map.containsKey(instance.getInstanceName())) {
+                throw new IllegalArgumentException("Duplicate instance name for wrappers: " + instance.getInstanceName());
+            }
+            map.put(instance.getInstanceName(), instance);
+        }
     }
 
-    public Set<Instance> getInstances() {
+    public List<WrapperInstance> getInstances() {
         return _wrappers;
     }
 
@@ -27,7 +36,7 @@ public class WrappersProperties {
         return _wrappers.stream().anyMatch(instance -> instance.equals(instanceName));
     }
 
-    public Instance getByName(String instanceName) {
+    public WrapperInstance getByName(String instanceName) {
         return _wrappers.stream().filter(instance -> instance.equals(instanceName)).findFirst().orElse(null);
     }
 }

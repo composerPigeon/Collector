@@ -3,8 +3,8 @@ package cz.cuni.matfyz.collector.server;
 import cz.cuni.matfyz.collector.persistor.AbstractPersistor;
 import cz.cuni.matfyz.collector.persistor.MongoPersistor;
 import cz.cuni.matfyz.collector.persistor.PersistorException;
-import cz.cuni.matfyz.collector.server.configurationproperties.Instance;
-import cz.cuni.matfyz.collector.server.configurationproperties.PersistorProperties;
+import cz.cuni.matfyz.collector.server.configurationproperties.PersistorInstance;
+import cz.cuni.matfyz.collector.server.configurationproperties.WrapperInstance;
 import cz.cuni.matfyz.collector.server.configurationproperties.SystemType;
 import cz.cuni.matfyz.collector.server.exceptions.ErrorMessages;
 import cz.cuni.matfyz.collector.wrappers.abstractwrapper.AbstractWrapper;
@@ -42,14 +42,14 @@ public class Initializers {
         _persistorInitializers.put(type, initializer);
     }
 
-    public Wrapper initializeWrapper(SystemType type, Instance instance) throws WrapperException {
+    public Wrapper initializeWrapper(SystemType type, WrapperInstance instance) throws WrapperException {
         if (!_wrapperInitializers.containsKey(type)) {
             throw new WrapperException(_errors.missingWrapperInitializer(type));
         }
         return _wrapperInitializers.get(type).apply(instance.getConnectionData());
     }
 
-    public AbstractPersistor initializePersistor(SystemType type, PersistorProperties properties) throws PersistorException {
+    public AbstractPersistor initializePersistor(SystemType type, PersistorInstance properties) throws PersistorException {
         if (!_persistorInitializers.containsKey(type)) {
             throw new PersistorException(_errors.missingPersistorInitializer(type));
         }

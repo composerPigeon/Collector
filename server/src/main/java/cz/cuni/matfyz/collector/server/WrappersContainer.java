@@ -1,8 +1,9 @@
 package cz.cuni.matfyz.collector.server;
 
 import cz.cuni.matfyz.collector.model.DataModel;
-import cz.cuni.matfyz.collector.server.configurationproperties.Instance;
-import cz.cuni.matfyz.collector.server.configurationproperties.WrappersProperties;
+import cz.cuni.matfyz.collector.server.configurationproperties.AbstractInstance;
+import cz.cuni.matfyz.collector.server.configurationproperties.WrapperInstance;
+import cz.cuni.matfyz.collector.server.configurationproperties.WrapperInstanceList;
 import cz.cuni.matfyz.collector.wrappers.abstractwrapper.Wrapper;
 import cz.cuni.matfyz.collector.wrappers.exceptions.WrapperException;
 
@@ -19,12 +20,12 @@ public class WrappersContainer implements AutoCloseable {
 
     private final Map<String, Wrapper> _wrappers;
 
-    private final WrappersProperties _properties;
+    private final WrapperInstanceList _properties;
 
     private final Initializers _initializers;
 
     @Autowired
-    public WrappersContainer(Initializers initializers, WrappersProperties properties) {
+    public WrappersContainer(Initializers initializers, WrapperInstanceList properties) {
         _initializers = initializers;
         _properties = properties;
         _wrappers = new HashMap<>();
@@ -34,10 +35,10 @@ public class WrappersContainer implements AutoCloseable {
      * Method for listing all wrappers
      * @return lit of maps, where each map contain selected infos about wrapper
      */
-    public List<Instance.ID> listInstances() {
-        List<Instance.ID> list = new ArrayList<>();
+    public List<AbstractInstance.Identifier> listInstances() {
+        List<AbstractInstance.Identifier> list = new ArrayList<>();
         for (var instance : _properties.getInstances()) {
-            list.add(instance.getID());
+            list.add(instance.getIdentifier());
         }
         return list;
     }
@@ -55,7 +56,7 @@ public class WrappersContainer implements AutoCloseable {
 
     private Wrapper _get(String instanceName) throws WrapperException {
         if (!_wrappers.containsKey(instanceName) && _properties.contains(instanceName)) {
-            Instance instance = _properties.getByName(instanceName);
+            WrapperInstance instance = _properties.getByName(instanceName);
             _wrappers.put(instance.getInstanceName(), _initializers.initializeWrapper(instance.getSystemType(), instance));
         }
         return _wrappers.get(instanceName);
