@@ -5,14 +5,16 @@ public abstract class AbstractInstance<TConnectionData> {
     protected final String _hostName;
     protected final int _port;
     protected final String _databaseName;
-    protected final Credentials _credentials;
+    protected final String _userName;
+    protected final String _password;
 
-    protected AbstractInstance(Identifier propsID, String hostName, int port, String databaseName, Credentials credentials) {
+    protected AbstractInstance(Identifier propsID, String hostName, int port, String databaseName, String userName, String password) {
         _propsID = propsID;
         _hostName = hostName;
         _port = port;
         _databaseName = databaseName;
-        _credentials = credentials;
+        _userName = userName;
+        _password = password;
     }
 
     public String getInstanceName() {
@@ -29,8 +31,5 @@ public abstract class AbstractInstance<TConnectionData> {
         return getInstanceName().equals(other);
     }
 
-    public record Identifier(SystemType systemType, String instanceName) {
-    }
-
-    protected record Credentials(String userName, String password) {}
+    public record Identifier(SystemType systemType, String instanceName) {}
 }

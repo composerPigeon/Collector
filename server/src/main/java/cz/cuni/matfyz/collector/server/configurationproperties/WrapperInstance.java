@@ -23,7 +23,8 @@ public class WrapperInstance extends AbstractInstance<AbstractWrapper.Connection
                 hostName,
                 port,
                 databaseName,
-                new AbstractInstance.Credentials(userName, password)
+                userName,
+                password
         );
     }
 
@@ -38,8 +39,8 @@ public class WrapperInstance extends AbstractInstance<AbstractWrapper.Connection
                 _port,
                 _propsID.systemType().name(),
                 _databaseName,
-                _credentials.userName(),
-                _credentials.password()
+                _userName,
+                _password
         );
     }
 }

@@ -26,7 +26,8 @@ public class PersistorInstance extends AbstractInstance<AbstractPersistor.Connec
                 hostName,
                 port,
                 databaseName,
-                new Credentials(userName, password)
+                userName,
+                password
         );
     }
 
@@ -35,8 +36,8 @@ public class PersistorInstance extends AbstractInstance<AbstractPersistor.Connec
                 _hostName,
                 _port,
                 _databaseName,
-                _credentials.userName(),
-                _credentials.password()
+                _userName,
+                _password
         );
     }
 }
