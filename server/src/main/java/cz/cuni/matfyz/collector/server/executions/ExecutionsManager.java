@@ -133,7 +133,7 @@ public class ExecutionsManager implements AutoCloseable {
      * @param model instance of DataModel to be saved as result
      * @throws ExecutionManagerException when some PersistorException occur during the process
      */
-    public void saveResult(String uuid, DataModel model) throws ExecutionManagerException {
+    public void saveExecutionResult(String uuid, DataModel model) throws ExecutionManagerException {
         try {
             _persistor.saveExecutionResult(uuid, model);
             _removeExecutionFromQueue(uuid);
@@ -150,7 +150,7 @@ public class ExecutionsManager implements AutoCloseable {
      * @param errorMsg error message produced by error which interrupted process of query evaluation
      * @throws ExecutionManagerException when some PersistorException occur during the process
      */
-    public void saveError(String uuid, String errorMsg) throws ExecutionManagerException {
+    public void saveExecutionError(String uuid, String errorMsg) throws ExecutionManagerException {
         try {
             _persistor.saveExecutionError(uuid, errorMsg);
             _removeExecutionFromQueue(uuid);

@@ -10,12 +10,16 @@ public class PostgresExceptionsFactory extends WrapperExceptionsFactory {
     }
 
     public DataCollectException tableForColumnNotFound(String columnName) {
-        var message = new Message("no table for column '" + columnName + "' was found").toString();
+        var message = new MessageBuilder()
+                .withContent("No table for column '%s' was found", columnName)
+                .build();
         return new DataCollectException(message);
     }
 
     public DataCollectException byteSizeForColumnTypeNotFoundInDataModel(String columnName, String columnType) {
-        var message = new Message(String.format("No byte size for column '%s' of type '%s' was found in data model", columnName, columnType)).toString();
+        var message = new MessageBuilder()
+                .withContent("No byte size for column '%s' of type '%s' was found in data model", columnName, columnType)
+                .build();
         return new DataCollectException(message);
     }
 }

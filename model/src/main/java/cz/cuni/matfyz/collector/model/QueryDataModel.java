@@ -138,7 +138,7 @@ class QueryDataModel implements DataModel {
             _query.getDatabaseData()
                     .addKindIfAbsent(kindName)
                     .getKind(kindName)
-                    .addAttributeIfNeeded(attributeName)
+                    .addAttributeIfAbsent(attributeName)
                     .getAttribute(attributeName)
                     .setMandatory(mandatory);
         } catch (DataModelException e) {
@@ -151,7 +151,7 @@ class QueryDataModel implements DataModel {
             _query.getDatabaseData()
                     .addKindIfAbsent(kindName)
                     .getKind(kindName)
-                    .addAttributeIfNeeded(attributeName)
+                    .addAttributeIfAbsent(attributeName)
                     .getAttribute(attributeName)
                     .setCountOfDistinctValues(count);
         } catch (DataModelException e) {
@@ -173,7 +173,7 @@ class QueryDataModel implements DataModel {
             _query.getDatabaseData()
                     .addKindIfAbsent(kindName)
                     .getKind(kindName)
-                    .addAttributeIfNeeded(attributeName)
+                    .addAttributeIfAbsent(attributeName)
                     .getAttribute(attributeName)
                     .addAttributeTypeIfAbsent(typeName)
                     .getAttributeType(typeName)
@@ -187,7 +187,7 @@ class QueryDataModel implements DataModel {
         try {
             _query.getResultData()
                     .getResultKind()
-                    .addAttributeIfNeeded(attributeName)
+                    .addAttributeIfAbsent(attributeName)
                     .getAttribute(attributeName)
                     .addAttributeTypeIfAbsent(typeName)
                     .getAttributeType(typeName)
@@ -202,7 +202,7 @@ class QueryDataModel implements DataModel {
             _query.getDatabaseData()
                     .addKindIfAbsent(kindName)
                     .getKind(kindName)
-                    .addAttributeIfNeeded(attributeName)
+                    .addAttributeIfAbsent(attributeName)
                     .getAttribute(attributeName)
                     .addAttributeTypeIfAbsent(typeName)
                     .getAttributeType(typeName)
@@ -216,7 +216,7 @@ class QueryDataModel implements DataModel {
         try {
             _query.getResultData()
                     .getResultKind()
-                    .addAttributeIfNeeded(attributeName)
+                    .addAttributeIfAbsent(attributeName)
                     .getAttribute(attributeName)
                     .addAttributeTypeIfAbsent(typeName)
                     .getAttributeType(typeName)
@@ -231,7 +231,7 @@ class QueryDataModel implements DataModel {
             _query.getDatabaseData()
                     .addKindIfAbsent(kindName)
                     .getKind(kindName)
-                    .addAttributeIfNeeded(attributeName)
+                    .addAttributeIfAbsent(attributeName)
                     .getAttribute(attributeName)
                     .addAttributeTypeIfAbsent(typeName);
         } catch (DataModelException e) {

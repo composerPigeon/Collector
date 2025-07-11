@@ -14,62 +14,64 @@ MongoExceptionsFactory extends WrapperExceptionsFactory {
 
     //region ParseException initialization
     public ParseException documentKeyNotFound(String key) {
-        var message = new Message("key '" + key + "' was not present in document").toString();
+        var message = new MessageBuilder()
+                .withContent("Key '%s' was not present in document", key)
+                .build();
         return new ParseException(message);
     }
 
     public ParseException invalidNumberOfArgumentsInMethod(String methodName, CommandBuilder.ReturnType type) {
-        String message;
-        if (type == CommandBuilder.ReturnType.Collection)
-            message = new Message("collection method '" + methodName + "' has invalid number of arguments. At most two are expected to be present").toString();
-        else if (type == CommandBuilder.ReturnType.Cursor)
-            message = new Message("cursor method '" + methodName + "' has invalid number of arguments. At most two are expected to be present").toString();
-        else
-            message = new Message("method '" + methodName + "' has invalid number of arguments. At most two are expected to be present.").toString();
+        var message = new MessageBuilder()
+                .withContent(
+                        "Method '%s' called on type '%s' has invalid number of arguments. At most two are expected to be present",
+                        methodName,
+                        type.name().toLowerCase()
+                ).build();
         return new ParseException(message);
     }
 
     public ParseException notSupportedMethod(String methodName, CommandBuilder.ReturnType type) {
-        String message;
-        if (type == CommandBuilder.ReturnType.Collection)
-            message = new Message("collection method '" + methodName + "' is not supported by system").toString();
-        else if (type == CommandBuilder.ReturnType.Cursor)
-            message = new Message("cursor method '" + methodName + "' is not supported by system").toString();
-        else
-            message = new Message("method '" + methodName + "' is not supported by system").toString();
+        var message = new MessageBuilder()
+                .withContent(
+                        "Method '%s' called on type '%s' is not supported by system",
+                        methodName,
+                        type.name().toLowerCase()
+                ).build();
         return new ParseException(message);
     }
 
     public ParseException invalidMethod(String methodName, CommandBuilder.ReturnType type) {
-        String message;
-        if (type == CommandBuilder.ReturnType.Collection)
-            message = new Message("collection method '" + methodName + "' does not exist").toString();
-        else if (type == CommandBuilder.ReturnType.Cursor)
-            message = new Message("cursor method '" + methodName + "' does not exist").toString();
-        else
-            message = new Message("method '" + methodName + "' does not exist").toString();
+        var message = new MessageBuilder()
+                .withContent(
+                        "Method '%s' called on type '%s' is does not exist",
+                        methodName, type.name().toLowerCase()
+                ).build();
         return new ParseException(message);
     }
 
     public ParseException invalidMethodOption(String optionName, String methodName, CommandBuilder.ReturnType type) {
-        String message;
-        if (type == CommandBuilder.ReturnType.Collection)
-            message = new Message("option '" + optionName + "' in collection method '" + methodName + "' is not supported or does not exist").toString();
-        else if (type == CommandBuilder.ReturnType.Cursor)
-            message = new Message("option '" + optionName + "' in cursor method '" + methodName + "' is not supported or does not exist").toString();
-        else
-            message = new Message("option '" + optionName + "' in method '" + methodName + "' is not supported or does not exist").toString();
+        var message = new MessageBuilder()
+                .withContent(
+                        "Option '%s' in method '%s' called on type '%s' is not supported or does not exist",
+                        optionName,
+                        methodName,
+                        type.name().toLowerCase()
+                ).build();
         return new ParseException(message);
     }
 
     public ParseException invalidCountUsage() {
-        String message = new Message("count method can be used on find method only").toString();
+        var message = new MessageBuilder()
+                .withContent("Method 'count' can be used on result of 'find' method only")
+                .build();
         return new ParseException(message);
     }
     //endregion
 
     public DataCollectException collectionNotParsed() {
-        var message = new Message("no collection was parsed from explain plan").toString();
+        var message = new MessageBuilder()
+                .withContent("No collection was parsed from explain plan")
+                .build();
         return new DataCollectException(message);
     }
 }

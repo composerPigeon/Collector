@@ -72,7 +72,7 @@ public class KindData {
     }
 
     @JsonIgnore
-    public KindData addAttributeIfNeeded(String attributeName) {
+    public KindData addAttributeIfAbsent(String attributeName) {
         if (!_attributes.containsKey(attributeName)) {
             _attributes.put(attributeName, new AttributeData(attributeName, _kindName));
         }

@@ -7,6 +7,7 @@ import cz.cuni.matfyz.collector.server.exceptions.ExecutionManagerException;
 import cz.cuni.matfyz.collector.wrappers.exceptions.WrapperException;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.scheduling.annotation.EnableScheduling;
 import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Component;
 
@@ -16,6 +17,7 @@ import org.slf4j.Logger;
  * Class representing Scheduler that will execute all waiting executions from queue
  */
 @Component
+@EnableScheduling
 public class ExecutionsScheduler {
 
     private final WrappersContainer _wrappers;
@@ -45,24 +47,24 @@ public class ExecutionsScheduler {
                     if (_wrappers.contains(execution.instanceName())) {
                         _manager.setExecutionRunning(execution.uuid());
                         DataModel result = _wrappers.executeQuery(execution.instanceName(), execution.query());
-                        _manager.saveResult(execution.uuid(), result);
+                        _manager.saveExecutionResult(execution.uuid(), result);
                     } else {
                         _logger.atError().log(_errors.nonExistentWrapper(execution.uuid(), execution.instanceName()));
-                        _manager.saveError(execution.uuid(), _errors.nonExistentWrapper(execution.uuid(), execution.instanceName()));
+                        _manager.saveExecutionError(execution.uuid(), _errors.nonExistentWrapper(execution.uuid(), execution.instanceName()));
                     }
                     _logger.atInfo().log("Execution " + execution.uuid() + " was successfully executed");
                 } catch (WrapperException | ExecutionManagerException e) {
-                    _logger.atError().setCause(e).log(e.getMessage());
-                    _manager.saveError(execution.uuid(), e.getMessage());
+                    var message = _errors.executionOfWrapperFailed(execution, e);
+
+                    _logger.atError().setCause(e).log(message);
+                    _manager.saveExecutionError(execution.uuid(), message);
                 } catch (Exception e) {
                     _logger.atError().setCause(e).log(e.getMessage());
-                    _manager.saveError(execution.uuid(), _errors.unexpectedErrorMsg());
+                    _manager.saveExecutionError(execution.uuid(), _errors.unexpectedErrorMsg());
                 }
             }
-        } catch (ExecutionManagerException e) {
-            _logger.atError().setCause(e).log(e.getMessage());
         } catch (Exception e) {
-            _logger.atError().setCause(e).log(_errors.unexpectedErrorMsg());
+            _logger.atError().setCause(e).log(e.getMessage());
         }
     }
 }
