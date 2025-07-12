@@ -1,0 +1,65 @@
+services:
+  collector:
+    build:
+      dockerfile: server/Dockerfile
+    container_name: collector
+    ports:
+      - "8080:8080"
+    depends_on:
+      - mongodb
+      - postgres
+      - neo4j
+
+  mongodb:
+    container_name: mongodb_collector
+    image: mongodb/mongodb-community-server:6.0-ubi8
+    restart: always
+    ports:
+      - "27017:27017"
+    environment:
+      - MONGO_INITDB_ROOT_USERNAME=mongo
+      - MONGO_INITDB_ROOT_PASSWORD=password
+    volumes:
+      - mongodata:/data/db
+
+  postgres:
+    container_name: postgres_collector
+    image: postgres:14.5
+    restart: always
+    ports:
+      - "5432:5432"
+    environment:
+      - POSTGRES_PASSWORD=password
+      - POSTGRES_USER=postgres
+    volumes:
+      - pgdata:/var/lib/postgresql/data
+
+  neo4j:
+    container_name: neo4j_collector
+    image: neo4j:5.26.0
+    restart: always
+    ports:
+      - "7474:7474"
+      - "7687:7687"
+    environment:
+      - NEO4J_AUTH=neo4j/password
+      - NEO4J_PLUGINS=["apoc", "apoc-extended"]
+      - NEO4J_initial_dbms_default__database=sales
+    volumes:
+      - neo4jdata:/data
+      - neo4jplugins:/plugins
+
+volumes:
+  neo4jdata:
+    external: true
+    name: neo4jdata
+  neo4jplugins:
+    external: true
+    name: neo4jplugins
+  pgdata:
+    external: true
+    name: pgdata
+  mongodata:
+    external: true
+    name: mongodata
+
