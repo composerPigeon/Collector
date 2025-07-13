@@ -11,3 +11,6 @@ MongoTestingData/
 build
 
 notes/
+
+# ignore databases data
+data
