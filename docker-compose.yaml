@@ -1,5 +1,5 @@
 services:
-  collector:
+  server:
     build:
       dockerfile: server/Dockerfile
     container_name: server
