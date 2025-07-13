@@ -55,6 +55,16 @@ public class PostgresQueryResultParser extends AbstractQueryResultParser<ResultS
         for (int i = 1; i <= metaData.getColumnCount(); i++) {
             String columnName = metaData.getColumnName(i);
             String typeName = metaData.getColumnTypeName(i);
+            System.out.println("consumed:: column: " + columnName + ", type: " + typeName);
+
+            if (typeName.contains("serial")) {
+                typeName = switch (typeName) {
+                    case "serial" -> "int4";
+                    case "bigserial" -> "int8";
+                    case "smallserial" -> "int2";
+                    default -> typeName;
+                };
+            }
 
             builder.addAttributeType(columnName, typeName);
         }

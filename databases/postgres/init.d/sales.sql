@@ -131,3 +131,5 @@ INSERT INTO Customers (id, fname, lname, age, addressId) VALUES
     (50, 'Isabella',  'Lewis',      30, 50);
 
 COMMIT;
+
+ANALYZE;

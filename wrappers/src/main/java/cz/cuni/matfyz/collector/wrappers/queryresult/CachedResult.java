@@ -1,5 +1,7 @@
 package cz.cuni.matfyz.collector.wrappers.queryresult;
 
+import com.fasterxml.jackson.core.JsonProcessingException;
+import com.fasterxml.jackson.databind.ObjectMapper;
 import org.bson.Document;
 
 import java.math.BigDecimal;
@@ -226,6 +228,16 @@ public class CachedResult {
      */
     public int getRecordCount() {
         return _records.size();
+    }
+
+    @Override
+    public String toString() {
+        var objectMapper = new ObjectMapper();
+        try {
+            return objectMapper.writeValueAsString(_records);
+        } catch (JsonProcessingException e) {
+            throw new RuntimeException(e);
+        }
     }
 
     /**
