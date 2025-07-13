@@ -51,15 +51,7 @@ services:
 
 volumes:
   neo4jdata:
-    external: true
-    name: neo4jdata
   neo4jplugins:
-    external: true
-    name: neo4jplugins
   pgdata:
-    external: true
-    name: pgdata
   mongodata:
-    external: true
-    name: mongodata
 
