@@ -14,3 +14,6 @@ notes/
 
 # ignore databases data
 data
+
+# ignore done file after completing neo4j import
+import/done
