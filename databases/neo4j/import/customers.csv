@@ -1,4 +1,4 @@
-:ID(Customer),fname,lname,age,:LABEL
+:ID(Customer),fname,lname,age:int,:LABEL
 1,Mia,Martinez,63,Customer
 2,Nicholas,Green,45,Customer
 3,Daniel,Johnson,55,Customer

@@ -15,8 +15,8 @@ CREATE TABLE Address (
     zipcode      VARCHAR(20)  NOT NULL
 );
 
--- ── Customers table ─────────────────────────────────────────────
-CREATE TABLE Customers (
+-- ── Customer table ─────────────────────────────────────────────
+CREATE TABLE Customer (
     id         SERIAL PRIMARY KEY,
     fname      VARCHAR(50)  NOT NULL,
     lname      VARCHAR(50)  NOT NULL,
