@@ -3,7 +3,7 @@ CREATE DATABASE sales;
 BEGIN;
 \connect sales;
 
-DROP TABLE IF EXISTS Customers CASCADE;
+DROP TABLE IF EXISTS Customer CASCADE;
 DROP TABLE IF EXISTS Address   CASCADE;
 
 -- ── Address table ───────────────────────────────────────────────
@@ -78,7 +78,7 @@ INSERT INTO Address (id, street, houseNumber, city, zipcode) VALUES
     (50, 'Willow Road',     '428', 'Clinton',      '14445');
 
 -- ── Populate Customers ──────────────────────────────────────────
-INSERT INTO Customers (id, fname, lname, age, addressId) VALUES
+INSERT INTO Customer (id, fname, lname, age, addressId) VALUES
     (1,  'Mia',       'Martinez',   63,  1),
     (2,  'Nicholas',  'Green',      45,  2),
     (3,  'Daniel',    'Johnson',    55,  3),
