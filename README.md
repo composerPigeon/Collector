@@ -1,6 +1,47 @@
 # Collector
 
+## Struktura projektu
+Postupně projedeme všechny složky projektu a prozradíme si více o jejich obsahu pro lepší orientaci.
+
+
+V kořenovém adresáři projektu se nachází především soubor `docker-compose.yaml`,
+kde jsou nadefinované konetjnery pro všechny databáze a server.
+Nachází se zde i toto README se základním popisem a jednoduchým návodem.
+Dále se zde nachází soubory důležité pro gradle,
+aby fungovaly všechny jeho nástroje.
+Zároveň je zde soubor `gradle.settings`, který definuje hlavní závislosti aplikace.
+A nakonec také soubory důležité pro git, například `.gitignore`.
+
+### databases
+Složka obsahuje inicializační skripty pro databáze, které načtou demo data po nastartování konetjenerů.
+Na datech se následně demonstruje základní funkčnost programu.
+Kontejnery mají do této složky namapovaná svá úložiště, takže zde jsou pak ukládána i vlastní data pro databáze běžící z dockeru
+
+### gradle
+Zde se nachazí .jar soubor pro gradle wrapper, pomocí kterého je možné projekt zkompilovat.
+
+### model
+Ve složce se nachází zdrojáky pro modul datového modelu aplikace.
+
+### persistor
+Zdrojáky pro modul peristoru.
+
+### python_client
+Drobný klient psaný v pythonu. Možné použít jako alternativu pro curl při testování aplikace.
+
+### server
+Zdrojáky pro modul serveru.
+Nachází se zde Front Controller aplikace a zároveň je zde ve složce resources soubor application.properties,
+kde se konfigurují parametry pro připojení k jednotlivým wrapperům a persistoru.
+Je zde Dockerfile, který definuje docker image pro aplikaci.
+
+### wrappers
+Zdrojáku pro modul wrappers.
+Jsou zde naimplmentované všechny wrappery a jejich abstraktní rozhraní.
+
 ## Uživatelská dokumentace
+Uživatelská dokumentace uvedená zde je značně zjednodušená. Daleko detailněji je vše popsáno v bakalářské práci.
+
 ### Instalace
 - po naklonování projektu z gitu je nutné projekt postavit a stáhnout všechny potřebné závislosti
   - to se provede spuštěním `./gradlew build`
