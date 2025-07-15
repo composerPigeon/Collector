@@ -209,7 +209,7 @@ public class CommandBuilder {
         if ("find".equals(function.name))
             _updateWithCollectionFind(function);
         else if ("aggregate".equals(function.name) || "count".equals(function.name) || "distinct".equals(function.name))
-            throw _exceptionsFactory.notSupportedMethod("aggregate", _returnType);
+            throw _exceptionsFactory.notSupportedMethod(function.name, _returnType);
         else
             throw _exceptionsFactory.invalidMethod(function.name, _returnType);
     }

@@ -31,9 +31,9 @@ Drobný klient psaný v pythonu. Možné použít jako alternativu pro curl při
 
 ### server
 Zdrojáky pro modul serveru.
-Nachází se zde Front Controller aplikace a zároveň je zde ve složce resources soubor application.properties,
+Nachází se zde Front Controller aplikace a zároveň je zde ve složce resources soubor `application.properties`,
 kde se konfigurují parametry pro připojení k jednotlivým wrapperům a persistoru.
-Je zde Dockerfile, který definuje docker image pro aplikaci.
+Je zde `Dockerfile`, který definuje docker image pro aplikaci.
 
 ### wrappers
 Zdrojáku pro modul wrappers.
